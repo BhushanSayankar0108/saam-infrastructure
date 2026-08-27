@@ -7,9 +7,18 @@ import {
   ClipboardCheck,
   ArrowUpRight,
   CheckCircle2,
+  Sparkles,
+  ShieldCheck,
+  Clock3,
+  MessageCircle,
+  Award,
 } from "lucide-react";
 
 import { Link } from "react-router-dom";
+
+/* =========================================================
+   SERVICES DATA
+========================================================= */
 
 const services = [
   {
@@ -111,90 +120,526 @@ const services = [
   },
 ];
 
+/* =========================================================
+   WHY CHOOSE US DATA
+========================================================= */
+
+const advantages = [
+  {
+    number: "01",
+    icon: Award,
+    title: "Quality Workmanship",
+    text:
+      "We maintain high standards of workmanship and attention to detail throughout every stage of construction.",
+  },
+  {
+    number: "02",
+    icon: ShieldCheck,
+    title: "Safety First",
+    text:
+      "Safety remains an important part of our planning, site management and project execution.",
+  },
+  {
+    number: "03",
+    icon: MessageCircle,
+    title: "Transparent Communication",
+    text:
+      "We maintain clear and consistent communication with clients throughout the complete project lifecycle.",
+  },
+  {
+    number: "04",
+    icon: Clock3,
+    title: "Timely Execution",
+    text:
+      "Careful planning and coordination help us maintain dependable project progress and delivery.",
+  },
+];
+
+/* =========================================================
+   SERVICES PAGE
+========================================================= */
+
 function ServicesPage() {
   return (
-    <main className="min-h-screen bg-stone-50 text-slate-950">
+    <main className="min-h-screen overflow-hidden bg-[#f8f5ed] text-[#070b1c]">
 
       {/* =====================================================
           PAGE HERO
-      ====================================================== */}
-      <section className="border-b border-slate-200 bg-stone-100 px-6 pb-20 pt-[150px] sm:pb-24 lg:px-8 lg:pb-28">
-        <div className="mx-auto max-w-7xl">
+      ===================================================== */}
 
-          <div className="flex items-center gap-3">
-            <span className="h-px w-10 bg-orange-500" />
+      <section
+        className="
+          relative overflow-hidden
+          border-b border-[#e5dbc3]
+          bg-[#f8f5ed]
+          px-5
+          pb-20
+          pt-24
+          sm:px-6
+          sm:pb-24
+          sm:pt-28
+          lg:px-8
+          lg:pb-28
+          lg:pt-32
+          xl:pb-32
+        "
+      >
 
-            <p className="text-sm font-semibold uppercase tracking-[0.25em] text-orange-600">
+        {/* BACKGROUND DECORATION */}
+
+        <div
+          className="
+            pointer-events-none
+            absolute
+            -right-40
+            -top-40
+            h-[320px]
+            w-[320px]
+            rounded-full
+            bg-[#c9a03b]/10
+            blur-3xl
+            sm:h-[450px]
+            sm:w-[450px]
+            lg:h-[600px]
+            lg:w-[600px]
+          "
+        />
+
+        <div
+          className="
+            pointer-events-none
+            absolute
+            -bottom-40
+            -left-40
+            h-[350px]
+            w-[350px]
+            rounded-full
+            bg-[#c9a03b]/5
+            blur-3xl
+            sm:h-[450px]
+            sm:w-[450px]
+          "
+        />
+
+        <div
+          className="
+            pointer-events-none
+            absolute
+            right-8
+            top-1/2
+            hidden
+            h-48
+            w-px
+            -translate-y-1/2
+            bg-gradient-to-b
+            from-transparent
+            via-[#c9a03b]/50
+            to-transparent
+            lg:block
+          "
+        />
+
+        <div
+          className="
+            pointer-events-none
+            absolute
+            right-20
+            top-28
+            hidden
+            h-24
+            w-24
+            rotate-45
+            border
+            border-[#c9a03b]/15
+            lg:block
+          "
+        />
+
+        <div className="relative mx-auto max-w-7xl">
+
+          {/* LABEL */}
+
+          <div className="flex items-center gap-4 sm:gap-5 lg:gap-6">
+
+            <span
+              className="
+                h-[3px]
+                w-10
+                shrink-0
+                bg-[#c9a03b]
+                sm:w-16
+                lg:w-24
+              "
+            />
+
+            <p
+              className="
+                text-[clamp(2rem,6vw,4.8rem)]
+                font-black
+                uppercase
+                leading-[0.9]
+                tracking-[0.08em]
+                text-[#b28a20]
+                sm:tracking-[0.1em]
+                lg:tracking-[0.12em]
+              "
+            >
               Our Services
             </p>
+
           </div>
 
-          <h1 className="mt-6 max-w-5xl text-5xl font-bold leading-[1.05] tracking-tight text-slate-950 sm:text-6xl lg:text-7xl">
+          {/* HERO HEADING */}
+
+          <h1
+            className="
+              mt-7
+              max-w-5xl
+              text-[clamp(2.35rem,5vw,4.8rem)]
+              font-black
+              leading-[1.02]
+              tracking-[-0.04em]
+              text-[#070b1c]
+              sm:mt-9
+              lg:mt-11
+            "
+          >
             Construction solutions
-            <br />
-            <span className="text-orange-600">
+            <span className="block text-[#a9925e]">
               built around your needs.
             </span>
           </h1>
 
-          <p className="mt-8 max-w-2xl text-base leading-7 text-slate-600 sm:text-lg sm:leading-8">
-            From civil construction and residential development to
-            infrastructure and project management, Saam Infrastructure
-            provides dependable solutions focused on quality, safety and
-            long-term value.
-          </p>
+          {/* DESCRIPTION */}
 
-        </div>
-      </section>
+          <div
+            className="
+              mt-8
+              flex
+              max-w-3xl
+              items-stretch
+              gap-4
+              sm:mt-10
+              sm:gap-5
+              lg:mt-12
+            "
+          >
 
+            <span className="w-[3px] shrink-0 bg-[#c9a03b]" />
 
-      {/* =====================================================
-          INTRODUCTION
-      ====================================================== */}
-      <section className="bg-white px-6 py-20 sm:py-24 lg:px-8">
-
-        <div className="mx-auto grid max-w-7xl gap-12 lg:grid-cols-[0.8fr_1.2fr] lg:items-center">
-
-          <div>
-
-            <p className="text-sm font-semibold uppercase tracking-[0.25em] text-orange-600">
-              What We Do
-            </p>
-
-            <h2 className="mt-4 text-4xl font-bold leading-tight text-slate-950 sm:text-5xl">
-              Reliable solutions from planning to completion.
-            </h2>
-
-          </div>
-
-          <div>
-
-            <p className="text-lg leading-8 text-slate-600">
-              We combine practical experience, technical knowledge and
-              responsible project execution to deliver construction and
-              infrastructure solutions that meet our clients' requirements.
-            </p>
-
-            <p className="mt-5 leading-7 text-slate-500">
-              Every project is approached with attention to quality,
-              coordination, safety and long-term performance.
+            <p
+              className="
+                text-sm
+                leading-7
+                text-[#36506e]
+                sm:text-base
+                sm:leading-8
+                lg:text-lg
+                lg:leading-9
+              "
+            >
+              From civil construction and residential development to
+              infrastructure and project management, Saam Infrastructure
+              provides dependable solutions focused on quality, safety and
+              long-term value.
             </p>
 
           </div>
 
-        </div>
+          {/* HERO ACCENT */}
 
+          <div className="mt-10 flex items-center gap-2 sm:mt-12">
+
+            <span className="h-1 w-12 rounded-full bg-[#c9a03b] sm:w-16" />
+            <span className="h-1 w-2 rounded-full bg-[#c9a03b]/40" />
+            <span className="h-1 w-2 rounded-full bg-[#c9a03b]/20" />
+
+          </div>
+
+        </div>
       </section>
 
+      {/* =====================================================
+          WHAT WE DO
+      ===================================================== */}
+
+      <section
+        className="
+          relative
+          overflow-hidden
+          bg-white
+          px-5
+          py-20
+          sm:px-6
+          sm:py-24
+          lg:px-8
+          lg:py-32
+        "
+      >
+
+        {/* BACKGROUND NUMBER */}
+
+        <span
+          className="
+            pointer-events-none
+            absolute
+            -right-5
+            top-0
+            hidden
+            select-none
+            text-[16rem]
+            font-black
+            leading-none
+            text-[#c9a03b]/[0.035]
+            lg:block
+          "
+        >
+          01
+        </span>
+
+        <div className="relative mx-auto max-w-7xl">
+
+          {/* SECTION TOP */}
+
+          <div className="grid gap-12 lg:grid-cols-[0.85fr_1.15fr] lg:items-end lg:gap-20">
+
+            {/* LEFT */}
+
+            <div>
+
+              <div className="flex items-center gap-4">
+
+                <span className="h-[3px] w-12 bg-[#c9a03b] sm:w-16" />
+
+                <p
+                  className="
+                    text-sm
+                    font-black
+                    uppercase
+                    tracking-[0.3em]
+                    text-[#b28a20]
+                    sm:text-base
+                  "
+                >
+                  What We Do
+                </p>
+
+              </div>
+
+              <h2
+                className="
+                  mt-6
+                  max-w-xl
+                  text-[clamp(2.2rem,4vw,4rem)]
+                  font-black
+                  leading-[1.03]
+                  tracking-[-0.04em]
+                  text-[#070b1c]
+                "
+              >
+                Reliable solutions
+                <span className="block text-[#a9925e]">
+                  from planning to completion.
+                </span>
+              </h2>
+
+            </div>
+
+            {/* RIGHT */}
+
+            <div>
+
+              <div
+                className="
+                  rounded-[1.5rem]
+                  border
+                  border-[#e6ddca]
+                  bg-[#f8f5ed]
+                  p-6
+                  sm:p-8
+                  lg:p-10
+                "
+              >
+
+                <div className="mb-5 flex items-center gap-3">
+
+                  <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[#c9a03b] text-[#070b1c]">
+                    <Sparkles size={17} />
+                  </span>
+
+                  <span className="text-xs font-black uppercase tracking-[0.2em] text-[#92751c]">
+                    Built with purpose
+                  </span>
+
+                </div>
+
+                <p
+                  className="
+                    text-base
+                    leading-8
+                    text-[#36506e]
+                    sm:text-lg
+                    sm:leading-9
+                  "
+                >
+                  We combine practical experience, technical knowledge and
+                  responsible project execution to deliver construction and
+                  infrastructure solutions that meet our clients&apos;
+                  requirements.
+                </p>
+
+                <p
+                  className="
+                    mt-5
+                    text-sm
+                    leading-7
+                    text-[#64748b]
+                    sm:text-base
+                  "
+                >
+                  Every project is approached with attention to quality,
+                  coordination, safety and long-term performance.
+                </p>
+
+              </div>
+
+            </div>
+
+          </div>
+
+          {/* VALUE STRIP */}
+
+          <div
+            className="
+              mt-12
+              grid
+              overflow-hidden
+              rounded-[1.5rem]
+              border
+              border-[#e4dac4]
+              sm:grid-cols-3
+            "
+          >
+
+            <WhatWeDoItem
+              number="01"
+              title="Plan"
+              text="Clear planning before execution."
+            />
+
+            <WhatWeDoItem
+              number="02"
+              title="Build"
+              text="Quality-focused project execution."
+            />
+
+            <WhatWeDoItem
+              number="03"
+              title="Deliver"
+              text="Dependable results built to last."
+            />
+
+          </div>
+
+        </div>
+      </section>
 
       {/* =====================================================
-          SERVICES GRID
-      ====================================================== */}
-      <section className="border-y border-slate-200 bg-stone-50 px-6 py-24 sm:py-28 lg:px-8">
+          OUR EXPERTISE
+      ===================================================== */}
+
+      <section
+        className="
+          border-y
+          border-[#e5dbc3]
+          bg-[#f8f5ed]
+          px-5
+          py-20
+          sm:px-6
+          sm:py-28
+          lg:px-8
+          lg:py-32
+        "
+      >
 
         <div className="mx-auto max-w-7xl">
 
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {/* HEADER */}
+
+          <div
+            className="
+              mb-12
+              flex
+              flex-col
+              gap-8
+              sm:mb-14
+              lg:mb-16
+              lg:flex-row
+              lg:items-end
+              lg:justify-between
+            "
+          >
+
+            <div>
+
+              <div className="flex items-center gap-4">
+
+                <span className="h-[3px] w-12 bg-[#c9a03b] sm:w-16" />
+
+                <p
+                  className="
+                    text-sm
+                    font-black
+                    uppercase
+                    tracking-[0.3em]
+                    text-[#b28a20]
+                    sm:text-base
+                  "
+                >
+                  Our Expertise
+                </p>
+
+              </div>
+
+              <h2
+                className="
+                  mt-6
+                  max-w-3xl
+                  text-[clamp(2.2rem,4vw,4rem)]
+                  font-black
+                  leading-[1.04]
+                  tracking-[-0.04em]
+                  text-[#070b1c]
+                "
+              >
+                Construction services
+                <span className="block text-[#a9925e]">
+                  built for real requirements.
+                </span>
+              </h2>
+
+            </div>
+
+            <p
+              className="
+                max-w-md
+                text-sm
+                leading-7
+                text-[#64748b]
+                sm:text-base
+                sm:leading-8
+              "
+            >
+              From residential projects to large infrastructure works, our
+              services are structured around practical execution, quality and
+              long-term performance.
+            </p>
+
+          </div>
+
+          {/* SERVICE GRID */}
+
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
 
             {services.map((service) => {
 
@@ -203,37 +648,148 @@ function ServicesPage() {
               return (
                 <article
                   key={service.id}
-                  className="group border border-slate-200 bg-white p-7 transition-all duration-300 hover:-translate-y-2 hover:border-orange-400 hover:shadow-xl sm:p-8"
+                  className="
+                    group
+                    relative
+                    overflow-hidden
+                    rounded-[1.5rem]
+                    border
+                    border-[#dfd5bf]
+                    bg-white
+                    p-6
+                    transition-all
+                    duration-500
+                    hover:-translate-y-2
+                    hover:border-[#c9a03b]
+                    hover:shadow-[0_25px_60px_rgba(7,11,28,0.10)]
+                    sm:p-7
+                    lg:p-8
+                  "
                 >
 
+                  {/* GOLD TOP LINE */}
+
+                  <div
+                    className="
+                      absolute
+                      left-0
+                      top-0
+                      h-1
+                      w-16
+                      rounded-br-full
+                      bg-[#c9a03b]
+                      transition-all
+                      duration-500
+                      group-hover:w-32
+                    "
+                  />
+
+                  {/* LARGE NUMBER */}
+
+                  <span
+                    className="
+                      pointer-events-none
+                      absolute
+                      -right-3
+                      -top-5
+                      text-[7rem]
+                      font-black
+                      leading-none
+                      text-[#c9a03b]/[0.055]
+                      transition-transform
+                      duration-500
+                      group-hover:scale-110
+                    "
+                  >
+                    {String(service.id).padStart(2, "0")}
+                  </span>
+
                   {/* ICON */}
-                  <div className="flex h-14 w-14 items-center justify-center border border-orange-500 text-orange-500 transition-all duration-300 group-hover:bg-orange-500 group-hover:text-white">
-                    <Icon size={27} />
+
+                  <div
+                    className="
+                      relative
+                      flex
+                      h-14
+                      w-14
+                      items-center
+                      justify-center
+                      rounded-2xl
+                      border
+                      border-[#c9a03b]
+                      bg-[#f8f5ed]
+                      text-[#b28a20]
+                      transition-all
+                      duration-500
+                      group-hover:rotate-3
+                      group-hover:bg-[#c9a03b]
+                      group-hover:text-white
+                    "
+                  >
+                    <Icon size={26} strokeWidth={1.8} />
                   </div>
 
-
                   {/* NUMBER */}
-                  <p className="mt-7 text-xs font-bold tracking-[0.25em] text-slate-400">
-                    SERVICE {String(service.id).padStart(2, "0")}
+
+                  <p
+                    className="
+                      relative
+                      mt-7
+                      text-xs
+                      font-black
+                      uppercase
+                      tracking-[0.22em]
+                      text-[#b28a20]
+                    "
+                  >
+                    Service {String(service.id).padStart(2, "0")}
                   </p>
 
-
                   {/* TITLE */}
-                  <h3 className="mt-3 text-2xl font-bold text-slate-950">
+
+                  <h3
+                    className="
+                      relative
+                      mt-3
+                      text-xl
+                      font-black
+                      leading-tight
+                      text-[#070b1c]
+                      sm:text-2xl
+                    "
+                  >
                     {service.title}
                   </h3>
 
-
                   {/* DESCRIPTION */}
-                  <p className="mt-4 leading-7 text-slate-500">
+
+                  <p
+                    className="
+                      relative
+                      mt-4
+                      text-sm
+                      leading-7
+                      text-[#64748b]
+                      sm:text-base
+                    "
+                  >
                     {service.description}
                   </p>
 
-
                   {/* FEATURES */}
-                  <div className="mt-7 space-y-3 border-t border-slate-200 pt-6">
+
+                  <div
+                    className="
+                      mt-7
+                      space-y-3
+                      border-t
+                      border-[#e7dfcf]
+                      pt-6
+                    "
+                  >
 
                     {service.points.map((point) => (
+
                       <div
                         key={point}
                         className="flex items-start gap-3"
@@ -241,32 +797,96 @@ function ServicesPage() {
 
                         <CheckCircle2
                           size={17}
-                          className="mt-0.5 shrink-0 text-orange-500"
+                          className="
+                            mt-0.5
+                            shrink-0
+                            text-[#c9a03b]
+                          "
                         />
 
-                        <span className="text-sm text-slate-600">
+                        <span
+                          className="
+                            text-sm
+                            leading-6
+                            text-[#5f6f7f]
+                          "
+                        >
                           {point}
                         </span>
 
                       </div>
+
                     ))}
 
                   </div>
 
+                  {/* =================================================
+                      FIXED FOOTER NAVIGATION
+                      ENTIRE FOOTER IS NOW CLICKABLE
+                  ================================================= */}
 
-                  {/* BOTTOM */}
-                  <div className="mt-8 flex items-center justify-between border-t border-slate-200 pt-5">
+                  <Link
+                    to="/"
+                    aria-label="Go to Saam Infrastructure home page"
+                    className="
+                      group/footer
+                      mt-8
+                      flex
+                      w-full
+                      cursor-pointer
+                      items-center
+                      justify-between
+                      border-t
+                      border-[#e7dfcf]
+                      pt-5
+                      no-underline
+                    "
+                  >
 
-                    <span className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
+                    {/* BRAND */}
+
+                    <span
+                      className="
+                        text-[10px]
+                        font-bold
+                        uppercase
+                        tracking-[0.18em]
+                        text-[#94a3b8]
+                        transition-colors
+                        duration-300
+                        group-hover/footer:text-[#b28a20]
+                        sm:text-xs
+                      "
+                    >
                       Saam Infrastructure
                     </span>
 
-                    <ArrowUpRight
-                      size={19}
-                      className="text-slate-400 transition-all duration-300 group-hover:-translate-y-1 group-hover:translate-x-1 group-hover:text-orange-500"
-                    />
+                    {/* ARROW */}
 
-                  </div>
+                    <span
+                      className="
+                        flex
+                        h-9
+                        w-9
+                        items-center
+                        justify-center
+                        rounded-full
+                        border
+                        border-[#d8c58f]
+                        text-[#b28a20]
+                        transition-all
+                        duration-300
+                        group-hover/footer:border-[#c9a03b]
+                        group-hover/footer:bg-[#c9a03b]
+                        group-hover/footer:text-white
+                        group-hover/footer:translate-x-1
+                        group-hover/footer:-translate-y-1
+                      "
+                    >
+                      <ArrowUpRight size={17} />
+                    </span>
+
+                  </Link>
 
                 </article>
               );
@@ -275,138 +895,534 @@ function ServicesPage() {
           </div>
 
         </div>
-
       </section>
-
 
       {/* =====================================================
           WHY CHOOSE US
-      ====================================================== */}
-      <section className="bg-white px-6 py-24 sm:py-28 lg:px-8">
+      ===================================================== */}
 
-        <div className="mx-auto max-w-7xl">
+      <section
+        className="
+          relative
+          overflow-hidden
+          bg-[#070b1c]
+          px-5
+          py-20
+          sm:px-6
+          sm:py-28
+          lg:px-8
+          lg:py-32
+        "
+      >
 
-          <div className="grid gap-12 lg:grid-cols-[0.75fr_1.25fr]">
+        {/* DECORATION */}
+
+        <div
+          className="
+            pointer-events-none
+            absolute
+            -right-32
+            -top-32
+            h-96
+            w-96
+            rounded-full
+            bg-[#c9a03b]/10
+            blur-3xl
+          "
+        />
+
+        <div
+          className="
+            pointer-events-none
+            absolute
+            -bottom-40
+            -left-40
+            h-96
+            w-96
+            rounded-full
+            bg-[#c9a03b]/5
+            blur-3xl
+          "
+        />
+
+        <div className="relative mx-auto max-w-7xl">
+
+          {/* TOP CONTENT */}
+
+          <div className="grid gap-12 lg:grid-cols-[0.75fr_1.25fr] lg:gap-20">
 
             {/* LEFT */}
+
             <div>
 
-              <p className="text-sm font-semibold uppercase tracking-[0.25em] text-orange-600">
-                Why Choose Us
-              </p>
+              <div className="flex items-center gap-4">
 
-              <h2 className="mt-4 text-4xl font-bold leading-tight text-slate-950 sm:text-5xl">
-                A dependable partner for your next project.
+                <span className="h-[3px] w-12 bg-[#c9a03b] sm:w-16" />
+
+                <p
+                  className="
+                    text-sm
+                    font-black
+                    uppercase
+                    tracking-[0.3em]
+                    text-[#d7b44d]
+                    sm:text-base
+                  "
+                >
+                  Why Choose Us
+                </p>
+
+              </div>
+
+              <h2
+                className="
+                  mt-6
+                  text-[clamp(2.2rem,4vw,4rem)]
+                  font-black
+                  leading-[1.04]
+                  tracking-[-0.04em]
+                  text-white
+                "
+              >
+                A dependable partner
+                <span className="block text-[#d7b44d]">
+                  for your next project.
+                </span>
               </h2>
 
-              <p className="mt-5 max-w-md leading-7 text-slate-500">
+              <p
+                className="
+                  mt-6
+                  max-w-md
+                  text-sm
+                  leading-7
+                  text-slate-300
+                  sm:text-base
+                  sm:leading-8
+                "
+              >
                 We believe successful construction is built on trust,
                 communication, quality and responsible execution.
               </p>
 
+              {/* MINI LINE */}
+
+              <div className="mt-8 flex items-center gap-2">
+
+                <span className="h-1 w-14 rounded-full bg-[#c9a03b]" />
+                <span className="h-1 w-2 rounded-full bg-[#c9a03b]/50" />
+                <span className="h-1 w-2 rounded-full bg-[#c9a03b]/25" />
+
+              </div>
+
             </div>
 
+            {/* RIGHT CARDS */}
 
-            {/* RIGHT */}
-            <div className="grid gap-5 sm:grid-cols-2">
+            <div className="grid gap-4 sm:grid-cols-2">
 
-              <WhyCard
-                number="01"
-                title="Quality Workmanship"
-                text="We maintain high standards of workmanship and attention to detail throughout every stage."
-              />
+              {advantages.map((item) => {
 
-              <WhyCard
-                number="02"
-                title="Safety First"
-                text="Safety remains an important part of our planning and project execution."
-              />
+                const Icon = item.icon;
 
-              <WhyCard
-                number="03"
-                title="Transparent Communication"
-                text="We maintain clear communication with clients throughout the project lifecycle."
-              />
-
-              <WhyCard
-                number="04"
-                title="Timely Execution"
-                text="Careful planning and coordination help us maintain dependable project progress."
-              />
+                return (
+                  <WhyChooseCard
+                    key={item.number}
+                    number={item.number}
+                    icon={Icon}
+                    title={item.title}
+                    text={item.text}
+                  />
+                );
+              })}
 
             </div>
 
           </div>
 
         </div>
-
       </section>
-
 
       {/* =====================================================
           CTA
-      ====================================================== */}
-      <section className="border-t border-slate-200 bg-slate-100 px-6 py-20 lg:px-8">
+      ===================================================== */}
 
-        <div className="mx-auto flex max-w-7xl flex-col gap-8 md:flex-row md:items-center md:justify-between">
+      <section
+        className="
+          relative
+          overflow-hidden
+          border-t
+          border-[#2d5146]
+          bg-[#f8f5ed]
+          px-5
+          py-16
+          sm:px-6
+          sm:py-20
+          lg:px-8
+          lg:py-24
+        "
+      >
 
-          <div>
+        {/* DECORATION */}
 
-            <p className="text-sm font-semibold uppercase tracking-[0.25em] text-orange-600">
-              Start Your Project
-            </p>
+        <div
+          className="
+            pointer-events-none
+            absolute
+            -right-32
+            -top-32
+            h-72
+            w-72
+            rounded-full
+            bg-[#c9a03b]/10
+            blur-3xl
+          "
+        />
 
-            <h2 className="mt-3 text-3xl font-bold text-slate-950 sm:text-4xl">
-              Let's build something great together.
-            </h2>
+        <div className="relative mx-auto max-w-7xl">
 
-            <p className="mt-4 max-w-2xl leading-7 text-slate-600">
-              Tell us about your construction or infrastructure requirements
-              and our team will be ready to discuss the next steps.
-            </p>
+          <div
+            className="
+              flex
+              flex-col
+              gap-8
+              rounded-[2rem]
+              border
+              border-[#dfd5bf]
+              bg-[#070b1c]
+              p-7
+              sm:p-10
+              lg:flex-row
+              lg:items-center
+              lg:justify-between
+              lg:p-12
+            "
+          >
+
+            {/* CONTENT */}
+
+            <div>
+
+              <div className="flex items-center gap-3">
+
+                <Sparkles
+                  size={16}
+                  className="text-[#d7b44d]"
+                />
+
+                <p
+                  className="
+                    text-xs
+                    font-bold
+                    uppercase
+                    tracking-[0.28em]
+                    text-[#d7b44d]
+                    sm:text-sm
+                  "
+                >
+                  Start Your Project
+                </p>
+
+              </div>
+
+              <h2
+                className="
+                  mt-4
+                  text-3xl
+                  font-black
+                  leading-tight
+                  text-white
+                  sm:text-4xl
+                  lg:text-5xl
+                "
+              >
+                Let&apos;s build something great
+                <span className="block text-[#d7b44d]">
+                  together.
+                </span>
+              </h2>
+
+              <p
+                className="
+                  mt-4
+                  max-w-2xl
+                  text-sm
+                  leading-7
+                  text-slate-300
+                  sm:text-base
+                "
+              >
+                Tell us about your construction or infrastructure requirements
+                and our team will be ready to discuss the next steps.
+              </p>
+
+            </div>
+
+            {/* BUTTON */}
+
+            <Link
+              to="/contact"
+              className="
+                group
+                inline-flex
+                w-full
+                shrink-0
+                items-center
+                justify-center
+                gap-3
+                rounded-full
+                border
+                border-[#c9a03b]
+                bg-[#c9a03b]
+                px-6
+                py-3
+                text-sm
+                font-bold
+                text-[#070b1c]
+                shadow-[0_12px_30px_rgba(201,160,59,0.20)]
+                transition-all
+                duration-300
+                hover:-translate-y-1
+                hover:bg-[#d7b44d]
+                sm:w-fit
+                sm:px-7
+              "
+            >
+              Discuss Your Project
+
+              <span
+                className="
+                  flex
+                  h-9
+                  w-9
+                  items-center
+                  justify-center
+                  rounded-full
+                  bg-[#070b1c]
+                  text-white
+                  transition-all
+                  duration-300
+                  group-hover:rotate-45
+                  group-hover:bg-white
+                  group-hover:text-[#070b1c]
+                "
+              >
+                <ArrowUpRight size={17} />
+              </span>
+
+            </Link>
 
           </div>
 
-          <Link
-            to="/contact"
-            className="group inline-flex w-fit shrink-0 items-center gap-3 bg-orange-500 px-7 py-4 text-sm font-bold text-white transition-all duration-300 hover:bg-orange-600"
-          >
-            Discuss Your Project
-
-            <ArrowUpRight
-              size={18}
-              className="transition-transform duration-300 group-hover:-translate-y-1 group-hover:translate-x-1"
-            />
-          </Link>
-
         </div>
-
       </section>
 
     </main>
   );
 }
 
-
 /* =========================================================
-   WHY CARD
+   WHAT WE DO ITEM
 ========================================================= */
 
-function WhyCard({ number, title, text }) {
+function WhatWeDoItem({ number, title, text }) {
   return (
-    <div className="border border-slate-200 bg-stone-50 p-7 transition-all duration-300 hover:-translate-y-1 hover:border-orange-400 hover:shadow-md">
+    <div
+      className="
+        group
+        relative
+        border-b
+        border-[#e4dac4]
+        bg-[#f8f5ed]
+        p-6
+        transition-all
+        duration-300
+        hover:bg-white
+        sm:border-b-0
+        sm:border-r
+        sm:last:border-r-0
+        sm:p-7
+        lg:p-8
+      "
+    >
 
-      <span className="text-sm font-bold tracking-[0.2em] text-orange-500">
-        {number}
-      </span>
+      <div className="flex items-start justify-between">
 
-      <h3 className="mt-4 text-xl font-bold text-slate-950">
+        <span
+          className="
+            text-xs
+            font-black
+            tracking-[0.2em]
+            text-[#b28a20]
+          "
+        >
+          {number}
+        </span>
+
+        <ArrowUpRight
+          size={18}
+          className="
+            text-[#b28a20]
+            transition-transform
+            duration-300
+            group-hover:-translate-y-1
+            group-hover:translate-x-1
+          "
+        />
+
+      </div>
+
+      <h3 className="mt-6 text-xl font-black text-[#070b1c]">
         {title}
       </h3>
 
-      <p className="mt-3 leading-7 text-slate-500">
+      <p className="mt-2 text-sm leading-6 text-[#64748b]">
         {text}
       </p>
+
+    </div>
+  );
+}
+
+/* =========================================================
+   WHY CHOOSE US CARD
+========================================================= */
+
+function WhyChooseCard({
+  number,
+  icon: Icon,
+  title,
+  text,
+}) {
+  return (
+    <div
+      className="
+        group
+        relative
+        overflow-hidden
+        rounded-[1.5rem]
+        border
+        border-white/10
+        bg-white/[0.045]
+        p-6
+        transition-all
+        duration-500
+        hover:-translate-y-1
+        hover:border-[#c9a03b]/60
+        hover:bg-white/[0.08]
+        sm:p-7
+      "
+    >
+
+      {/* BACKGROUND NUMBER */}
+
+      <span
+        className="
+          pointer-events-none
+          absolute
+          -right-2
+          -top-5
+          text-7xl
+          font-black
+          leading-none
+          text-[#d7b44d]/[0.06]
+          transition-transform
+          duration-500
+          group-hover:scale-110
+        "
+      >
+        {number}
+      </span>
+
+      {/* ICON + NUMBER */}
+
+      <div className="relative flex items-center justify-between">
+
+        <div
+          className="
+            flex
+            h-11
+            w-11
+            items-center
+            justify-center
+            rounded-xl
+            border
+            border-[#c9a03b]/50
+            bg-[#c9a03b]/10
+            text-[#d7b44d]
+            transition-all
+            duration-300
+            group-hover:bg-[#c9a03b]
+            group-hover:text-[#070b1c]
+          "
+        >
+          <Icon size={21} strokeWidth={1.8} />
+        </div>
+
+        <span
+          className="
+            text-xs
+            font-black
+            tracking-[0.2em]
+            text-[#d7b44d]
+          "
+        >
+          {number}
+        </span>
+
+      </div>
+
+      {/* TITLE */}
+
+      <h3
+        className="
+          relative
+          mt-6
+          text-xl
+          font-black
+          leading-tight
+          text-white
+        "
+      >
+        {title}
+      </h3>
+
+      {/* TEXT */}
+
+      <p
+        className="
+          relative
+          mt-3
+          text-sm
+          leading-7
+          text-slate-400
+          sm:text-base
+        "
+      >
+        {text}
+      </p>
+
+      {/* BOTTOM LINE */}
+
+      <div className="relative mt-6 flex items-center gap-2">
+
+        <span
+          className="
+            h-1
+            w-8
+            rounded-full
+            bg-[#c9a03b]
+            transition-all
+            duration-500
+            group-hover:w-14
+          "
+        />
+
+        <span className="h-1 w-2 rounded-full bg-[#c9a03b]/30" />
+
+        <span className="h-1 w-2 rounded-full bg-[#c9a03b]/15" />
+
+      </div>
 
     </div>
   );

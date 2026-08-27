@@ -1,221 +1,960 @@
+import { useEffect, useRef } from "react";
+
 import {
   CheckCircle2,
   Eye,
   Target,
   ArrowUpRight,
+  Award,
+  ShieldCheck,
+  ChevronLeft,
+  ChevronRight,
+  Sparkles,
+  Shield,
+  Handshake,
+  TrendingUp,
 } from "lucide-react";
 
 import aboutConstruction from "../assets/images/about-construction.jpg";
 
+/* =========================================================
+   LEADERSHIP DATA
+========================================================= */
+
+const leaders = [
+  {
+    name: "Sachin Lihitkar",
+    role: "Managing Director & Founder",
+    image: "https://i.pravatar.cc/900?img=12",
+    imagePosition: "center center",
+    description:
+      "Leading Saam Infrastructure with a clear vision for quality construction, professional execution and long-term growth.",
+    statement:
+      "With a strong focus on quality, client satisfaction and responsible execution, Sachin provides strategic direction across projects and ensures that every decision reflects the values of reliability, safety and integrity.",
+  },
+  {
+    name: "Ashwini Lihitkar",
+    role: "Co-Founder",
+    image: "https://i.pravatar.cc/900?img=47",
+    imagePosition: "center center",
+    description:
+      "Supporting the growth of Saam Infrastructure through coordination, strong values and a commitment to dependable project delivery.",
+    statement:
+      "Ashwini contributes to the company's growth with a focus on collaboration, organisation and maintaining the professional standards that define the Saam Infrastructure approach.",
+  },
+];
+
+/* =========================================================
+   TEAM DATA
+========================================================= */
+
+const teamMembers = [
+  {
+    name: "Rajesh Sharma",
+    role: "Project Director",
+    image: "https://i.pravatar.cc/700?img=11",
+    description:
+      "Experienced in project planning, coordination and ensuring successful project execution.",
+  },
+  {
+    name: "Amit Patil",
+    role: "Project Manager",
+    image: "https://i.pravatar.cc/700?img=13",
+    description:
+      "Focused on efficient project management, coordination and maintaining construction standards.",
+  },
+  {
+    name: "Priya Deshmukh",
+    role: "Operations Manager",
+    image: "https://i.pravatar.cc/700?img=47",
+    description:
+      "Responsible for smooth operations, team coordination and dependable project delivery.",
+  },
+  {
+    name: "Sandeep Kulkarni",
+    role: "Senior Project Engineer",
+    image: "https://i.pravatar.cc/700?img=68",
+    description:
+      "Bringing technical expertise, attention to detail and practical engineering knowledge.",
+  },
+];
+
+/* =========================================================
+   MAIN PAGE
+========================================================= */
+
 function AboutPage() {
   return (
-    <main className="min-h-screen bg-stone-50 text-slate-950">
- 
+    <main className="min-h-screen overflow-hidden bg-[#F8F5ED] text-[#070B1C]">
+
       {/* =====================================================
-          PAGE HERO
-      ====================================================== */}
-      <section className="border-b border-slate-200 bg-stone-100 px-6 pb-20 pt-[150px] sm:pb-24 lg:px-8 lg:pb-28">
-        <div className="mx-auto max-w-7xl">
+          HERO
+      ===================================================== */}
 
-          <div className="flex items-center gap-3">
-            <span className="h-px w-10 bg-orange-500" />
+      <section
+        className="
+          relative
+          overflow-hidden
+          border-b
+          border-[#E5DBC3]
+          bg-[#F8F5ED]
+          px-4
+          pb-16
+          pt-14
+          sm:px-6
+          sm:pb-20
+          sm:pt-20
+          lg:px-8
+          lg:pb-24
+          lg:pt-24
+          xl:pb-28
+        "
+      >
 
-            <span className="text-sm font-semibold uppercase tracking-[0.25em] text-orange-600">
+        {/* GOLD GLOW */}
+
+        <div
+          className="
+            pointer-events-none
+            absolute
+            -right-32
+            -top-32
+            h-[320px]
+            w-[320px]
+            rounded-full
+            bg-[#C9A03B]/10
+            blur-3xl
+            sm:h-[480px]
+            sm:w-[480px]
+          "
+        />
+
+        {/* SECOND GLOW */}
+
+        <div
+          className="
+            pointer-events-none
+            absolute
+            -bottom-40
+            -left-40
+            h-[360px]
+            w-[360px]
+            rounded-full
+            bg-[#C9A03B]/5
+            blur-3xl
+          "
+        />
+
+        {/* ARCHITECTURAL GRID */}
+
+        <div
+          className="
+            pointer-events-none
+            absolute
+            right-0
+            top-0
+            h-full
+            w-[38%]
+            opacity-[0.035]
+            [background-image:linear-gradient(#070B1C_1px,transparent_1px),linear-gradient(90deg,#070B1C_1px,transparent_1px)]
+            [background-size:42px_42px]
+          "
+        />
+
+        <div className="relative mx-auto max-w-7xl">
+
+          {/* =================================================
+              ABOUT US H1
+          ================================================= */}
+
+          <div className="flex items-center gap-3 sm:gap-5">
+
+            <span
+              className="
+                h-[3px]
+                w-8
+                shrink-0
+                bg-[#C9A03B]
+                sm:w-14
+                lg:w-20
+              "
+            />
+
+            <h1
+              className="
+                text-[clamp(2rem,6vw,4.8rem)]
+                font-black
+                uppercase
+                leading-[0.9]
+                tracking-[0.06em]
+                text-[#B28A20]
+              "
+            >
               About Us
-            </span>
+            </h1>
+
           </div>
 
-          <h1 className="mt-6 max-w-5xl text-5xl font-bold leading-[1.05] tracking-tight text-slate-950 sm:text-6xl lg:text-7xl">
-            Building with purpose.
-            <br />
-            <span className="text-orange-600">
-              Delivering with precision.
-            </span>
-          </h1>
+          {/* =================================================
+              MAIN H2 HEADINGS
+          ================================================= */}
 
-          <p className="mt-8 max-w-2xl text-base leading-7 text-slate-600 sm:text-lg sm:leading-8">
-            Saam Infrastructure delivers dependable construction and
-            infrastructure solutions with quality, precision, safety and
-            long-term value at the core.
+          <div
+            className="
+              mt-10
+              max-w-6xl
+              sm:mt-12
+              lg:mt-14
+            "
+          >
+
+            <h2
+              className="
+                text-[clamp(2.35rem,5vw,4.8rem)]
+                font-black
+                leading-[1.04]
+                tracking-[-0.04em]
+                text-[#070B1C]
+              "
+            >
+              Building with{" "}
+              <span className="text-[#B28A20]">
+                purpose.
+              </span>
+            </h2>
+
+            <h2
+              className="
+                mt-5
+                text-[clamp(2.35rem,5vw,4.8rem)]
+                font-black
+                leading-[1.04]
+                tracking-[-0.04em]
+                text-[#070B1C]
+                sm:mt-6
+              "
+            >
+              Delivering with precision.
+            </h2>
+
+          </div>
+
+          {/* DESCRIPTION */}
+
+          <div
+            className="
+              mt-8
+              flex
+              max-w-3xl
+              items-stretch
+              gap-4
+              sm:mt-10
+              sm:gap-5
+              lg:mt-12
+            "
+          >
+
+            <span className="w-[3px] shrink-0 bg-[#C9A03B]" />
+
+            <p
+              className="
+                text-sm
+                leading-7
+                text-[#36506E]
+                sm:text-base
+                sm:leading-8
+                lg:text-lg
+                lg:leading-9
+              "
+            >
+              Saam Infrastructure delivers dependable construction and
+              infrastructure solutions with quality, precision, safety
+              and long-term value at the core.
+            </p>
+
+          </div>
+
+          {/* DECORATIVE MARKER */}
+
+          <div className="mt-9 flex items-center gap-2 sm:mt-11">
+
+            <span className="h-1 w-12 rounded-full bg-[#C9A03B]" />
+
+            <span className="h-1 w-4 rounded-full bg-[#C9A03B]/35" />
+
+            <span className="h-1 w-2 rounded-full bg-[#C9A03B]/20" />
+
+          </div>
+
+        </div>
+      </section>
+
+      {/* =====================================================
+    WHO WE ARE
+===================================================== */}
+
+<section
+  className="
+    bg-white
+    px-4
+    py-16
+    sm:px-6
+    sm:py-24
+    lg:px-8
+    lg:py-32
+  "
+>
+  <div
+    className="
+      mx-auto
+      grid
+      max-w-7xl
+      gap-12
+      lg:grid-cols-2
+      lg:items-center
+      lg:gap-16
+      xl:gap-20
+    "
+  >
+
+    {/* =================================================
+        IMAGE
+    ================================================== */}
+
+    <div
+      className="
+        relative
+        mx-auto
+        w-full
+        max-w-[620px]
+        px-1
+        pb-2
+        sm:px-0
+        sm:pb-2
+      "
+    >
+
+      {/* =================================================
+          SMALL GOLD/BROWN BACKGROUND OUTLINE
+
+          Reduced from:
+          -bottom-5 / -right-5
+          88% / 88%
+          border-2
+
+          Now:
+          -bottom-2 / -right-2
+          full size
+          thin border
+      ================================================== */}
+
+      <div
+        className="
+          pointer-events-none
+          absolute
+          -bottom-2
+          -right-2
+          h-full
+          w-full
+          rounded-[2rem]
+          rounded-tl-none
+          border
+          border-[#C9A03B]/45
+          sm:-bottom-3
+          sm:-right-3
+          sm:rounded-[2.25rem]
+        "
+      />
+
+      {/* =================================================
+          IMAGE CARD
+      ================================================== */}
+
+      <div
+        className="
+          group
+          relative
+          z-10
+          h-[360px]
+          w-full
+          overflow-hidden
+          rounded-[2rem]
+          rounded-tl-none
+          rounded-br-[3.5rem]
+          bg-[#070B1C]
+          shadow-[0_20px_45px_rgba(7,11,28,0.13)]
+          sm:h-[480px]
+          sm:rounded-[2.25rem]
+          sm:rounded-br-[4rem]
+          lg:h-[560px]
+          xl:h-[580px]
+        "
+      >
+
+        {/* IMAGE */}
+
+        <img
+          src={aboutConstruction}
+          alt="Saam Infrastructure construction site"
+          className="
+            absolute
+            inset-0
+            h-full
+            w-full
+            object-cover
+            object-center
+            transition-transform
+            duration-700
+            ease-out
+            group-hover:scale-[1.03]
+          "
+        />
+
+        {/* DARK IMAGE OVERLAY */}
+
+        <div
+          className="
+            pointer-events-none
+            absolute
+            inset-0
+            bg-gradient-to-t
+            from-[#070B1C]/90
+            via-[#070B1C]/15
+            to-transparent
+          "
+        />
+
+        {/* INNER IMAGE BORDER */}
+
+        <div
+          className="
+            pointer-events-none
+            absolute
+            inset-3
+            rounded-[1.5rem]
+            rounded-tl-none
+            border
+            border-white/15
+            sm:inset-5
+            sm:rounded-[1.75rem]
+          "
+        />
+
+        {/* IMAGE CONTENT */}
+
+        <div
+          className="
+            absolute
+            bottom-0
+            left-0
+            right-0
+            z-10
+            p-5
+            sm:p-8
+            lg:p-9
+          "
+        >
+
+          {/* Gold line */}
+
+          <div
+            className="
+              mb-3
+              h-1
+              w-10
+              bg-[#D7B44D]
+              sm:mb-4
+              sm:w-14
+            "
+          />
+
+          <p
+            className="
+              text-[10px]
+              font-bold
+              uppercase
+              tracking-[0.22em]
+              text-[#D7B44D]
+              sm:text-xs
+              sm:tracking-[0.25em]
+            "
+          >
+            Saam Infrastructure
+          </p>
+
+          <p
+            className="
+              mt-2
+              max-w-sm
+              text-2xl
+              font-black
+              leading-tight
+              text-white
+              sm:mt-3
+              sm:text-3xl
+              lg:text-4xl
+            "
+          >
+            Built to stand
+            <span className="block">
+              strong.
+            </span>
           </p>
 
         </div>
-      </section>
 
+        {/* SMALL GOLD BOTTOM ACCENT */}
+
+        <div
+          className="
+            absolute
+            bottom-0
+            left-0
+            h-1
+            w-20
+            bg-[#C9A03B]
+            sm:w-28
+          "
+        />
+
+      </div>
+
+    </div>
+
+
+    {/* =================================================
+        CONTENT - WHO WE ARE
+    ================================================== */}
+
+    <div className="min-w-0">
+
+      {/* SECTION LABEL */}
+
+      <div className="flex items-center gap-3 sm:gap-4">
+
+        <span
+          className="
+            h-[2px]
+            w-8
+            shrink-0
+            bg-[#C9A03B]
+            sm:w-12
+          "
+        />
+
+        <p
+          className="
+            text-[10px]
+            font-bold
+            uppercase
+            tracking-[0.25em]
+            text-[#B28A20]
+            sm:text-xs
+          "
+        >
+          Who We Are
+        </p>
+
+      </div>
+
+
+      {/* HEADING */}
+
+      <h2
+        className="
+          mt-5
+          text-3xl
+          font-black
+          leading-[1.05]
+          tracking-[-0.035em]
+          text-[#070B1C]
+          sm:text-4xl
+          md:text-5xl
+          lg:text-5xl
+          xl:text-6xl
+        "
+      >
+        Infrastructure built
+
+        <span className="block text-[#A9925E]">
+          for the future.
+        </span>
+      </h2>
+
+
+      {/* DESCRIPTION */}
+
+      <p
+        className="
+          mt-6
+          text-sm
+          leading-7
+          text-[#36506E]
+          sm:text-base
+          sm:leading-8
+          lg:text-lg
+        "
+      >
+        Saam Infrastructure is committed to delivering reliable
+        construction and infrastructure solutions that combine
+        engineering expertise, quality workmanship and thoughtful
+        execution.
+      </p>
+
+      <p
+        className="
+          mt-4
+          text-sm
+          leading-7
+          text-[#64748B]
+          sm:mt-5
+          sm:text-base
+          sm:leading-8
+        "
+      >
+        From planning and development to execution and completion,
+        we focus on creating durable spaces and infrastructure that
+        meet the needs of our clients and deliver lasting value.
+      </p>
+
+
+      {/* =================================================
+          FEATURES
+      ================================================== */}
+
+      <div
+        className="
+          mt-8
+          grid
+          grid-cols-1
+          gap-5
+          sm:mt-10
+          sm:grid-cols-2
+          sm:gap-6
+        "
+      >
+
+        <Feature
+          icon={CheckCircle2}
+          title="Quality"
+          text="High standards at every stage of construction."
+        />
+
+        <Feature
+          icon={Award}
+          title="Reliability"
+          text="Dependable planning and project execution."
+        />
+
+        <Feature
+          icon={ShieldCheck}
+          title="Safety"
+          text="Responsible practices with safety at the core."
+        />
+
+        <Feature
+          icon={Target}
+          title="Long-Term Value"
+          text="Solutions designed for durability and performance."
+        />
+
+      </div>
+
+
+      {/* =================================================
+          BUTTON
+      ================================================== */}
+
+      <div className="mt-8 sm:mt-10">
+
+        <a
+          href="#vision"
+          className="
+            group
+            inline-flex
+            w-full
+            items-center
+            justify-between
+            gap-4
+            rounded-full
+            bg-[#C9A03B]
+            px-5
+            py-3
+            text-sm
+            font-bold
+            text-[#070B1C]
+            shadow-[0_10px_25px_rgba(201,160,59,0.18)]
+            transition-all
+            duration-300
+            hover:-translate-y-1
+            hover:bg-[#B28A20]
+            hover:text-white
+            hover:shadow-[0_15px_35px_rgba(201,160,59,0.25)]
+            sm:w-fit
+            sm:justify-center
+            sm:px-6
+            sm:py-3.5
+          "
+        >
+
+          <span>
+            Our Vision & Mission
+          </span>
+
+          <span
+            className="
+              flex
+              h-9
+              w-9
+              shrink-0
+              items-center
+              justify-center
+              rounded-full
+              bg-[#070B1C]
+              text-[#D7B44D]
+              transition-transform
+              duration-300
+              group-hover:rotate-45
+            "
+          >
+            <ArrowUpRight size={17} />
+          </span>
+
+        </a>
+
+      </div>
+
+    </div>
+
+  </div>
+</section>
 
       {/* =====================================================
-          WHO WE ARE
-      ====================================================== */}
-      <section className="bg-stone-50 px-6 py-24 sm:py-28 lg:px-8 lg:py-32">
-        <div className="mx-auto grid max-w-7xl gap-14 lg:grid-cols-2 lg:items-center lg:gap-20">
+          LEADERSHIP
+      ===================================================== */}
 
-          {/* IMAGE */}
-          <div className="relative">
+      <section
+        className="
+          relative
+          overflow-hidden
+          border-y
+          border-[#E5DBC3]
+          bg-[#F8F5ED]
+          px-4
+          py-20
+          sm:px-6
+          sm:py-28
+          lg:px-8
+          lg:py-32
+        "
+      >
 
-            <div className="absolute -bottom-5 -right-5 h-full w-full border border-orange-500/30" />
+        {/* BACKGROUND GLOW */}
 
-            <div className="relative h-[420px] overflow-hidden sm:h-[520px] lg:h-[580px]">
+        <div
+          className="
+            pointer-events-none
+            absolute
+            -left-32
+            top-20
+            h-72
+            w-72
+            rounded-full
+            bg-[#C9A03B]/10
+            blur-3xl
+          "
+        />
 
-              <img
-                src={aboutConstruction}
-                alt="Saam Infrastructure construction site"
-                className="h-full w-full object-cover transition-transform duration-700 hover:scale-105"
-              />
+        <div
+          className="
+            pointer-events-none
+            absolute
+            -right-32
+            bottom-0
+            h-96
+            w-96
+            rounded-full
+            bg-[#C9A03B]/5
+            blur-3xl
+          "
+        />
 
-              <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-transparent to-transparent" />
+        <div className="relative mx-auto max-w-7xl">
 
-              <div className="absolute bottom-0 left-0 p-7 sm:p-9">
+          {/* LEADERSHIP HEADER */}
 
-                <p className="text-sm font-semibold uppercase tracking-[0.2em] text-orange-400">
-                  Saam Infrastructure
-                </p>
+          <div className="mx-auto max-w-3xl text-center">
 
-                <p className="mt-2 text-2xl font-bold text-white">
-                  Built to stand strong.
-                </p>
+            <div className="flex items-center justify-center gap-3 sm:gap-4">
 
-              </div>
+              <span className="h-[2px] w-8 bg-[#C9A03B] sm:w-12" />
+
+              <p
+                className="
+                  text-[10px]
+                  font-bold
+                  uppercase
+                  tracking-[0.28em]
+                  text-[#B28A20]
+                  sm:text-sm
+                "
+              >
+                Leadership
+              </p>
+
+              <span className="h-[2px] w-8 bg-[#C9A03B] sm:w-12" />
 
             </div>
-          </div>
 
-
-          {/* CONTENT */}
-          <div>
-
-            <p className="text-sm font-semibold uppercase tracking-[0.25em] text-orange-600">
-              Who We Are
-            </p>
-
-            <h2 className="mt-4 text-4xl font-bold leading-tight tracking-tight text-slate-950 sm:text-5xl">
-              Infrastructure built for the future.
+            <h2
+              className="
+                mt-5
+                text-3xl
+                font-black
+                leading-[1.05]
+                tracking-[-0.03em]
+                text-[#070B1C]
+                sm:text-5xl
+                lg:text-6xl
+              "
+            >
+              Leadership that
+              <span className="block text-[#A9925E]">
+                drives excellence.
+              </span>
             </h2>
 
-            <p className="mt-7 text-lg leading-8 text-slate-600">
-              Saam Infrastructure is committed to delivering reliable
-              construction and infrastructure solutions that combine
-              engineering expertise, quality workmanship and thoughtful
-              execution.
+            <p
+              className="
+                mt-5
+                text-sm
+                leading-7
+                text-[#64748B]
+                sm:text-base
+                sm:leading-8
+                lg:text-lg
+              "
+            >
+              Strong leadership, clear vision and responsible execution
+              form the foundation of Saam Infrastructure.
             </p>
 
-            <p className="mt-5 leading-7 text-slate-500">
-              From planning and development to execution and completion, we
-              focus on creating durable spaces and infrastructure that meet
-              the needs of our clients and deliver lasting value.
-            </p>
+          </div>
 
+          {/* =================================================
+              TWO LEADERS
+          ================================================= */}
 
-            {/* FEATURES */}
-            <div className="mt-10 grid gap-6 sm:grid-cols-2">
+          <div
+            className="
+              mt-12
+              grid
+              gap-7
+              sm:mt-16
+              lg:grid-cols-2
+              lg:gap-8
+            "
+          >
 
-              <Feature
-                title="Quality"
-                text="High standards at every stage of construction."
+            {leaders.map((leader, index) => (
+              <LeaderCard
+                key={leader.name}
+                leader={leader}
+                index={index}
               />
-
-              <Feature
-                title="Reliability"
-                text="Dependable planning and project execution."
-              />
-
-              <Feature
-                title="Safety"
-                text="Responsible practices with safety at the core."
-              />
-
-              <Feature
-                title="Long-Term Value"
-                text="Solutions designed for durability and performance."
-              />
-
-            </div>
+            ))}
 
           </div>
 
         </div>
-      </section>
 
+      </section>
 
       {/* =====================================================
           VISION & MISSION
-      ====================================================== */}
-      <section className="border-y border-slate-200 bg-white px-6 py-24 sm:py-28 lg:px-8">
+      ===================================================== */}
+
+      <section
+        id="vision"
+        className="
+          scroll-mt-20
+          border-y
+          border-[#E5DBC3]
+          bg-white
+          px-4
+          py-20
+          sm:px-6
+          sm:py-28
+          lg:px-8
+          lg:py-32
+        "
+      >
 
         <div className="mx-auto max-w-7xl">
 
           <div className="max-w-3xl">
 
-            <div className="flex items-center gap-3">
+            <SectionLabel text="Vision & Mission" />
 
-              <span className="h-px w-10 bg-orange-500" />
-
-              <p className="text-sm font-semibold uppercase tracking-[0.25em] text-orange-600">
-                Vision & Mission
-              </p>
-
-            </div>
-
-            <h2 className="mt-5 text-4xl font-bold leading-tight tracking-tight text-slate-950 sm:text-5xl">
-              Creating infrastructure that makes a difference.
+            <h2
+              className="
+                mt-5
+                text-3xl
+                font-black
+                leading-tight
+                tracking-[-0.03em]
+                text-[#070B1C]
+                sm:text-5xl
+                lg:text-6xl
+              "
+            >
+              Creating infrastructure
+              <span className="block text-[#A9925E]">
+                that makes a difference.
+              </span>
             </h2>
 
-            <p className="mt-5 text-lg leading-8 text-slate-500">
-              Our vision and mission guide the way we approach every project,
-              partnership and construction challenge.
+            <p
+              className="
+                mt-5
+                text-sm
+                leading-7
+                text-[#64748B]
+                sm:text-base
+                sm:leading-8
+              "
+            >
+              Our vision and mission guide the way we approach every
+              project, partnership and construction challenge.
             </p>
 
           </div>
 
+          <div
+            className="
+              mt-12
+              grid
+              gap-6
+              lg:mt-14
+              lg:grid-cols-2
+            "
+          >
 
-          <div className="mt-14 grid gap-6 lg:grid-cols-2">
+            <VisionCard
+              number="01"
+              icon={Eye}
+              label="Our Vision"
+              title="Building a stronger tomorrow."
+              text="To become a trusted name in construction and infrastructure by creating high-quality, sustainable and dependable spaces that contribute to the growth and development of communities."
+            />
 
-            {/* VISION */}
-            <div className="group border border-slate-200 bg-stone-50 p-8 transition-all duration-300 hover:-translate-y-1 hover:border-orange-400 hover:shadow-lg sm:p-10">
-
-              <div className="flex h-14 w-14 items-center justify-center border border-orange-500 text-orange-500 transition-all duration-300 group-hover:bg-orange-500 group-hover:text-white">
-                <Eye size={27} />
-              </div>
-
-              <p className="mt-7 text-sm font-bold uppercase tracking-[0.2em] text-orange-600">
-                Our Vision
-              </p>
-
-              <h3 className="mt-3 text-3xl font-bold text-slate-950">
-                Building a stronger tomorrow.
-              </h3>
-
-              <p className="mt-5 leading-7 text-slate-500">
-                To become a trusted name in construction and infrastructure by
-                creating high-quality, sustainable and dependable spaces that
-                contribute to the growth and development of communities.
-              </p>
-
-            </div>
-
-
-            {/* MISSION */}
-            <div className="group border border-slate-200 bg-stone-50 p-8 transition-all duration-300 hover:-translate-y-1 hover:border-orange-400 hover:shadow-lg sm:p-10">
-
-              <div className="flex h-14 w-14 items-center justify-center border border-orange-500 text-orange-500 transition-all duration-300 group-hover:bg-orange-500 group-hover:text-white">
-                <Target size={27} />
-              </div>
-
-              <p className="mt-7 text-sm font-bold uppercase tracking-[0.2em] text-orange-600">
-                Our Mission
-              </p>
-
-              <h3 className="mt-3 text-3xl font-bold text-slate-950">
-                Delivering with purpose.
-              </h3>
-
-              <p className="mt-5 leading-7 text-slate-500">
-                To deliver construction and infrastructure projects with
-                quality workmanship, responsible practices, transparent
-                communication and dependable execution while creating lasting
-                value for our clients.
-              </p>
-
-            </div>
+            <VisionCard
+              number="02"
+              icon={Target}
+              label="Our Mission"
+              title="Delivering with purpose."
+              text="To deliver construction and infrastructure projects with quality workmanship, responsible practices, transparent communication and dependable execution while creating lasting value for our clients."
+            />
 
           </div>
 
@@ -223,46 +962,82 @@ function AboutPage() {
 
       </section>
 
-
       {/* =====================================================
           OUR HISTORY
-      ====================================================== */}
-      <section className="border-y border-slate-200 bg-slate-100 px-6 py-24 sm:py-28 lg:px-8">
+      ===================================================== */}
+
+      <section
+        className="
+          border-y
+          border-[#E5DBC3]
+          bg-[#F8F5ED]
+          px-4
+          py-20
+          sm:px-6
+          sm:py-28
+          lg:px-8
+        "
+      >
 
         <div className="mx-auto max-w-7xl">
 
-          <div className="grid gap-14 lg:grid-cols-[0.75fr_1.25fr] lg:items-start">
+          <div
+            className="
+              grid
+              gap-14
+              lg:grid-cols-[0.75fr_1.25fr]
+            "
+          >
 
-            {/* LEFT */}
             <div>
 
-              <div className="flex items-center gap-3">
+              <SectionLabel text="Our History" />
 
-                <span className="h-px w-10 bg-orange-500" />
-
-                <p className="text-sm font-semibold uppercase tracking-[0.25em] text-orange-600">
-                  Our History
-                </p>
-
-              </div>
-
-              <h2 className="mt-5 text-4xl font-bold leading-tight text-slate-950 sm:text-5xl">
-                Growing through every project.
+              <h2
+                className="
+                  mt-5
+                  text-3xl
+                  font-black
+                  leading-tight
+                  text-[#070B1C]
+                  sm:text-5xl
+                "
+              >
+                Growing through
+                <span className="block text-[#A9925E]">
+                  every project.
+                </span>
               </h2>
 
-              <p className="mt-5 max-w-md leading-7 text-slate-600">
-                Our journey is built around a simple commitment — delivering
-                dependable construction solutions and building relationships
-                that last.
+              <p
+                className="
+                  mt-5
+                  max-w-md
+                  text-sm
+                  leading-7
+                  text-[#64748B]
+                  sm:text-base
+                "
+              >
+                Our journey is built around a simple commitment —
+                delivering dependable construction solutions and
+                building relationships that last.
               </p>
 
             </div>
 
-
-            {/* TIMELINE */}
             <div className="relative">
 
-              <div className="absolute bottom-0 left-[9px] top-0 w-px bg-slate-300" />
+              <div
+                className="
+                  absolute
+                  bottom-0
+                  left-[10px]
+                  top-0
+                  w-[2px]
+                  bg-[#DED4BD]
+                "
+              />
 
               <HistoryItem
                 year="01"
@@ -297,56 +1072,127 @@ function AboutPage() {
 
       </section>
 
-
       {/* =====================================================
           OUR APPROACH
-      ====================================================== */}
-      <section className="border-b border-slate-200 bg-white px-6 py-24 sm:py-28 lg:px-8">
+      ===================================================== */}
 
-        <div className="mx-auto max-w-7xl">
+      <section
+        className="
+          relative
+          overflow-hidden
+          border-b
+          border-[#E5DBC3]
+          bg-white
+          px-4
+          py-20
+          sm:px-6
+          sm:py-28
+          lg:px-8
+          lg:py-32
+        "
+      >
 
-          <div className="grid gap-12 lg:grid-cols-[0.8fr_1.2fr]">
+        <div
+          className="
+            pointer-events-none
+            absolute
+            -right-40
+            top-20
+            h-[420px]
+            w-[420px]
+            rounded-full
+            bg-[#C9A03B]/[0.06]
+            blur-3xl
+          "
+        />
+
+        <div className="relative mx-auto max-w-7xl">
+
+          <div
+            className="
+              grid
+              gap-12
+              lg:grid-cols-[0.72fr_1.28fr]
+              lg:items-center
+            "
+          >
 
             <div>
 
-              <p className="text-sm font-semibold uppercase tracking-[0.25em] text-orange-600">
-                Our Approach
-              </p>
+              <SectionLabel text="Our Approach" />
 
-              <h2 className="mt-4 text-4xl font-bold leading-tight text-slate-950 sm:text-5xl">
-                Built on strong foundations.
+              <h2
+                className="
+                  mt-5
+                  text-3xl
+                  font-black
+                  leading-[1.05]
+                  tracking-tight
+                  text-[#070B1C]
+                  sm:text-5xl
+                  lg:text-6xl
+                "
+              >
+                Built on strong
+                <span className="block text-[#A9925E]">
+                  foundations.
+                </span>
               </h2>
 
-              <p className="mt-5 max-w-md leading-7 text-slate-500">
-                Every project begins with careful planning, responsible
-                execution and a clear understanding of our client's goals.
+              <p
+                className="
+                  mt-6
+                  max-w-md
+                  text-sm
+                  leading-7
+                  text-[#64748B]
+                  sm:text-base
+                  sm:leading-8
+                "
+              >
+                Every project begins with careful planning,
+                responsible execution and a clear understanding
+                of our client's goals.
               </p>
+
+              <div className="mt-8 flex items-center gap-3">
+
+                <div className="h-1 w-16 rounded-full bg-[#C9A03B]" />
+
+                <div className="h-1 w-5 rounded-full bg-[#C9A03B]/30" />
+
+                <div className="h-1 w-2 rounded-full bg-[#C9A03B]/15" />
+
+              </div>
 
             </div>
 
-
-            <div className="grid gap-6 sm:grid-cols-2">
+            <div className="grid gap-5 sm:grid-cols-2">
 
               <ApproachCard
                 number="01"
+                icon={Sparkles}
                 title="Quality First"
                 text="We maintain high standards of workmanship and attention to detail throughout every project."
               />
 
               <ApproachCard
                 number="02"
+                icon={Handshake}
                 title="Client Focus"
                 text="We work closely with our clients to understand their goals and deliver practical solutions."
               />
 
               <ApproachCard
                 number="03"
+                icon={Shield}
                 title="Responsible Execution"
                 text="Our projects are approached with safety, coordination and dependable execution at every stage."
               />
 
               <ApproachCard
                 number="04"
+                icon={TrendingUp}
                 title="Lasting Value"
                 text="We aim to create durable infrastructure that delivers value long after project completion."
               />
@@ -359,92 +1205,171 @@ function AboutPage() {
 
       </section>
 
-
       {/* =====================================================
           OUR TEAM
-      ====================================================== */}
-      <section className="bg-stone-50 px-6 py-24 sm:py-28 lg:px-8">
+      ===================================================== */}
 
-        <div className="mx-auto max-w-7xl">
+      <section
+        className="
+          relative
+          overflow-hidden
+          bg-[#F8F5ED]
+          px-4
+          py-20
+          sm:px-6
+          sm:py-28
+          lg:px-8
+          lg:py-32
+        "
+      >
 
-          <div className="max-w-3xl">
+        <div className="relative mx-auto max-w-7xl">
 
-            <div className="flex items-center gap-3">
+          <div
+            className="
+              flex
+              flex-col
+              gap-8
+              md:flex-row
+              md:items-end
+              md:justify-between
+            "
+          >
 
-              <span className="h-px w-10 bg-orange-500" />
+            <div className="max-w-3xl">
 
-              <p className="text-sm font-semibold uppercase tracking-[0.25em] text-orange-600">
-                Our Team
+              <SectionLabel text="Our Team" />
+
+              <h2
+                className="
+                  mt-5
+                  text-3xl
+                  font-black
+                  leading-tight
+                  tracking-tight
+                  text-[#070B1C]
+                  sm:text-5xl
+                  lg:text-6xl
+                "
+              >
+                The people behind
+                <span className="block text-[#A9925E]">
+                  our projects.
+                </span>
+              </h2>
+
+              <p
+                className="
+                  mt-5
+                  text-sm
+                  leading-7
+                  text-[#64748B]
+                  sm:text-base
+                  sm:leading-8
+                "
+              >
+                Our team brings together experience, technical knowledge
+                and a shared commitment to delivering dependable project
+                outcomes.
               </p>
 
             </div>
 
-            <h2 className="mt-5 text-4xl font-bold leading-tight tracking-tight text-slate-950 sm:text-5xl">
-              The people behind our projects.
-            </h2>
+            <div className="hidden items-center gap-2 lg:flex">
 
-            <p className="mt-5 text-lg leading-8 text-slate-500">
-              Our team brings together experience, technical knowledge and a
-              shared commitment to delivering dependable project outcomes.
-            </p>
+              <span className="h-2 w-8 rounded-full bg-[#C9A03B]" />
 
-          </div>
+              <span className="h-2 w-2 rounded-full bg-[#C9A03B]/30" />
 
+              <span className="h-2 w-2 rounded-full bg-[#C9A03B]/15" />
 
-          {/* TEAM GRID */}
-          <div className="mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-
-            <TeamMember
-              initials="RS"
-              name="Rajesh Sharma"
-              role="Managing Director"
-            />
-
-            <TeamMember
-              initials="AP"
-              name="Amit Patil"
-              role="Project Director"
-            />
-
-            <TeamMember
-              initials="PD"
-              name="Priya Deshmukh"
-              role="Operations Manager"
-            />
-
-            <TeamMember
-              initials="SK"
-              name="Sandeep Kulkarni"
-              role="Senior Project Engineer"
-            />
+            </div>
 
           </div>
+
+          <TeamCarousel />
 
         </div>
 
       </section>
 
-
       {/* =====================================================
           BOTTOM STATEMENT
-      ====================================================== */}
-      <section className="border-t border-slate-200 bg-stone-100 px-6 py-16 lg:px-8">
+      ===================================================== */}
 
-        <div className="mx-auto flex max-w-7xl flex-col justify-between gap-8 md:flex-row md:items-center">
+      <section
+        className="
+          border-t
+          border-[#E5DBC3]
+          bg-[#070B1C]
+          px-4
+          py-14
+          sm:px-6
+          sm:py-16
+          lg:px-8
+        "
+      >
+
+        <div
+          className="
+            mx-auto
+            flex
+            max-w-7xl
+            flex-col
+            justify-between
+            gap-7
+            md:flex-row
+            md:items-center
+          "
+        >
 
           <div>
 
-            <p className="text-sm font-semibold uppercase tracking-[0.25em] text-orange-600">
+            <p
+              className="
+                text-xs
+                font-bold
+                uppercase
+                tracking-[0.28em]
+                text-[#D7B44D]
+              "
+            >
               Saam Infrastructure
             </p>
 
-            <h2 className="mt-3 max-w-3xl text-3xl font-bold leading-tight text-slate-950 sm:text-4xl">
-              Built with purpose. Delivered with precision.
+            <h2
+              className="
+                mt-3
+                max-w-3xl
+                text-2xl
+                font-black
+                leading-tight
+                text-white
+                sm:text-4xl
+              "
+            >
+              Built with purpose.
+              <span className="block text-[#D7B44D]">
+                Delivered with precision.
+              </span>
             </h2>
 
           </div>
 
-          <div className="flex h-14 w-14 shrink-0 items-center justify-center border border-orange-500 text-orange-500">
+          <div
+            className="
+              flex
+              h-14
+              w-14
+              shrink-0
+              items-center
+              justify-center
+              rounded-full
+              border
+              border-[#C9A03B]
+              text-[#D7B44D]
+            "
+          >
             <ArrowUpRight size={22} />
           </div>
 
@@ -456,54 +1381,26 @@ function AboutPage() {
   );
 }
 
-
 /* =========================================================
-   FEATURE COMPONENT
+   SECTION LABEL
 ========================================================= */
 
-function Feature({ title, text }) {
+function SectionLabel({ text }) {
   return (
-    <div className="flex items-start gap-3">
+    <div className="flex items-center gap-3 sm:gap-4">
 
-      <CheckCircle2
-        size={21}
-        className="mt-0.5 shrink-0 text-orange-500"
-      />
+      <span className="h-[2px] w-10 bg-[#C9A03B] sm:w-12" />
 
-      <div>
-
-        <h3 className="font-semibold text-slate-950">
-          {title}
-        </h3>
-
-        <p className="mt-2 text-sm leading-6 text-slate-500">
-          {text}
-        </p>
-
-      </div>
-
-    </div>
-  );
-}
-
-
-/* =========================================================
-   APPROACH CARD
-========================================================= */
-
-function ApproachCard({ number, title, text }) {
-  return (
-    <div className="border border-slate-200 bg-stone-50 p-7 transition-all duration-300 hover:-translate-y-1 hover:border-orange-400 hover:shadow-md">
-
-      <span className="text-sm font-bold text-orange-500">
-        {number}
-      </span>
-
-      <h3 className="mt-5 text-xl font-bold text-slate-950">
-        {title}
-      </h3>
-
-      <p className="mt-3 leading-7 text-slate-500">
+      <p
+        className="
+          text-[10px]
+          font-bold
+          uppercase
+          tracking-[0.28em]
+          text-[#B28A20]
+          sm:text-sm
+        "
+      >
         {text}
       </p>
 
@@ -511,30 +1408,43 @@ function ApproachCard({ number, title, text }) {
   );
 }
 
-
 /* =========================================================
-   HISTORY ITEM
+   FEATURE
 ========================================================= */
 
-function HistoryItem({ year, title, text, last }) {
+function Feature({ icon: Icon, title, text }) {
   return (
-    <div className={`relative flex gap-7 ${last ? "" : "pb-12"}`}>
+    <div className="group flex items-start gap-4">
 
-      <div className="relative z-10 mt-1 flex h-5 w-5 shrink-0 items-center justify-center border border-orange-500 bg-slate-100">
-        <div className="h-2 w-2 bg-orange-500" />
+      <div
+        className="
+          flex
+          h-11
+          w-11
+          shrink-0
+          items-center
+          justify-center
+          rounded-xl
+          border
+          border-[#D8C58F]
+          text-[#B28A20]
+          transition-all
+          duration-300
+          group-hover:border-[#C9A03B]
+          group-hover:bg-[#C9A03B]
+          group-hover:text-white
+        "
+      >
+        <Icon size={20} />
       </div>
 
       <div>
 
-        <span className="text-sm font-bold tracking-[0.2em] text-orange-600">
-          {year}
-        </span>
-
-        <h3 className="mt-2 text-2xl font-bold text-slate-950">
+        <h3 className="font-bold text-[#070B1C]">
           {title}
         </h3>
 
-        <p className="mt-3 max-w-2xl leading-7 text-slate-600">
+        <p className="mt-2 text-sm leading-6 text-[#64748B]">
           {text}
         </p>
 
@@ -544,33 +1454,1084 @@ function HistoryItem({ year, title, text, last }) {
   );
 }
 
+/* =========================================================
+   LEADERSHIP CARD
+========================================================= */
+
+function LeaderCard({ leader, index }) {
+  return (
+    <article
+      className="
+        group
+        relative
+        overflow-hidden
+        rounded-[2rem]
+        border
+        border-[#DFD5BF]
+        bg-white
+        shadow-[0_18px_50px_rgba(7,11,28,0.08)]
+        transition-all
+        duration-500
+        hover:-translate-y-2
+        hover:border-[#C9A03B]
+        hover:shadow-[0_28px_70px_rgba(7,11,28,0.15)]
+      "
+    >
+      {/* =====================================================
+          IMAGE SECTION
+      ====================================================== */}
+
+      <div
+        className="
+          relative
+          overflow-hidden
+          bg-[#070B1C]
+          aspect-[4/3]
+          sm:aspect-[16/10]
+        "
+      >
+        {/* IMAGE */}
+
+        <img
+          src={leader.image}
+          alt={`${leader.name} - ${leader.role}`}
+          loading="lazy"
+          style={{
+            objectPosition: leader.imagePosition || "center center",
+          }}
+          className="
+            absolute
+            inset-0
+            h-full
+            w-full
+            object-cover
+            object-center
+            transition-transform
+            duration-700
+            group-hover:scale-105
+          "
+        />
+
+        {/* DARK GRADIENT */}
+
+        <div
+          className="
+            pointer-events-none
+            absolute
+            inset-0
+            bg-gradient-to-t
+            from-[#070B1C]/75
+            via-[#070B1C]/10
+            to-transparent
+          "
+        />
+
+        {/* GOLD IMAGE FRAME */}
+
+        <div
+          className="
+            pointer-events-none
+            absolute
+            inset-4
+            rounded-[1.4rem]
+            border
+            border-[#D7B44D]/45
+            sm:inset-5
+            sm:rounded-[1.5rem]
+          "
+        />
+
+        {/* LEADER NUMBER */}
+
+        <span
+          className="
+            absolute
+            right-5
+            top-4
+            text-6xl
+            font-black
+            leading-none
+            text-white/15
+            sm:right-7
+            sm:top-5
+            sm:text-7xl
+          "
+        >
+          0{index + 1}
+        </span>
+
+        {/* IMAGE BOTTOM LABEL */}
+
+        <div
+          className="
+            absolute
+            bottom-0
+            left-0
+            right-0
+            p-5
+            sm:p-7
+          "
+        >
+          <div className="mb-3 h-[3px] w-12 bg-[#D7B44D]" />
+
+          <p
+            className="
+              text-[9px]
+              font-bold
+              uppercase
+              tracking-[0.28em]
+              text-[#D7B44D]
+              sm:text-[10px]
+            "
+          >
+            Saam Infrastructure
+          </p>
+
+          <p
+            className="
+              mt-1
+              text-xs
+              font-semibold
+              text-white/85
+              sm:text-sm
+            "
+          >
+            Leadership
+          </p>
+        </div>
+      </div>
+
+      {/* =====================================================
+          DETAILS SECTION
+      ====================================================== */}
+
+      <div
+        className="
+          relative
+          flex
+          flex-col
+          p-6
+          sm:p-7
+          lg:p-8
+        "
+      >
+        {/* TOP META */}
+
+        <div
+          className="
+            flex
+            items-start
+            justify-between
+            gap-4
+          "
+        >
+          <p
+            className="
+              max-w-[75%]
+              text-[10px]
+              font-bold
+              uppercase
+              leading-4
+              tracking-[0.22em]
+              text-[#B28A20]
+              sm:text-xs
+              sm:leading-5
+            "
+          >
+            {leader.role}
+          </p>
+
+          <span
+            className="
+              shrink-0
+              rounded-full
+              bg-[#F8F5ED]
+              px-3
+              py-1.5
+              text-[8px]
+              font-bold
+              uppercase
+              tracking-[0.16em]
+              text-[#B28A20]
+              sm:px-3.5
+              sm:py-2
+              sm:text-[9px]
+            "
+          >
+            Leader 0{index + 1}
+          </span>
+        </div>
+
+        {/* NAME */}
+
+        <h3
+          className="
+            mt-4
+            max-w-xl
+            text-3xl
+            font-black
+            leading-[1.02]
+            tracking-[-0.035em]
+            text-[#070B1C]
+            sm:mt-5
+            sm:text-4xl
+            lg:text-[2.6rem]
+          "
+        >
+          {leader.name}
+        </h3>
+
+        {/* GOLD LINE */}
+
+        <div
+          className="
+            mt-5
+            h-[3px]
+            w-16
+            rounded-full
+            bg-[#C9A03B]
+            transition-all
+            duration-500
+            group-hover:w-24
+          "
+        />
+
+        {/* DESCRIPTION */}
+
+        <p
+          className="
+            mt-5
+            text-base
+            font-semibold
+            leading-7
+            text-[#36506E]
+            sm:mt-6
+            sm:text-lg
+            sm:leading-8
+          "
+        >
+          {leader.description}
+        </p>
+
+        {/* STATEMENT */}
+
+        <p
+          className="
+            mt-4
+            text-sm
+            leading-7
+            text-[#64748B]
+            sm:mt-5
+            sm:text-base
+            sm:leading-8
+          "
+        >
+          {leader.statement}
+        </p>
+
+        {/* =================================================
+            LEADER STATS
+        ================================================== */}
+
+        <div
+          className="
+            mt-7
+            grid
+            grid-cols-3
+            gap-3
+            border-t
+            border-[#E5DBC3]
+            pt-6
+            sm:mt-8
+            sm:gap-5
+            sm:pt-7
+          "
+        >
+          <LeaderStat
+            number={`0${index + 1}`}
+            label="Leader"
+          />
+
+          <LeaderStat
+            number="100%"
+            label="Commitment"
+          />
+
+          <LeaderStat
+            number="24/7"
+            label="Focus"
+          />
+        </div>
+
+        {/* BOTTOM GOLD DECORATION */}
+
+        <div
+          className="
+            mt-7
+            flex
+            items-center
+            gap-2
+          "
+        >
+          <span
+            className="
+              h-[3px]
+              w-12
+              rounded-full
+              bg-[#C9A03B]
+              transition-all
+              duration-500
+              group-hover:w-20
+            "
+          />
+
+          <span
+            className="
+              h-[3px]
+              w-4
+              rounded-full
+              bg-[#C9A03B]/30
+            "
+          />
+
+          <span
+            className="
+              h-[3px]
+              w-2
+              rounded-full
+              bg-[#C9A03B]/15
+            "
+          />
+        </div>
+      </div>
+
+      {/* HOVER GOLD CORNER */}
+
+      <div
+        className="
+          pointer-events-none
+          absolute
+          bottom-0
+          right-0
+          h-20
+          w-20
+          rounded-tl-[2rem]
+          bg-[#C9A03B]/[0.04]
+          transition-all
+          duration-500
+          group-hover:h-28
+          group-hover:w-28
+          group-hover:bg-[#C9A03B]/[0.08]
+        "
+      />
+    </article>
+  );
+}
+
+/* =========================================================
+   LEADER STAT
+========================================================= */
+
+function LeaderStat({ number, label }) {
+  return (
+    <div>
+
+      <p className="text-xl font-black text-[#B28A20] sm:text-2xl">
+        {number}
+      </p>
+
+      <p
+        className="
+          mt-1
+          text-[8px]
+          font-bold
+          uppercase
+          tracking-[0.12em]
+          text-[#64748B]
+          sm:text-[10px]
+        "
+      >
+        {label}
+      </p>
+
+    </div>
+  );
+}
+
+/* =========================================================
+   VISION CARD
+========================================================= */
+
+function VisionCard({
+  number,
+  icon: Icon,
+  label,
+  title,
+  text,
+}) {
+  return (
+    <div
+      className="
+        group
+        relative
+        overflow-hidden
+        rounded-[2rem]
+        border
+        border-[#E2D9C5]
+        bg-[#F8F5ED]
+        p-7
+        transition-all
+        duration-500
+        hover:-translate-y-2
+        hover:border-[#C9A03B]
+        hover:bg-white
+        hover:shadow-[0_25px_60px_rgba(7,11,28,0.10)]
+        sm:p-10
+      "
+    >
+
+      <span
+        className="
+          pointer-events-none
+          absolute
+          -right-3
+          -top-8
+          text-[8rem]
+          font-black
+          leading-none
+          text-[#C9A03B]/[0.07]
+          transition-transform
+          duration-500
+          group-hover:scale-110
+        "
+      >
+        {number}
+      </span>
+
+      <div
+        className="
+          absolute
+          left-0
+          top-0
+          h-1.5
+          w-24
+          rounded-r-full
+          bg-[#C9A03B]
+          transition-all
+          duration-500
+          group-hover:w-40
+        "
+      />
+
+      <div
+        className="
+          flex
+          h-16
+          w-16
+          items-center
+          justify-center
+          rounded-full
+          border-2
+          border-[#C9A03B]
+          bg-white
+          text-[#B28A20]
+          transition-all
+          duration-500
+          group-hover:rotate-6
+          group-hover:bg-[#C9A03B]
+          group-hover:text-white
+        "
+      >
+        <Icon size={28} strokeWidth={1.8} />
+      </div>
+
+      <p
+        className="
+          relative
+          mt-7
+          text-xs
+          font-bold
+          uppercase
+          tracking-[0.22em]
+          text-[#B28A20]
+        "
+      >
+        {label}
+      </p>
+
+      <h3
+        className="
+          relative
+          mt-3
+          text-2xl
+          font-black
+          leading-tight
+          text-[#070B1C]
+          sm:text-3xl
+        "
+      >
+        {title}
+      </h3>
+
+      <p
+        className="
+          relative
+          mt-5
+          text-sm
+          leading-7
+          text-[#64748B]
+          sm:text-base
+        "
+      >
+        {text}
+      </p>
+
+      <div className="relative mt-8 flex items-center gap-3">
+
+        <span className="h-1 w-10 rounded-full bg-[#C9A03B] transition-all duration-500 group-hover:w-16" />
+
+        <span className="h-1 w-2 rounded-full bg-[#C9A03B]/30" />
+
+        <span className="h-1 w-2 rounded-full bg-[#C9A03B]/15" />
+
+      </div>
+
+    </div>
+  );
+}
+
+/* =========================================================
+   HISTORY ITEM
+========================================================= */
+
+function HistoryItem({ year, title, text, last }) {
+  return (
+    <div
+      className={`relative flex gap-5 sm:gap-7 ${
+        last ? "" : "pb-12"
+      }`}
+    >
+
+      <div
+        className="
+          relative
+          z-10
+          mt-1
+          flex
+          h-5
+          w-5
+          shrink-0
+          items-center
+          justify-center
+          rounded-full
+          border-2
+          border-[#C9A03B]
+          bg-[#F8F5ED]
+        "
+      >
+        <div className="h-2 w-2 rounded-full bg-[#C9A03B]" />
+      </div>
+
+      <div>
+
+        <span
+          className="
+            text-sm
+            font-black
+            tracking-[0.2em]
+            text-[#B28A20]
+          "
+        >
+          {year}
+        </span>
+
+        <h3 className="mt-2 text-2xl font-black text-[#070B1C]">
+          {title}
+        </h3>
+
+        <p
+          className="
+            mt-3
+            max-w-2xl
+            text-sm
+            leading-7
+            text-[#64748B]
+            sm:text-base
+          "
+        >
+          {text}
+        </p>
+
+      </div>
+
+    </div>
+  );
+}
+
+/* =========================================================
+   APPROACH CARD
+========================================================= */
+
+function ApproachCard({
+  number,
+  title,
+  text,
+  icon: Icon,
+}) {
+  return (
+    <div
+      className="
+        group
+        relative
+        min-h-[255px]
+        overflow-hidden
+        rounded-[2rem]
+        rounded-br-[4rem]
+        border
+        border-[#E4DAC4]
+        bg-[#F8F5ED]
+        p-7
+        transition-all
+        duration-500
+        hover:-translate-y-2
+        hover:border-[#C9A03B]
+        hover:bg-white
+        hover:shadow-[0_25px_60px_rgba(7,11,28,0.12)]
+        sm:p-8
+      "
+    >
+
+      <span
+        className="
+          pointer-events-none
+          absolute
+          -right-2
+          -top-7
+          select-none
+          text-[7rem]
+          font-black
+          leading-none
+          text-[#C9A03B]/[0.08]
+          transition-all
+          duration-500
+          group-hover:scale-110
+        "
+      >
+        {number}
+      </span>
+
+      <div className="relative z-10 flex items-center justify-between">
+
+        <span
+          className="
+            flex
+            h-9
+            min-w-9
+            items-center
+            justify-center
+            rounded-full
+            bg-[#070B1C]
+            px-3
+            text-xs
+            font-black
+            tracking-[0.15em]
+            text-[#D7B44D]
+          "
+        >
+          {number}
+        </span>
+
+        <div
+          className="
+            flex
+            h-11
+            w-11
+            items-center
+            justify-center
+            rounded-2xl
+            border
+            border-[#D9C99E]
+            bg-white
+            text-[#B28A20]
+            transition-all
+            duration-500
+            group-hover:rotate-6
+            group-hover:bg-[#C9A03B]
+            group-hover:text-white
+          "
+        >
+          <Icon size={19} />
+        </div>
+
+      </div>
+
+      <div className="relative z-10 mt-8">
+
+        <h3 className="text-xl font-black text-[#070B1C] sm:text-2xl">
+          {title}
+        </h3>
+
+        <p className="mt-3 text-sm leading-7 text-[#64748B]">
+          {text}
+        </p>
+
+      </div>
+
+      <div className="absolute bottom-6 left-7 right-7 flex items-center gap-2">
+
+        <span className="h-[3px] w-10 rounded-full bg-[#C9A03B] transition-all duration-500 group-hover:w-20" />
+
+        <span className="h-[3px] w-3 rounded-full bg-[#C9A03B]/30" />
+
+        <span className="h-[3px] w-2 rounded-full bg-[#C9A03B]/15" />
+
+      </div>
+
+    </div>
+  );
+}
+
+/* =========================================================
+   TEAM CAROUSEL
+========================================================= */
+
+function TeamCarousel() {
+  const carouselRef = useRef(null);
+
+  useEffect(() => {
+    const carousel = carouselRef.current;
+
+    if (!carousel) {
+      return;
+    }
+
+    const interval = setInterval(() => {
+
+      const maxScroll =
+        carousel.scrollWidth - carousel.clientWidth;
+
+      if (carousel.scrollLeft >= maxScroll - 10) {
+
+        carousel.scrollTo({
+          left: 0,
+          behavior: "smooth",
+        });
+
+      } else {
+
+        carousel.scrollBy({
+          left: carousel.clientWidth * 0.82,
+          behavior: "smooth",
+        });
+
+      }
+
+    }, 5000);
+
+    return () => {
+      clearInterval(interval);
+    };
+  }, []);
+
+  const scrollLeft = () => {
+
+    carouselRef.current?.scrollBy({
+      left: -carouselRef.current.clientWidth * 0.82,
+      behavior: "smooth",
+    });
+
+  };
+
+  const scrollRight = () => {
+
+    carouselRef.current?.scrollBy({
+      left: carouselRef.current.clientWidth * 0.82,
+      behavior: "smooth",
+    });
+
+  };
+
+  return (
+    <div className="relative mt-12 sm:mt-14">
+
+      {/* DESKTOP LEFT */}
+
+      <button
+        type="button"
+        onClick={scrollLeft}
+        aria-label="Previous team members"
+        className="
+          absolute
+          -left-3
+          top-1/2
+          z-20
+          hidden
+          h-12
+          w-12
+          -translate-y-1/2
+          items-center
+          justify-center
+          rounded-full
+          border
+          border-[#D8C89F]
+          bg-white
+          text-[#070B1C]
+          shadow-lg
+          transition-all
+          hover:bg-[#C9A03B]
+          hover:text-white
+          lg:flex
+        "
+      >
+        <ChevronLeft size={21} />
+      </button>
+
+      {/* CAROUSEL */}
+
+      <div
+        ref={carouselRef}
+        className="
+          flex
+          gap-5
+          overflow-x-auto
+          scroll-smooth
+          snap-x
+          snap-mandatory
+          pb-6
+          pr-3
+          [scrollbar-width:none]
+          [&::-webkit-scrollbar]:hidden
+          sm:gap-6
+        "
+      >
+
+        {teamMembers.map((member) => (
+
+          <div
+            key={member.name}
+            className="
+              w-[88%]
+              shrink-0
+              snap-start
+              sm:w-[48%]
+              lg:w-[31.5%]
+            "
+          >
+            <TeamMember {...member} />
+          </div>
+
+        ))}
+
+      </div>
+
+      {/* DESKTOP RIGHT */}
+
+      <button
+        type="button"
+        onClick={scrollRight}
+        aria-label="Next team members"
+        className="
+          absolute
+          -right-3
+          top-1/2
+          z-20
+          hidden
+          h-12
+          w-12
+          -translate-y-1/2
+          items-center
+          justify-center
+          rounded-full
+          bg-[#070B1C]
+          text-white
+          shadow-lg
+          transition-all
+          hover:bg-[#C9A03B]
+          lg:flex
+        "
+      >
+        <ChevronRight size={21} />
+      </button>
+
+      {/* MOBILE CONTROLS */}
+
+      <div className="mt-3 flex items-center justify-between lg:hidden">
+
+        <p
+          className="
+            text-[10px]
+            font-bold
+            uppercase
+            tracking-[0.18em]
+            text-[#94A3B8]
+            sm:text-xs
+          "
+        >
+          Swipe to explore
+        </p>
+
+        <div className="flex gap-2">
+
+          <button
+            type="button"
+            onClick={scrollLeft}
+            aria-label="Previous team members"
+            className="
+              flex
+              h-10
+              w-10
+              items-center
+              justify-center
+              rounded-full
+              border
+              border-[#D8C89F]
+              bg-white
+              text-[#070B1C]
+            "
+          >
+            <ChevronLeft size={18} />
+          </button>
+
+          <button
+            type="button"
+            onClick={scrollRight}
+            aria-label="Next team members"
+            className="
+              flex
+              h-10
+              w-10
+              items-center
+              justify-center
+              rounded-full
+              bg-[#070B1C]
+              text-white
+            "
+          >
+            <ChevronRight size={18} />
+          </button>
+
+        </div>
+
+      </div>
+
+    </div>
+  );
+}
 
 /* =========================================================
    TEAM MEMBER
 ========================================================= */
 
-function TeamMember({ initials, name, role }) {
+function TeamMember({
+  name,
+  role,
+  image,
+  description,
+}) {
   return (
-    <div className="group border border-slate-200 bg-white p-7 transition-all duration-300 hover:-translate-y-1 hover:border-orange-400 hover:shadow-lg">
+    <article
+      className="
+        group
+        relative
+        h-full
+        overflow-hidden
+        rounded-[2rem]
+        border
+        border-[#DED3BA]
+        bg-white
+        shadow-[0_12px_35px_rgba(7,11,28,0.06)]
+        transition-all
+        duration-500
+        hover:-translate-y-3
+        hover:border-[#C9A03B]
+        hover:shadow-[0_28px_65px_rgba(7,11,28,0.15)]
+      "
+    >
 
-      <div className="flex h-24 w-24 items-center justify-center border border-orange-500 bg-slate-950 text-2xl font-bold text-orange-500 transition-all duration-300 group-hover:bg-orange-500 group-hover:text-white">
-        {initials}
+      <div
+        className="
+          relative
+          h-[300px]
+          overflow-hidden
+          sm:h-[350px]
+        "
+      >
+
+        <img
+          src={image}
+          alt={name}
+          loading="lazy"
+          className="
+            h-full
+            w-full
+            object-cover
+            grayscale-[12%]
+            transition-all
+            duration-700
+            group-hover:scale-110
+            group-hover:grayscale-0
+          "
+        />
+
+        <div
+          className="
+            absolute
+            inset-0
+            bg-gradient-to-t
+            from-[#070B1C]
+            via-[#070B1C]/15
+            to-transparent
+          "
+        />
+
+        <div className="absolute bottom-0 left-0 right-0 p-6">
+
+          <div className="mb-3 h-[3px] w-12 bg-[#D7B44D]" />
+
+          <p
+            className="
+              text-[10px]
+              font-bold
+              uppercase
+              tracking-[0.25em]
+              text-[#D7B44D]
+            "
+          >
+            Saam Infrastructure
+          </p>
+
+        </div>
+
       </div>
 
-      <h3 className="mt-7 text-xl font-bold text-slate-950">
-        {name}
-      </h3>
+      <div className="p-6 sm:p-7">
 
-      <p className="mt-2 text-sm font-semibold uppercase tracking-[0.15em] text-orange-600">
-        {role}
-      </p>
+        <h3 className="text-xl font-black text-[#070B1C] sm:text-2xl">
+          {name}
+        </h3>
 
-      <p className="mt-4 text-sm leading-6 text-slate-500">
-        Dedicated to delivering quality, reliable execution and successful
-        project outcomes.
-      </p>
+        <p
+          className="
+            mt-2
+            text-xs
+            font-bold
+            uppercase
+            tracking-[0.15em]
+            text-[#B28A20]
+          "
+        >
+          {role}
+        </p>
 
-    </div>
+        <div className="my-5 h-px bg-gradient-to-r from-[#C9A03B]/60 via-[#E7DFCF] to-transparent" />
+
+        <p className="text-sm leading-7 text-[#64748B]">
+          {description}
+        </p>
+
+      </div>
+
+    </article>
   );
 }
 

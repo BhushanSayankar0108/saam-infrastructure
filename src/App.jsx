@@ -2,7 +2,6 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
-import StartProject from "./components/StartProject";
 import ScrollToTop from "./components/ScrollToTop";
 
 import Home from "./pages/Home";
@@ -11,11 +10,12 @@ import ServicesPage from "./pages/ServicesPage";
 import ProjectsPage from "./pages/ProjectsPage";
 import GalleryPage from "./pages/GalleryPage";
 import ContactPage from "./pages/ContactPage";
+import ProjectDetailsPage from "./pages/ProjectDetailsPage";
 
 function App() {
   return (
     <BrowserRouter>
-      
+
       {/* ================= SCROLL TO TOP ================= */}
       <ScrollToTop />
 
@@ -26,6 +26,11 @@ function App() {
 
         {/* ================= PAGE CONTENT ================= */}
         <Routes>
+
+          <Route
+  path="/projects/:id"
+  element={<ProjectDetailsPage />}
+/>
 
           <Route
             path="/"
@@ -59,13 +64,11 @@ function App() {
 
         </Routes>
 
-        {/* ================= COMMON CTA ================= */}
-        <StartProject />
-
         {/* ================= COMMON FOOTER ================= */}
         <Footer />
 
       </div>
+
     </BrowserRouter>
   );
 }

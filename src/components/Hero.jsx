@@ -1,50 +1,52 @@
 import { useEffect, useState } from "react";
-import {
-  ArrowDownRight,
-  ArrowUpRight,
-  ChevronLeft,
-  ChevronRight,
-} from "lucide-react";
+import { ArrowDownRight, ArrowUpRight } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const slides = [
   {
     image:
-      "https://images.unsplash.com/photo-1541888946425-d81bb19240f5?auto=format&fit=crop&w=2000&q=90",
+      "https://images.unsplash.com/photo-1541888946425-d81bb19240f5?auto=format&fit=crop&w=2200&q=90",
     label: "Built with Purpose",
     title: "Engineering Excellence",
     description:
-      "Creating spaces that stand strong for generations.",
+      "Creating spaces that stand strong for generations with precision, quality and thoughtful engineering.",
   },
   {
     image:
-      "https://images.unsplash.com/photo-1503387762-592deb58ef4e?auto=format&fit=crop&w=2000&q=90",
+      "https://images.unsplash.com/photo-1503387762-592deb58ef4e?auto=format&fit=crop&w=2200&q=90",
     label: "Construction Excellence",
     title: "Building the Future",
     description:
-      "Reliable construction solutions designed for lasting performance.",
+      "Reliable construction solutions designed for lasting performance, safety and long-term value.",
   },
   {
     image:
-      "https://images.unsplash.com/photo-1511818966892-d7d671e672a2?auto=format&fit=crop&w=2000&q=90",
+      "https://images.unsplash.com/photo-1511818966892-d7d671e672a2?auto=format&fit=crop&w=2200&q=90",
     label: "Infrastructure",
     title: "Strong Foundations",
     description:
-      "Infrastructure delivered with precision, safety and responsibility.",
+      "Infrastructure delivered with precision, responsibility and a commitment to creating better spaces.",
   },
   {
     image:
-      "https://images.unsplash.com/photo-1565793298595-6a879b1d9492?auto=format&fit=crop&w=2000&q=90",
+      "https://images.unsplash.com/photo-1565793298595-6a879b1d9492?auto=format&fit=crop&w=2200&q=90",
     label: "Project Execution",
     title: "Quality That Lasts",
     description:
-      "From planning to completion, every detail matters.",
+      "From planning to completion, every detail matters. We focus on dependable execution and lasting quality.",
   },
 ];
 
 function Hero() {
   const [currentSlide, setCurrentSlide] = useState(0);
 
-  /* ================= AUTO CAROUSEL ================= */
+  const slide = slides[currentSlide];
+
+  // ============================================================
+  // AUTOMATIC CAROUSEL
+  // Changes every 5 seconds
+  // ============================================================
+
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % slides.length);
@@ -53,322 +55,597 @@ function Hero() {
     return () => clearInterval(interval);
   }, []);
 
-  /* ================= NEXT ================= */
-  const nextSlide = () => {
-    setCurrentSlide((prev) => (prev + 1) % slides.length);
-  };
+  // ============================================================
+  // DOT NAVIGATION
+  // ============================================================
 
-  /* ================= PREVIOUS ================= */
-  const previousSlide = () => {
-    setCurrentSlide(
-      (prev) => (prev - 1 + slides.length) % slides.length
-    );
+  const goToSlide = (index) => {
+    setCurrentSlide(index);
   };
-
-  const slide = slides[currentSlide];
 
   return (
     <section
       id="home"
-      className="relative min-h-screen overflow-hidden bg-slate-950 pt-20"
+      className="
+        relative
+        min-h-screen
+        w-full
+        overflow-hidden
+        bg-[#171815]
+        pt-[86px]
+      "
     >
-      {/* ===================================================== */}
-      {/* FULL HERO CAROUSEL BACKGROUND */}
-      {/* ===================================================== */}
+      {/* ============================================================
+          FULL SCREEN BACKGROUND IMAGE CAROUSEL
+      ============================================================ */}
 
-      <div className="absolute inset-0">
+      <div className="absolute inset-0 overflow-hidden">
         {slides.map((item, index) => (
           <img
             key={item.image}
             src={item.image}
             alt=""
-            className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-1000 ${
-              currentSlide === index ? "opacity-100" : "opacity-0"
-            }`}
+            aria-hidden="true"
+            className={`
+              absolute
+              inset-0
+              h-full
+              w-full
+              object-cover
+              object-center
+              transition-all
+              duration-[1600ms]
+              ease-in-out
+              ${
+                currentSlide === index
+                  ? "scale-105 opacity-100"
+                  : "scale-100 opacity-0"
+              }
+            `}
           />
         ))}
       </div>
 
-      {/* ===================================================== */}
-      {/* LIGHT DARK OVERLAY */}
-      {/* ===================================================== */}
+      {/* ============================================================
+          LIGHT OVERLAY
+          
+          Reduced darkness so the construction image remains visible.
+      ============================================================ */}
 
-      <div className="absolute inset-0 bg-slate-950/40" />
+      <div
+        className="
+          absolute
+          inset-0
+          bg-black/15
+        "
+      />
 
-      {/* ===================================================== */}
-      {/* LEFT GRADIENT - KEEPS TEXT READABLE */}
-      {/* ===================================================== */}
+      {/* ============================================================
+          LEFT TEXT READABILITY
+      ============================================================ */}
 
-      <div className="absolute inset-0 bg-gradient-to-r from-slate-950/80 via-slate-950/45 to-slate-950/10" />
+      <div
+        className="
+          absolute
+          inset-0
+          bg-gradient-to-r
+          from-[#11120F]/65
+          via-[#11120F]/35
+          to-transparent
+        "
+      />
 
-      {/* ===================================================== */}
-      {/* BOTTOM GRADIENT */}
-      {/* ===================================================== */}
+      {/* ============================================================
+          BOTTOM READABILITY
+      ============================================================ */}
 
-      <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-transparent to-slate-950/10" />
+      <div
+        className="
+          absolute
+          inset-x-0
+          bottom-0
+          h-[360px]
+          bg-gradient-to-t
+          from-[#11120F]/70
+          via-[#11120F]/25
+          to-transparent
+        "
+      />
 
-      {/* ===================================================== */}
-      {/* HERO CONTENT */}
-      {/* ===================================================== */}
+      {/* ============================================================
+          TOP READABILITY
+      ============================================================ */}
 
-      <div className="relative z-10 mx-auto flex min-h-[calc(100vh-80px)] max-w-7xl items-center px-6 pb-20 pt-20 sm:pt-24 lg:px-8 lg:pb-24 lg:pt-16">
+      <div
+        className="
+          absolute
+          inset-x-0
+          top-0
+          h-32
+          bg-gradient-to-b
+          from-[#11120F]/35
+          to-transparent
+        "
+      />
 
-        <div className="grid w-full items-center gap-12 lg:grid-cols-[1.1fr_0.9fr] lg:gap-16">
+      {/* ============================================================
+          MOBILE LIGHT OVERLAY
+          
+          Keep image visible on mobile as well.
+      ============================================================ */}
 
-          {/* ================================================= */}
-          {/* LEFT CONTENT */}
-          {/* ================================================= */}
+      <div
+        className="
+          absolute
+          inset-0
+          bg-black/10
+          md:hidden
+        "
+      />
 
-          <div className="max-w-3xl">
+      {/* ============================================================
+          GOLD AMBIENT LIGHT
+      ============================================================ */}
 
-            {/* Eyebrow */}
-            <div className="mb-6 flex items-center gap-3">
-              <span className="h-px w-12 bg-orange-500" />
+      <div
+        className="
+          pointer-events-none
+          absolute
+          -right-[180px]
+          -top-[140px]
+          h-[350px]
+          w-[350px]
+          rounded-full
+          bg-[#D1A82A]/10
+          blur-3xl
+          sm:h-[450px]
+          sm:w-[450px]
+        "
+      />
 
-              <span className="text-xs font-semibold uppercase tracking-[0.3em] text-orange-400 sm:text-sm">
-                Construction & Infrastructure
+      <div
+        className="
+          pointer-events-none
+          absolute
+          -bottom-[160px]
+          -left-[120px]
+          h-[300px]
+          w-[300px]
+          rounded-full
+          bg-[#D1A82A]/8
+          blur-3xl
+          sm:h-[400px]
+          sm:w-[400px]
+        "
+      />
+
+      {/* ============================================================
+          MAIN HERO CONTENT
+      ============================================================ */}
+
+      <div
+        className="
+          relative
+          z-10
+          mx-auto
+          flex
+          min-h-[calc(100vh-86px)]
+          max-w-7xl
+          items-center
+          px-5
+          py-16
+          sm:px-6
+          sm:py-20
+          md:px-8
+          md:py-20
+          lg:px-8
+          lg:py-16
+        "
+      >
+        <div className="w-full">
+          {/* ========================================================
+              DYNAMIC CONTENT
+              
+              This changes with every slide.
+          ======================================================== */}
+
+          <div
+            key={currentSlide}
+            className="
+              max-w-4xl
+              animate-[heroContent_0.8s_ease-out]
+            "
+          >
+            {/* ======================================================
+                LABEL
+            ====================================================== */}
+
+            <div
+              className="
+                mb-5
+                flex
+                items-center
+                gap-3
+                sm:mb-7
+              "
+            >
+              <span
+                className="
+                  h-[2px]
+                  w-8
+                  shrink-0
+                  bg-[#D2A92E]
+                  sm:w-12
+                "
+              />
+
+              <span
+                className="
+                  text-[9px]
+                  font-bold
+                  uppercase
+                  tracking-[0.22em]
+                  text-[#F0CC58]
+                  sm:text-xs
+                  sm:tracking-[0.28em]
+                  md:text-sm
+                "
+              >
+                {slide.label}
               </span>
             </div>
 
-            {/* Heading */}
-            <h1 className="text-5xl font-bold leading-[1.05] tracking-tight text-white drop-shadow-lg sm:text-6xl lg:text-7xl">
-              Building the{" "}
-              <span className="text-orange-500">Future.</span>
+            {/* ======================================================
+                MAIN HEADING
+            ====================================================== */}
+
+            <h1
+              className="
+                max-w-5xl
+                text-[46px]
+                font-bold
+                leading-[0.95]
+                tracking-[-0.045em]
+                text-white
+                drop-shadow-[0_4px_20px_rgba(0,0,0,0.55)]
+                sm:text-6xl
+                md:text-7xl
+                lg:text-[78px]
+                xl:text-[88px]
+              "
+            >
+              {slide.title}
             </h1>
 
-            {/* Secondary Heading */}
-            <h2 className="mt-4 max-w-2xl text-2xl font-semibold leading-tight text-white drop-shadow-lg sm:text-3xl lg:text-5xl">
+            {/* ======================================================
+                SECONDARY HEADING
+            ====================================================== */}
+
+            <h2
+              className="
+                mt-5
+                max-w-3xl
+                text-[24px]
+                font-semibold
+                leading-[1.12]
+                text-white
+                drop-shadow-[0_3px_15px_rgba(0,0,0,0.55)]
+                sm:mt-6
+                sm:text-3xl
+                md:text-4xl
+                lg:text-5xl
+              "
+            >
               One Strong Foundation at a Time.
             </h2>
 
-            {/* Description */}
-            <p className="mt-7 max-w-2xl text-base leading-7 text-slate-100 drop-shadow-md sm:text-lg">
-              Saam Infrastructure delivers dependable construction and
-              infrastructure solutions with a focus on quality, precision,
-              safety and long-term value.
+            {/* ======================================================
+                DESCRIPTION
+            ====================================================== */}
+
+            <p
+              className="
+                mt-6
+                max-w-2xl
+                text-sm
+                leading-7
+                text-white/90
+                drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)]
+                sm:mt-7
+                sm:text-base
+                sm:leading-8
+                md:text-lg
+              "
+            >
+              {slide.description}
             </p>
-
-            {/* Buttons */}
-            <div className="mt-9 flex flex-col gap-4 sm:flex-row">
-
-              {/* Projects */}
-              <a
-                href="/projects"
-                className="group flex w-full items-center justify-center gap-3 bg-orange-500 px-7 py-4 text-sm font-semibold text-white shadow-lg transition-all duration-300 hover:bg-orange-600 sm:w-fit"
-              >
-                Explore Projects
-
-                <ArrowUpRight
-                  size={18}
-                  className="transition-transform duration-300 group-hover:-translate-y-1 group-hover:translate-x-1"
-                />
-              </a>
-
-              {/* Contact */}
-              <a
-                href="/contact"
-                className="group flex w-full items-center justify-center gap-3 border border-white/50 bg-slate-950/30 px-7 py-4 text-sm font-semibold text-white backdrop-blur-sm transition-all duration-300 hover:border-orange-400 hover:bg-orange-500/20 sm:w-fit"
-              >
-                Get a Quote
-
-                <ArrowUpRight
-                  size={18}
-                  className="transition-transform duration-300 group-hover:-translate-y-1 group-hover:translate-x-1"
-                />
-              </a>
-            </div>
-
-            {/* Stats */}
-            <div className="mt-12 grid max-w-xl grid-cols-3 border-t border-white/30 pt-7 sm:mt-14">
-
-              <div>
-                <div className="text-2xl font-bold text-white sm:text-3xl">
-                  15+
-                </div>
-
-                <div className="mt-1 text-[10px] uppercase tracking-wider text-slate-200 sm:text-xs">
-                  Projects
-                </div>
-              </div>
-
-              <div className="border-l border-white/30 pl-4 sm:pl-5">
-                <div className="text-2xl font-bold text-white sm:text-3xl">
-                  10+
-                </div>
-
-                <div className="mt-1 text-[10px] uppercase tracking-wider text-slate-200 sm:text-xs">
-                  Years Experience
-                </div>
-              </div>
-
-              <div className="border-l border-white/30 pl-4 sm:pl-5">
-                <div className="text-2xl font-bold text-white sm:text-3xl">
-                  100%
-                </div>
-
-                <div className="mt-1 text-[10px] uppercase tracking-wider text-slate-200 sm:text-xs">
-                  Commitment
-                </div>
-              </div>
-
-            </div>
           </div>
 
-          {/* ================================================= */}
-          {/* RIGHT SLIDE INFORMATION */}
-          {/* ================================================= */}
+          {/* ========================================================
+              STATIC CTA BUTTONS
 
-          <div className="hidden justify-end lg:flex">
+              These NEVER change when the carousel changes.
+          ======================================================== */}
 
-            <div className="relative w-full max-w-md">
+          <div
+            className="
+              mt-8
+              flex
+              w-full
+              flex-col
+              gap-3
+              sm:mt-9
+              sm:flex-row
+              sm:gap-4
+            "
+          >
+            {/* ======================================================
+                EXPLORE PROJECTS
+            ====================================================== */}
 
-              {/* Decorative Border */}
-              <div className="absolute -right-4 -top-4 h-full w-full border border-orange-500/50" />
+            <Link
+              to="/projects"
+              className="
+                group
+                inline-flex
+                w-full
+                items-center
+                justify-center
+                gap-3
+                rounded-full
+                bg-[#D1A82A]
+                px-6
+                py-3.5
+                text-sm
+                font-bold
+                text-[#171815]
+                shadow-[0_10px_30px_rgba(209,168,42,0.30)]
+                transition-all
+                duration-300
+                hover:-translate-y-1
+                hover:bg-[#E3C04F]
+                hover:shadow-[0_15px_40px_rgba(209,168,42,0.40)]
+                sm:w-auto
+                sm:px-7
+                sm:py-4
+              "
+            >
+              <span>Explore Projects</span>
 
-              {/* Information Card */}
-              <div className="relative border border-white/30 bg-slate-950/30 p-8 backdrop-blur-md">
+              <span
+                className="
+                  flex
+                  h-8
+                  w-8
+                  shrink-0
+                  items-center
+                  justify-center
+                  rounded-full
+                  bg-[#171815]/10
+                  transition-all
+                  duration-300
+                  group-hover:bg-[#171815]/20
+                "
+              >
+                <ArrowUpRight
+                  size={17}
+                  strokeWidth={2.2}
+                  className="
+                    transition-transform
+                    duration-300
+                    group-hover:-translate-y-0.5
+                    group-hover:translate-x-0.5
+                  "
+                />
+              </span>
+            </Link>
 
-                {/* Slide Number */}
-                <div className="flex items-center justify-between">
+            {/* ======================================================
+                GET A QUOTE
+            ====================================================== */}
 
-                  <span className="text-sm font-bold tracking-[0.2em] text-orange-400">
-                    PROJECT {String(currentSlide + 1).padStart(2, "0")}
-                  </span>
+            <Link
+              to="/contact"
+              className="
+                group
+                inline-flex
+                w-full
+                items-center
+                justify-center
+                gap-3
+                rounded-full
+                border
+                border-[#E0C15B]
+                bg-[#F7F4EC]
+                px-6
+                py-3.5
+                text-sm
+                font-bold
+                text-[#171815]
+                shadow-[0_8px_25px_rgba(0,0,0,0.20)]
+                transition-all
+                duration-300
+                hover:-translate-y-1
+                hover:border-[#D1A82A]
+                hover:bg-white
+                hover:shadow-[0_12px_35px_rgba(0,0,0,0.25)]
+                sm:w-auto
+                sm:px-7
+                sm:py-4
+              "
+            >
+              <span>Get a Quote</span>
 
-                  <span className="text-sm text-white/70">
-                    0{slides.length}
-                  </span>
-                </div>
-
-                <div className="mt-8 h-px bg-white/20" />
-
-                {/* Label */}
-                <div className="mt-8 flex items-center gap-2">
-
-                  <span className="h-2 w-2 rounded-full bg-orange-500" />
-
-                  <span className="text-xs font-semibold uppercase tracking-[0.2em] text-orange-400">
-                    {slide.label}
-                  </span>
-
-                </div>
-
-                {/* Title */}
-                <h3 className="mt-4 text-3xl font-bold leading-tight text-white">
-                  {slide.title}
-                </h3>
-
-                {/* Description */}
-                <p className="mt-4 text-sm leading-7 text-slate-200">
-                  {slide.description}
-                </p>
-
-                {/* Controls */}
-                <div className="mt-8 flex items-center justify-between">
-
-                  <div className="flex gap-2">
-                    {slides.map((item, index) => (
-                      <button
-                        key={item.image}
-                        type="button"
-                        onClick={() => setCurrentSlide(index)}
-                        aria-label={`Go to slide ${index + 1}`}
-                        className={`h-1.5 transition-all duration-300 ${
-                          currentSlide === index
-                            ? "w-10 bg-orange-500"
-                            : "w-5 bg-white/40 hover:bg-orange-400"
-                        }`}
-                      />
-                    ))}
-                  </div>
-
-                  <div className="flex gap-2">
-
-                    <button
-                      type="button"
-                      onClick={previousSlide}
-                      aria-label="Previous slide"
-                      className="flex h-10 w-10 items-center justify-center border border-white/40 bg-slate-950/40 text-white backdrop-blur-sm transition hover:border-orange-500 hover:bg-orange-500"
-                    >
-                      <ChevronLeft size={19} />
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={nextSlide}
-                      aria-label="Next slide"
-                      className="flex h-10 w-10 items-center justify-center border border-white/40 bg-slate-950/40 text-white backdrop-blur-sm transition hover:border-orange-500 hover:bg-orange-500"
-                    >
-                      <ChevronRight size={19} />
-                    </button>
-
-                  </div>
-                </div>
-              </div>
-            </div>
+              <span
+                className="
+                  flex
+                  h-8
+                  w-8
+                  shrink-0
+                  items-center
+                  justify-center
+                  rounded-full
+                  bg-[#D1A82A]/15
+                  text-[#171815]
+                  transition-all
+                  duration-300
+                  group-hover:bg-[#D1A82A]
+                "
+              >
+                <ArrowUpRight
+                  size={17}
+                  strokeWidth={2.2}
+                  className="
+                    transition-transform
+                    duration-300
+                    group-hover:-translate-y-0.5
+                    group-hover:translate-x-0.5
+                  "
+                />
+              </span>
+            </Link>
           </div>
         </div>
       </div>
 
-      {/* ===================================================== */}
-      {/* MOBILE CONTROLS */}
-      {/* ===================================================== */}
+      {/* ============================================================
+          LEFT SIDE CAROUSEL DOTS
 
-      <div className="absolute bottom-20 right-6 z-20 flex gap-2 lg:hidden">
+          ONLY these 4 dots control the carousel.
+          No previous/next buttons.
+      ============================================================ */}
 
-        <button
-          type="button"
-          onClick={previousSlide}
-          aria-label="Previous slide"
-          className="flex h-10 w-10 items-center justify-center border border-white/40 bg-slate-950/50 text-white backdrop-blur-sm transition hover:border-orange-500 hover:bg-orange-500"
-        >
-          <ChevronLeft size={19} />
-        </button>
-
-        <button
-          type="button"
-          onClick={nextSlide}
-          aria-label="Next slide"
-          className="flex h-10 w-10 items-center justify-center border border-white/40 bg-slate-950/50 text-white backdrop-blur-sm transition hover:border-orange-500 hover:bg-orange-500"
-        >
-          <ChevronRight size={19} />
-        </button>
-
-      </div>
-
-      {/* ===================================================== */}
-      {/* MOBILE DOTS */}
-      {/* ===================================================== */}
-
-      <div className="absolute bottom-7 left-6 z-20 flex gap-2 lg:hidden">
-
+      <div
+        className="
+          absolute
+          bottom-8
+          left-5
+          z-30
+          flex
+          items-center
+          gap-2
+          sm:left-6
+          md:left-8
+          lg:left-10
+        "
+      >
         {slides.map((item, index) => (
           <button
             key={item.image}
             type="button"
-            onClick={() => setCurrentSlide(index)}
+            onClick={() => goToSlide(index)}
             aria-label={`Go to slide ${index + 1}`}
-            className={`h-1.5 transition-all duration-300 ${
-              currentSlide === index
-                ? "w-10 bg-orange-500"
-                : "w-5 bg-white/50 hover:bg-orange-400"
-            }`}
+            aria-current={currentSlide === index ? "true" : "false"}
+            className={`
+              rounded-full
+              transition-all
+              duration-500
+              ${
+                currentSlide === index
+                  ? "h-2 w-9 bg-[#D1A82A] shadow-[0_0_12px_rgba(209,168,42,0.5)] sm:w-10"
+                  : "h-2 w-2 bg-white/60 hover:bg-[#F0CC58]"
+              }
+            `}
           />
         ))}
-
       </div>
 
-      {/* ===================================================== */}
-      {/* SCROLL INDICATOR */}
-      {/* ===================================================== */}
+      {/* ============================================================
+          SLIDE NUMBER
+          
+          Kept on the right, but NO slide buttons.
+      ============================================================ */}
+
+      <div
+        className="
+          absolute
+          bottom-8
+          right-5
+          z-30
+          hidden
+          rounded-full
+          border
+          border-white/25
+          bg-black/25
+          px-3
+          py-2
+          text-[10px]
+          font-bold
+          tracking-[0.2em]
+          text-white
+          backdrop-blur-md
+          sm:block
+          md:right-8
+          lg:right-10
+        "
+      >
+        {String(currentSlide + 1).padStart(2, "0")}
+        {" / "}
+        {String(slides.length).padStart(2, "0")}
+      </div>
+
+      {/* ============================================================
+          DESKTOP SCROLL INDICATOR
+      ============================================================ */}
 
       <a
         href="#about"
-        className="absolute bottom-7 left-1/2 z-20 hidden -translate-x-1/2 items-center gap-3 text-xs uppercase tracking-[0.25em] text-white/80 transition-colors hover:text-orange-400 md:flex"
+        className="
+          absolute
+          bottom-8
+          left-1/2
+          z-20
+          hidden
+          -translate-x-1/2
+          items-center
+          gap-3
+          text-[10px]
+          font-semibold
+          uppercase
+          tracking-[0.25em]
+          text-white/80
+          transition-colors
+          hover:text-[#F0CC58]
+          lg:flex
+        "
       >
         Scroll to explore
         <ArrowDownRight size={16} />
       </a>
+
+      {/* ============================================================
+          GOLD BOTTOM LINE
+      ============================================================ */}
+
+      <div
+        className="
+          absolute
+          bottom-0
+          left-0
+          right-0
+          z-40
+          h-[3px]
+          bg-[#D1A82A]
+        "
+      />
+
+      {/* ============================================================
+          CONTENT ANIMATION
+      ============================================================ */}
+
+      <style>{`
+        @keyframes heroContent {
+          from {
+            opacity: 0;
+            transform: translateY(18px);
+          }
+
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+      `}</style>
     </section>
   );
 }

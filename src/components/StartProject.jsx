@@ -1,36 +1,48 @@
 import { ArrowUpRight } from "lucide-react";
+import { Link } from "react-router-dom";
 
 function StartProject() {
   return (
-    <section className="bg-slate-950 px-6 py-20 text-white sm:py-24 lg:px-8 lg:py-28">
-      <div className="mx-auto max-w-7xl">
+    <section className="border-t border-[#C9A24A]/20 bg-[#171916]">
 
-        <div className="flex flex-col gap-10 md:flex-row md:items-center md:justify-between">
+      <div className="mx-auto max-w-7xl px-6 py-20 lg:px-8 lg:py-24">
 
-          {/* LEFT CONTENT */}
-          <div className="max-w-3xl">
+        <div className="grid gap-12 lg:grid-cols-[1fr_auto] lg:items-center">
 
-            <p className="text-sm font-semibold uppercase tracking-[0.25em] text-orange-400">
-              Start Your Project
-            </p>
+          {/* ================= LEFT CONTENT ================= */}
+          <div>
 
-            <h2 className="mt-4 text-4xl font-bold leading-tight tracking-tight sm:text-5xl">
-              Have a project in mind?
+            <div className="flex items-center gap-3">
+
+              <span className="h-px w-12 bg-[#C9A24A]" />
+
+              <p className="text-sm font-semibold uppercase tracking-[0.25em] text-[#C9A24A]">
+                Start Your Project
+              </p>
+
+            </div>
+
+            <h2 className="mt-5 max-w-3xl text-4xl font-bold leading-tight text-white sm:text-5xl lg:text-6xl">
+              Have a project
+              <br />
+              <span className="text-[#C9A24A]">
+                in mind?
+              </span>
             </h2>
 
-            <p className="mt-4 max-w-2xl text-base leading-7 text-slate-400 sm:text-lg">
-              Let's discuss your construction and infrastructure requirements
-              and find the right solution for your project.
+            <p className="mt-6 max-w-2xl text-base leading-7 text-[#B9B9B0] sm:text-lg sm:leading-8">
+              Let's discuss your construction and infrastructure
+              requirements and find the right solution for your project.
             </p>
 
           </div>
 
-          {/* BUTTON */}
-          <div className="shrink-0">
+          {/* ================= BUTTON ================= */}
+          <div>
 
-            <a
-              href="/contact"
-              className="group flex w-fit items-center gap-3 bg-orange-500 px-7 py-4 text-sm font-bold text-white transition-all duration-300 hover:bg-orange-600"
+            <Link
+              to="/contact"
+              className="group inline-flex items-center gap-3 border border-[#C9A24A] bg-[#C9A24A] px-7 py-4 text-sm font-bold text-[#171916] transition-all duration-300 hover:border-[#E0C36A] hover:bg-[#E0C36A]"
             >
               Get a Quote
 
@@ -38,13 +50,14 @@ function StartProject() {
                 size={18}
                 className="transition-transform duration-300 group-hover:-translate-y-1 group-hover:translate-x-1"
               />
-            </a>
+            </Link>
 
           </div>
 
         </div>
 
       </div>
+
     </section>
   );
 }

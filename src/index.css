@@ -1,21 +1,155 @@
 @import "tailwindcss";
 
+/* =========================================================
+   SAAM INFRASTRUCTURE
+   GLOBAL BRAND THEME
+   ========================================================= */
+
+:root {
+  /* ================= BRAND COLORS ================= */
+
+  --saam-green: #1f4037;
+  --saam-green-dark: #182f29;
+  --saam-green-deep: #12251f;
+  --saam-green-light: #31594d;
+
+  --saam-gold: #c9a227;
+  --saam-gold-dark: #a98216;
+  --saam-gold-light: #e0c35b;
+
+  /* ================= BACKGROUNDS ================= */
+
+  --saam-white: #fffdf8;
+  --saam-cream: #f8f6ef;
+  --saam-beige: #f3f0e6;
+  --saam-soft-green: #eef1eb;
+
+  /* ================= TEXT ================= */
+
+  --saam-text: #18201d;
+  --saam-text-light: #3f4742;
+  --saam-muted: #687169;
+  --saam-muted-light: #858b84;
+
+  /* ================= BORDERS ================= */
+
+  --saam-border: #d8d3c4;
+  --saam-border-light: #e6e2d7;
+
+  /* ================= EFFECTS ================= */
+
+  --saam-shadow: rgba(24, 47, 41, 0.12);
+}
+
+/* =========================================================
+   HTML
+========================================================= */
+
 html {
   scroll-behavior: smooth;
+  background: var(--saam-cream);
 }
+
+/* =========================================================
+   BODY
+========================================================= */
 
 body {
   margin: 0;
   min-width: 320px;
-  background: #020617;
-  font-family: Arial, Helvetica, sans-serif;
+
+  background-color: var(--saam-cream);
+  color: var(--saam-text);
+
+  font-family:
+    Arial,
+    Helvetica,
+    sans-serif;
+
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
+
+/* =========================================================
+   BOX SIZING
+========================================================= */
 
 * {
   box-sizing: border-box;
 }
 
+/* =========================================================
+   IMAGES
+========================================================= */
+
 img {
   display: block;
   max-width: 100%;
+}
+
+/* =========================================================
+   LINKS
+========================================================= */
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* =========================================================
+   BUTTONS
+========================================================= */
+
+button {
+  font-family: inherit;
+}
+
+/* =========================================================
+   TEXT SELECTION
+========================================================= */
+
+::selection {
+  background-color: var(--saam-gold);
+  color: var(--saam-green-deep);
+}
+
+/* =========================================================
+   SCROLLBAR
+========================================================= */
+
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--saam-beige);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--saam-gold);
+  border-radius: 0;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--saam-gold-dark);
+}
+
+/* =========================================================
+   FOCUS
+========================================================= */
+
+button:focus-visible,
+a:focus-visible {
+  outline: 2px solid var(--saam-gold);
+  outline-offset: 3px;
+}
+
+/* =========================================================
+   SMOOTH PAGE TRANSITIONS
+========================================================= */
+
+img,
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
 }
