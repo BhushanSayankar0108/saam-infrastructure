@@ -182,7 +182,7 @@ function AboutPage() {
 
             <h1
               className="
-                text-[clamp(2rem,6vw,4.8rem)]
+                text-[clamp(2.5rem,7vw,5.8rem)]
                 font-black
                 uppercase
                 leading-[0.9]
@@ -210,7 +210,7 @@ function AboutPage() {
 
             <h2
               className="
-                text-[clamp(2.35rem,5vw,4.8rem)]
+                text-[clamp(2.2rem,5vw,4.5rem)]
                 font-black
                 leading-[1.04]
                 tracking-[-0.04em]
@@ -226,7 +226,7 @@ function AboutPage() {
             <h2
               className="
                 mt-5
-                text-[clamp(2.35rem,5vw,4.8rem)]
+                text-[clamp(2.2rem,5vw,4.5rem)]
                 font-black
                 leading-[1.04]
                 tracking-[-0.04em]
@@ -290,444 +290,344 @@ function AboutPage() {
       </section>
 
       {/* =====================================================
-    WHO WE ARE
-===================================================== */}
+          WHO WE ARE
+      ===================================================== */}
 
-<section
-  className="
-    bg-white
-    px-4
-    py-16
-    sm:px-6
-    sm:py-24
-    lg:px-8
-    lg:py-32
-  "
->
-  <div
-    className="
-      mx-auto
-      grid
-      max-w-7xl
-      gap-12
-      lg:grid-cols-2
-      lg:items-center
-      lg:gap-16
-      xl:gap-20
-    "
-  >
-
-    {/* =================================================
-        IMAGE
-    ================================================== */}
-
-    <div
-      className="
-        relative
-        mx-auto
-        w-full
-        max-w-[620px]
-        px-1
-        pb-2
-        sm:px-0
-        sm:pb-2
-      "
-    >
-
-      {/* =================================================
-          SMALL GOLD/BROWN BACKGROUND OUTLINE
-
-          Reduced from:
-          -bottom-5 / -right-5
-          88% / 88%
-          border-2
-
-          Now:
-          -bottom-2 / -right-2
-          full size
-          thin border
-      ================================================== */}
-
-      <div
+      <section
         className="
-          pointer-events-none
-          absolute
-          -bottom-2
-          -right-2
-          h-full
-          w-full
-          rounded-[2rem]
-          rounded-tl-none
-          border
-          border-[#C9A03B]/45
-          sm:-bottom-3
-          sm:-right-3
-          sm:rounded-[2.25rem]
-        "
-      />
-
-      {/* =================================================
-          IMAGE CARD
-      ================================================== */}
-
-      <div
-        className="
-          group
-          relative
-          z-10
-          h-[360px]
-          w-full
-          overflow-hidden
-          rounded-[2rem]
-          rounded-tl-none
-          rounded-br-[3.5rem]
-          bg-[#070B1C]
-          shadow-[0_20px_45px_rgba(7,11,28,0.13)]
-          sm:h-[480px]
-          sm:rounded-[2.25rem]
-          sm:rounded-br-[4rem]
-          lg:h-[560px]
-          xl:h-[580px]
+          bg-white
+          px-4
+          py-16
+          sm:px-6
+          sm:py-24
+          lg:px-8
+          lg:py-32
         "
       >
 
-        {/* IMAGE */}
-
-        <img
-          src={aboutConstruction}
-          alt="Saam Infrastructure construction site"
-          className="
-            absolute
-            inset-0
-            h-full
-            w-full
-            object-cover
-            object-center
-            transition-transform
-            duration-700
-            ease-out
-            group-hover:scale-[1.03]
-          "
-        />
-
-        {/* DARK IMAGE OVERLAY */}
-
         <div
           className="
-            pointer-events-none
-            absolute
-            inset-0
-            bg-gradient-to-t
-            from-[#070B1C]/90
-            via-[#070B1C]/15
-            to-transparent
-          "
-        />
-
-        {/* INNER IMAGE BORDER */}
-
-        <div
-          className="
-            pointer-events-none
-            absolute
-            inset-3
-            rounded-[1.5rem]
-            rounded-tl-none
-            border
-            border-white/15
-            sm:inset-5
-            sm:rounded-[1.75rem]
-          "
-        />
-
-        {/* IMAGE CONTENT */}
-
-        <div
-          className="
-            absolute
-            bottom-0
-            left-0
-            right-0
-            z-10
-            p-5
-            sm:p-8
-            lg:p-9
+            mx-auto
+            grid
+            max-w-7xl
+            gap-14
+            lg:grid-cols-2
+            lg:items-center
+            lg:gap-20
           "
         >
 
-          {/* Gold line */}
+          {/* IMAGE */}
 
-          <div
-            className="
-              mb-3
-              h-1
-              w-10
-              bg-[#D7B44D]
-              sm:mb-4
-              sm:w-14
-            "
-          />
+          <div className="relative mx-auto w-full max-w-[620px]">
 
-          <p
-            className="
-              text-[10px]
-              font-bold
-              uppercase
-              tracking-[0.22em]
-              text-[#D7B44D]
-              sm:text-xs
-              sm:tracking-[0.25em]
-            "
-          >
-            Saam Infrastructure
-          </p>
+            <div
+              className="
+                absolute
+                -bottom-5
+                -right-5
+                h-[88%]
+                w-[88%]
+                rounded-[2rem]
+                rounded-tl-none
+                border-2
+                border-[#C9A03B]/40
+                sm:-bottom-7
+                sm:-right-7
+              "
+            />
 
-          <p
-            className="
-              mt-2
-              max-w-sm
-              text-2xl
-              font-black
-              leading-tight
-              text-white
-              sm:mt-3
-              sm:text-3xl
-              lg:text-4xl
-            "
-          >
-            Built to stand
-            <span className="block">
-              strong.
-            </span>
-          </p>
+            <div
+              className="
+                group
+                relative
+                z-10
+                h-[360px]
+                overflow-hidden
+                rounded-[2rem]
+                rounded-tl-none
+                rounded-br-[4rem]
+                bg-[#070B1C]
+                shadow-[0_25px_60px_rgba(7,11,28,0.16)]
+                sm:h-[500px]
+                lg:h-[580px]
+              "
+            >
+
+              <img
+                src={aboutConstruction}
+                alt="Saam Infrastructure construction site"
+                className="
+                  h-full
+                  w-full
+                  object-cover
+                  transition-transform
+                  duration-700
+                  group-hover:scale-105
+                "
+              />
+
+              <div
+                className="
+                  absolute
+                  inset-0
+                  bg-gradient-to-t
+                  from-[#070B1C]/95
+                  via-[#070B1C]/20
+                  to-transparent
+                "
+              />
+
+              <div
+                className="
+                  pointer-events-none
+                  absolute
+                  inset-4
+                  rounded-[1.5rem]
+                  rounded-tl-none
+                  border
+                  border-white/20
+                  sm:inset-6
+                "
+              />
+
+              <div className="absolute bottom-0 left-0 right-0 p-6 sm:p-10">
+
+                <div className="mb-4 h-1 w-14 bg-[#D7B44D]" />
+
+                <p
+                  className="
+                    text-xs
+                    font-bold
+                    uppercase
+                    tracking-[0.25em]
+                    text-[#D7B44D]
+                    sm:text-sm
+                  "
+                >
+                  Saam Infrastructure
+                </p>
+
+                <p
+                  className="
+                    mt-3
+                    max-w-sm
+                    text-2xl
+                    font-black
+                    leading-tight
+                    text-white
+                    sm:text-4xl
+                  "
+                >
+                  Built to stand strong.
+                </p>
+
+              </div>
+
+            </div>
+
+            {/* QUALITY BADGE */}
+
+            <div
+              className="
+                absolute
+                -bottom-7
+                left-4
+                z-20
+                flex
+                items-center
+                gap-3
+                rounded-2xl
+                border
+                border-[#E3D6B8]
+                bg-white
+                px-4
+                py-3
+                shadow-[0_15px_35px_rgba(7,11,28,0.12)]
+                sm:left-8
+                sm:px-5
+                sm:py-4
+              "
+            >
+
+              <div
+                className="
+                  flex
+                  h-10
+                  w-10
+                  shrink-0
+                  items-center
+                  justify-center
+                  rounded-full
+                  bg-[#C9A03B]
+                  text-white
+                "
+              >
+                <CheckCircle2 size={20} />
+              </div>
+
+              <div>
+
+                <p className="text-sm font-black text-[#070B1C]">
+                  Quality First
+                </p>
+
+                <p className="text-xs text-[#64748B]">
+                  Every project. Every stage.
+                </p>
+
+              </div>
+
+            </div>
+
+          </div>
+
+          {/* CONTENT */}
+
+          <div className="pt-5 lg:pt-0">
+
+            <SectionLabel text="Who We Are" />
+
+            <h2
+              className="
+                mt-5
+                text-3xl
+                font-black
+                leading-[1.05]
+                tracking-[-0.03em]
+                text-[#070B1C]
+                sm:text-5xl
+                lg:text-6xl
+              "
+            >
+              Infrastructure built
+              <span className="block text-[#A9925E]">
+                for the future.
+              </span>
+            </h2>
+
+            <p
+              className="
+                mt-7
+                text-base
+                leading-8
+                text-[#36506E]
+                sm:text-lg
+              "
+            >
+              Saam Infrastructure is committed to delivering reliable
+              construction and infrastructure solutions that combine
+              engineering expertise, quality workmanship and thoughtful
+              execution.
+            </p>
+
+            <p
+              className="
+                mt-5
+                text-sm
+                leading-7
+                text-[#64748B]
+                sm:text-base
+              "
+            >
+              From planning and development to execution and completion,
+              we focus on creating durable spaces and infrastructure that
+              meet the needs of our clients and deliver lasting value.
+            </p>
+
+            <div className="mt-9 grid gap-7 sm:grid-cols-2">
+
+              <Feature
+                icon={CheckCircle2}
+                title="Quality"
+                text="High standards at every stage of construction."
+              />
+
+              <Feature
+                icon={Award}
+                title="Reliability"
+                text="Dependable planning and project execution."
+              />
+
+              <Feature
+                icon={ShieldCheck}
+                title="Safety"
+                text="Responsible practices with safety at the core."
+              />
+
+              <Feature
+                icon={Target}
+                title="Long-Term Value"
+                text="Solutions designed for durability and performance."
+              />
+
+            </div>
+
+            <div className="mt-10">
+
+              <a
+                href="#vision"
+                className="
+                  group
+                  inline-flex
+                  w-full
+                  items-center
+                  justify-between
+                  gap-5
+                  rounded-full
+                  border
+                  border-[#C9A03B]
+                  bg-[#C9A03B]
+                  py-2
+                  pl-6
+                  pr-2
+                  text-sm
+                  font-bold
+                  text-[#070B1C]
+                  shadow-[0_12px_30px_rgba(201,160,59,0.20)]
+                  transition-all
+                  duration-300
+                  hover:-translate-y-1
+                  hover:bg-[#B28A20]
+                  hover:text-white
+                  sm:w-auto
+                "
+              >
+
+                <span>
+                  Our Vision & Mission
+                </span>
+
+                <span
+                  className="
+                    flex
+                    h-11
+                    w-11
+                    shrink-0
+                    items-center
+                    justify-center
+                    rounded-full
+                    bg-[#070B1C]
+                    text-white
+                    transition-all
+                    duration-300
+                    group-hover:rotate-45
+                    group-hover:bg-white
+                    group-hover:text-[#070B1C]
+                  "
+                >
+                  <ArrowUpRight size={19} />
+                </span>
+
+              </a>
+
+            </div>
+
+          </div>
 
         </div>
 
-        {/* SMALL GOLD BOTTOM ACCENT */}
-
-        <div
-          className="
-            absolute
-            bottom-0
-            left-0
-            h-1
-            w-20
-            bg-[#C9A03B]
-            sm:w-28
-          "
-        />
-
-      </div>
-
-    </div>
-
-
-    {/* =================================================
-        CONTENT - WHO WE ARE
-    ================================================== */}
-
-    <div className="min-w-0">
-
-      {/* SECTION LABEL */}
-
-      <div className="flex items-center gap-3 sm:gap-4">
-
-        <span
-          className="
-            h-[2px]
-            w-8
-            shrink-0
-            bg-[#C9A03B]
-            sm:w-12
-          "
-        />
-
-        <p
-          className="
-            text-[10px]
-            font-bold
-            uppercase
-            tracking-[0.25em]
-            text-[#B28A20]
-            sm:text-xs
-          "
-        >
-          Who We Are
-        </p>
-
-      </div>
-
-
-      {/* HEADING */}
-
-      <h2
-        className="
-          mt-5
-          text-3xl
-          font-black
-          leading-[1.05]
-          tracking-[-0.035em]
-          text-[#070B1C]
-          sm:text-4xl
-          md:text-5xl
-          lg:text-5xl
-          xl:text-6xl
-        "
-      >
-        Infrastructure built
-
-        <span className="block text-[#A9925E]">
-          for the future.
-        </span>
-      </h2>
-
-
-      {/* DESCRIPTION */}
-
-      <p
-        className="
-          mt-6
-          text-sm
-          leading-7
-          text-[#36506E]
-          sm:text-base
-          sm:leading-8
-          lg:text-lg
-        "
-      >
-        Saam Infrastructure is committed to delivering reliable
-        construction and infrastructure solutions that combine
-        engineering expertise, quality workmanship and thoughtful
-        execution.
-      </p>
-
-      <p
-        className="
-          mt-4
-          text-sm
-          leading-7
-          text-[#64748B]
-          sm:mt-5
-          sm:text-base
-          sm:leading-8
-        "
-      >
-        From planning and development to execution and completion,
-        we focus on creating durable spaces and infrastructure that
-        meet the needs of our clients and deliver lasting value.
-      </p>
-
-
-      {/* =================================================
-          FEATURES
-      ================================================== */}
-
-      <div
-        className="
-          mt-8
-          grid
-          grid-cols-1
-          gap-5
-          sm:mt-10
-          sm:grid-cols-2
-          sm:gap-6
-        "
-      >
-
-        <Feature
-          icon={CheckCircle2}
-          title="Quality"
-          text="High standards at every stage of construction."
-        />
-
-        <Feature
-          icon={Award}
-          title="Reliability"
-          text="Dependable planning and project execution."
-        />
-
-        <Feature
-          icon={ShieldCheck}
-          title="Safety"
-          text="Responsible practices with safety at the core."
-        />
-
-        <Feature
-          icon={Target}
-          title="Long-Term Value"
-          text="Solutions designed for durability and performance."
-        />
-
-      </div>
-
-
-      {/* =================================================
-          BUTTON
-      ================================================== */}
-
-      <div className="mt-8 sm:mt-10">
-
-        <a
-          href="#vision"
-          className="
-            group
-            inline-flex
-            w-full
-            items-center
-            justify-between
-            gap-4
-            rounded-full
-            bg-[#C9A03B]
-            px-5
-            py-3
-            text-sm
-            font-bold
-            text-[#070B1C]
-            shadow-[0_10px_25px_rgba(201,160,59,0.18)]
-            transition-all
-            duration-300
-            hover:-translate-y-1
-            hover:bg-[#B28A20]
-            hover:text-white
-            hover:shadow-[0_15px_35px_rgba(201,160,59,0.25)]
-            sm:w-fit
-            sm:justify-center
-            sm:px-6
-            sm:py-3.5
-          "
-        >
-
-          <span>
-            Our Vision & Mission
-          </span>
-
-          <span
-            className="
-              flex
-              h-9
-              w-9
-              shrink-0
-              items-center
-              justify-center
-              rounded-full
-              bg-[#070B1C]
-              text-[#D7B44D]
-              transition-transform
-              duration-300
-              group-hover:rotate-45
-            "
-          >
-            <ArrowUpRight size={17} />
-          </span>
-
-        </a>
-
-      </div>
-
-    </div>
-
-  </div>
-</section>
+      </section>
 
       {/* =====================================================
           LEADERSHIP
@@ -1484,35 +1384,47 @@ function LeaderCard({ leader, index }) {
       <div
         className="
           relative
+          flex
+          aspect-[4/3]
+          w-full
+          items-center
+          justify-center
           overflow-hidden
           bg-[#070B1C]
-          aspect-[4/3]
           sm:aspect-[16/10]
         "
       >
-        {/* IMAGE */}
+        {/* COMPLETE IMAGE FIT
+
+            object-contain is intentional here.
+
+            It displays the COMPLETE image selected/uploaded by
+            the admin without cropping. Portrait, landscape,
+            square and other aspect ratios are all supported.
+
+            Any unused space is filled by the dark background.
+        */}
 
         <img
           src={leader.image}
           alt={`${leader.name} - ${leader.role}`}
           loading="lazy"
+          decoding="async"
+          draggable="false"
           style={{
             objectPosition: leader.imagePosition || "center center",
           }}
           className="
-            absolute
-            inset-0
+            block
             h-full
             w-full
-            object-cover
+            select-none
+            object-contain
             object-center
-            transition-transform
-            duration-700
-            group-hover:scale-105
           "
         />
 
-        {/* DARK GRADIENT */}
+        {/* SUBTLE BOTTOM GRADIENT */}
 
         <div
           className="
@@ -1521,7 +1433,7 @@ function LeaderCard({ leader, index }) {
             inset-0
             bg-gradient-to-t
             from-[#070B1C]/75
-            via-[#070B1C]/10
+            via-[#070B1C]/5
             to-transparent
           "
         />

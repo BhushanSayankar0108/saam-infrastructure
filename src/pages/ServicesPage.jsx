@@ -14,8 +14,6 @@ import {
   Award,
 } from "lucide-react";
 
-import { Link } from "react-router-dom";
-
 /* =========================================================
    SERVICES DATA
 ========================================================= */
@@ -637,7 +635,9 @@ function ServicesPage() {
 
           </div>
 
-          {/* SERVICE GRID */}
+          {/* =================================================
+              SERVICE GRID
+          ================================================= */}
 
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
 
@@ -651,6 +651,9 @@ function ServicesPage() {
                   className="
                     group
                     relative
+                    flex
+                    h-full
+                    flex-col
                     overflow-hidden
                     rounded-[1.5rem]
                     border
@@ -684,7 +687,7 @@ function ServicesPage() {
                     "
                   />
 
-                  {/* LARGE NUMBER */}
+                  {/* LARGE BACKGROUND NUMBER */}
 
                   <span
                     className="
@@ -692,6 +695,7 @@ function ServicesPage() {
                       absolute
                       -right-3
                       -top-5
+                      select-none
                       text-[7rem]
                       font-black
                       leading-none
@@ -704,69 +708,78 @@ function ServicesPage() {
                     {String(service.id).padStart(2, "0")}
                   </span>
 
-                  {/* ICON */}
+                  {/* =================================================
+                      ICON + SERVICE TITLE
+                  ================================================= */}
 
                   <div
                     className="
                       relative
                       flex
-                      h-14
-                      w-14
+                      min-h-[72px]
                       items-center
-                      justify-center
-                      rounded-2xl
-                      border
-                      border-[#c9a03b]
-                      bg-[#f8f5ed]
-                      text-[#b28a20]
-                      transition-all
-                      duration-500
-                      group-hover:rotate-3
-                      group-hover:bg-[#c9a03b]
-                      group-hover:text-white
+                      gap-4
+                      pr-8
+                      sm:gap-5
                     "
                   >
-                    <Icon size={26} strokeWidth={1.8} />
+
+                    {/* ICON */}
+
+                    <div
+                      className="
+                        flex
+                        h-14
+                        w-14
+                        shrink-0
+                        items-center
+                        justify-center
+                        rounded-2xl
+                        border
+                        border-[#c9a03b]
+                        bg-[#f8f5ed]
+                        text-[#b28a20]
+                        transition-all
+                        duration-500
+                        group-hover:rotate-3
+                        group-hover:bg-[#c9a03b]
+                        group-hover:text-white
+                        sm:h-16
+                        sm:w-16
+                      "
+                    >
+                      <Icon
+                        size={26}
+                        strokeWidth={1.8}
+                        className="sm:h-7 sm:w-7"
+                      />
+                    </div>
+
+                    {/* SERVICE TITLE */}
+
+                    <h3
+                      className="
+                        min-w-0
+                        text-lg
+                        font-black
+                        leading-[1.15]
+                        tracking-[-0.02em]
+                        text-[#070b1c]
+                        sm:text-xl
+                        lg:text-2xl
+                      "
+                    >
+                      {service.title}
+                    </h3>
+
                   </div>
-
-                  {/* NUMBER */}
-
-                  <p
-                    className="
-                      relative
-                      mt-7
-                      text-xs
-                      font-black
-                      uppercase
-                      tracking-[0.22em]
-                      text-[#b28a20]
-                    "
-                  >
-                    Service {String(service.id).padStart(2, "0")}
-                  </p>
-
-                  {/* TITLE */}
-
-                  <h3
-                    className="
-                      relative
-                      mt-3
-                      text-xl
-                      font-black
-                      leading-tight
-                      text-[#070b1c]
-                      sm:text-2xl
-                    "
-                  >
-                    {service.title}
-                  </h3>
 
                   {/* DESCRIPTION */}
 
                   <p
                     className="
                       relative
-                      mt-4
+                      mt-6
                       text-sm
                       leading-7
                       text-[#64748b]
@@ -792,7 +805,11 @@ function ServicesPage() {
 
                       <div
                         key={point}
-                        className="flex items-start gap-3"
+                        className="
+                          flex
+                          items-start
+                          gap-3
+                        "
                       >
 
                         <CheckCircle2
@@ -819,74 +836,6 @@ function ServicesPage() {
                     ))}
 
                   </div>
-
-                  {/* =================================================
-                      FIXED FOOTER NAVIGATION
-                      ENTIRE FOOTER IS NOW CLICKABLE
-                  ================================================= */}
-
-                  <Link
-                    to="/"
-                    aria-label="Go to Saam Infrastructure home page"
-                    className="
-                      group/footer
-                      mt-8
-                      flex
-                      w-full
-                      cursor-pointer
-                      items-center
-                      justify-between
-                      border-t
-                      border-[#e7dfcf]
-                      pt-5
-                      no-underline
-                    "
-                  >
-
-                    {/* BRAND */}
-
-                    <span
-                      className="
-                        text-[10px]
-                        font-bold
-                        uppercase
-                        tracking-[0.18em]
-                        text-[#94a3b8]
-                        transition-colors
-                        duration-300
-                        group-hover/footer:text-[#b28a20]
-                        sm:text-xs
-                      "
-                    >
-                      Saam Infrastructure
-                    </span>
-
-                    {/* ARROW */}
-
-                    <span
-                      className="
-                        flex
-                        h-9
-                        w-9
-                        items-center
-                        justify-center
-                        rounded-full
-                        border
-                        border-[#d8c58f]
-                        text-[#b28a20]
-                        transition-all
-                        duration-300
-                        group-hover/footer:border-[#c9a03b]
-                        group-hover/footer:bg-[#c9a03b]
-                        group-hover/footer:text-white
-                        group-hover/footer:translate-x-1
-                        group-hover/footer:-translate-y-1
-                      "
-                    >
-                      <ArrowUpRight size={17} />
-                    </span>
-
-                  </Link>
 
                 </article>
               );
@@ -1160,8 +1109,8 @@ function ServicesPage() {
 
             {/* BUTTON */}
 
-            <Link
-              to="/contact"
+            <a
+              href="/contact"
               className="
                 group
                 inline-flex
@@ -1179,6 +1128,7 @@ function ServicesPage() {
                 text-sm
                 font-bold
                 text-[#070b1c]
+                no-underline
                 shadow-[0_12px_30px_rgba(201,160,59,0.20)]
                 transition-all
                 duration-300
@@ -1210,7 +1160,7 @@ function ServicesPage() {
                 <ArrowUpRight size={17} />
               </span>
 
-            </Link>
+            </a>
 
           </div>
 
