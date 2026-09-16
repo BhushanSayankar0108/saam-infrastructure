@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import {
   CheckCircle2,
@@ -18,72 +18,258 @@ import {
 import aboutConstruction from "../assets/images/about-construction.jpg";
 
 /* =========================================================
-   LEADERSHIP DATA
+   CMS CONFIG + FALLBACK DATA
 ========================================================= */
 
-const leaders = [
+const API_BASE_URL = "http://localhost:8080";
+const ABOUT_API = `${API_BASE_URL}/api/about-page`;
+
+const DEFAULT_CONTENT = {
+  enabled: true,
+  heroLabel: "About Us",
+  heroHeading: "Building with purpose.",
+  heroHeadingHighlight: "Delivering with precision.",
+  heroDescription:
+    "Saam Infrastructure delivers dependable construction and infrastructure solutions with quality, precision, safety and long-term value at the core.",
+  whoWeAreImage: "/about-construction.jpg",
+  whoWeAreImageAlt: "Saam Infrastructure construction site",
+  whoWeAreLabel: "Who We Are",
+  whoWeAreHeading: "Infrastructure built for the future.",
+  whoWeAreHeadingHighlight: "",
+  whoWeAreParagraph1:
+    "Saam Infrastructure is committed to delivering reliable construction and infrastructure solutions that combine engineering expertise, quality workmanship and thoughtful execution.",
+  whoWeAreParagraph2:
+    "From planning and development to execution and completion, we focus on creating durable spaces and infrastructure that meet the needs of our clients and deliver lasting value.",
+  whoWeAreButtonText: "Our Vision & Mission",
+  whoWeAreButtonLink: "#vision",
+  visionMissionLabel: "Vision & Mission",
+  visionMissionHeading: "Creating infrastructure",
+  visionMissionHeadingHighlight: "that makes a difference.",
+  visionMissionDescription:
+    "Our vision and mission guide the way we approach every project, partnership and construction challenge.",
+  historyLabel: "Our History",
+  historyHeading: "Growing through",
+  historyHeadingHighlight: "every project.",
+  historyDescription:
+    "Our journey is built around a simple commitment — delivering dependable construction solutions and building relationships that last.",
+  approachLabel: "Our Approach",
+  approachHeading: "Built on strong",
+  approachHeadingHighlight: "foundations.",
+  approachDescription:
+    "Every project begins with careful planning, responsible execution and a clear understanding of our client's goals.",
+  teamLabel: "Our Team",
+  teamHeading: "The people behind",
+  teamHeadingHighlight: "our projects.",
+  teamDescription:
+    "Our team brings together experience, technical knowledge and a shared commitment to delivering dependable project outcomes.",
+  bottomStatementLabel: "Saam Infrastructure",
+  bottomStatementHeading: "Built with purpose.",
+  bottomStatementHighlight: "Delivered with precision.",
+};
+
+const DEFAULT_FEATURES = [
+  { title: "Quality", description: "High standards at every stage of construction.", icon: "CheckCircle2", enabled: true, displayOrder: 0 },
+  { title: "Reliability", description: "Dependable planning and project execution.", icon: "Award", enabled: true, displayOrder: 1 },
+  { title: "Safety", description: "Responsible practices with safety at the core.", icon: "ShieldCheck", enabled: true, displayOrder: 2 },
+  { title: "Long-Term Value", description: "Solutions designed for durability and performance.", icon: "Target", enabled: true, displayOrder: 3 },
+];
+
+const DEFAULT_LEADERS = [
   {
-    name: "Sachin Lihitkar",
-    role: "Managing Director & Founder",
-    image: "https://i.pravatar.cc/900?img=12",
-    imagePosition: "center center",
-    description:
-      "Leading Saam Infrastructure with a clear vision for quality construction, professional execution and long-term growth.",
-    statement:
-      "With a strong focus on quality, client satisfaction and responsible execution, Sachin provides strategic direction across projects and ensures that every decision reflects the values of reliability, safety and integrity.",
+    name: "Sachin Lihitkar", role: "Managing Director & Founder",
+    image: "https://i.pravatar.cc/900?img=12", imagePosition: "center center",
+    description: "Leading Saam Infrastructure with a clear vision for quality construction, professional execution and long-term growth.",
+    statement: "With a strong focus on quality, client satisfaction and responsible execution, Sachin provides strategic direction across projects and ensures that every decision reflects the values of reliability, safety and integrity.",
+    enabled: true, displayOrder: 0,
   },
   {
-    name: "Ashwini Lihitkar",
-    role: "Co-Founder",
-    image: "https://i.pravatar.cc/900?img=47",
-    imagePosition: "center center",
-    description:
-      "Supporting the growth of Saam Infrastructure through coordination, strong values and a commitment to dependable project delivery.",
-    statement:
-      "Ashwini contributes to the company's growth with a focus on collaboration, organisation and maintaining the professional standards that define the Saam Infrastructure approach.",
+    name: "Ashwini Lihitkar", role: "Co-Founder",
+    image: "https://i.pravatar.cc/900?img=47", imagePosition: "center center",
+    description: "Supporting the growth of Saam Infrastructure through coordination, strong values and a commitment to dependable project delivery.",
+    statement: "Ashwini contributes to the company's growth with a focus on collaboration, organisation and maintaining the professional standards that define the Saam Infrastructure approach.",
+    enabled: true, displayOrder: 1,
   },
 ];
 
-/* =========================================================
-   TEAM DATA
-========================================================= */
-
-const teamMembers = [
-  {
-    name: "Rajesh Sharma",
-    role: "Project Director",
-    image: "https://i.pravatar.cc/700?img=11",
-    description:
-      "Experienced in project planning, coordination and ensuring successful project execution.",
-  },
-  {
-    name: "Amit Patil",
-    role: "Project Manager",
-    image: "https://i.pravatar.cc/700?img=13",
-    description:
-      "Focused on efficient project management, coordination and maintaining construction standards.",
-  },
-  {
-    name: "Priya Deshmukh",
-    role: "Operations Manager",
-    image: "https://i.pravatar.cc/700?img=47",
-    description:
-      "Responsible for smooth operations, team coordination and dependable project delivery.",
-  },
-  {
-    name: "Sandeep Kulkarni",
-    role: "Senior Project Engineer",
-    image: "https://i.pravatar.cc/700?img=68",
-    description:
-      "Bringing technical expertise, attention to detail and practical engineering knowledge.",
-  },
+const DEFAULT_VISION_MISSION = [
+  { type: "vision", label: "Our Vision", title: "Building a stronger tomorrow.", text: "To become a trusted name in construction and infrastructure by creating high-quality, sustainable and dependable spaces that contribute to the growth and development of communities.", icon: "Eye", enabled: true, displayOrder: 0 },
+  { type: "mission", label: "Our Mission", title: "Delivering with purpose.", text: "To deliver construction and infrastructure projects with quality workmanship, responsible practices, transparent communication and dependable execution while creating lasting value for our clients.", icon: "Target", enabled: true, displayOrder: 1 },
 ];
+
+const DEFAULT_HISTORY = [
+  { year: "01", title: "Foundation", text: "Saam Infrastructure began with a focus on providing reliable construction and infrastructure solutions with quality at the centre of every project.", enabled: true, displayOrder: 0 },
+  { year: "02", title: "Building Experience", text: "With every project, we continued strengthening our capabilities through practical experience, responsible execution and close client collaboration.", enabled: true, displayOrder: 1 },
+  { year: "03", title: "Expanding Capabilities", text: "Our growing experience allowed us to take on diverse construction, development and infrastructure requirements.", enabled: true, displayOrder: 2 },
+  { year: "04", title: "Looking Ahead", text: "We continue to build towards a future focused on innovation, quality, sustainability and long-term value.", enabled: true, displayOrder: 3 },
+];
+
+const DEFAULT_APPROACH = [
+  { number: "01", title: "Quality First", text: "We maintain high standards of workmanship and attention to detail throughout every project.", icon: "Sparkles", enabled: true, displayOrder: 0 },
+  { number: "02", title: "Client Focus", text: "We work closely with our clients to understand their goals and deliver practical solutions.", icon: "Handshake", enabled: true, displayOrder: 1 },
+  { number: "03", title: "Responsible Execution", text: "Our projects are approached with safety, coordination and dependable execution at every stage.", icon: "Shield", enabled: true, displayOrder: 2 },
+  { number: "04", title: "Lasting Value", text: "We aim to create durable infrastructure that delivers value long after project completion.", icon: "TrendingUp", enabled: true, displayOrder: 3 },
+];
+
+const DEFAULT_TEAM = [
+  { name: "Rajesh Sharma", role: "Project Director", image: "https://i.pravatar.cc/700?img=11", description: "Experienced in project planning, coordination and ensuring successful project execution.", enabled: true, displayOrder: 0 },
+  { name: "Amit Patil", role: "Project Manager", image: "https://i.pravatar.cc/700?img=13", description: "Focused on efficient project management, coordination and maintaining construction standards.", enabled: true, displayOrder: 1 },
+  { name: "Priya Deshmukh", role: "Operations Manager", image: "https://i.pravatar.cc/700?img=47", description: "Responsible for smooth operations, team coordination and dependable project delivery.", enabled: true, displayOrder: 2 },
+  { name: "Sandeep Kulkarni", role: "Senior Project Engineer", image: "https://i.pravatar.cc/700?img=68", description: "Bringing technical expertise, attention to detail and practical engineering knowledge.", enabled: true, displayOrder: 3 },
+];
+
+const ICONS = { CheckCircle2, Award, ShieldCheck, Target, Eye, Sparkles, Handshake, Shield, TrendingUp };
+
+function cmsImageUrl(value, fallback = "") {
+  const raw = String(value || "").trim();
+
+  if (!raw) return fallback;
+
+  if (/^https?:\/\//i.test(raw)) {
+    return raw;
+  }
+
+  // Uploaded CMS images are served by Spring Boot from /images/**.
+  if (raw.startsWith("/images/")) {
+    return `${API_BASE_URL}${raw}`;
+  }
+
+  // The old fallback value was /about-construction.jpg, but the actual
+  // source image lives under src/assets. Use the imported asset instead
+  // of creating a broken browser URL.
+  if (raw === "/about-construction.jpg") {
+    return fallback;
+  }
+
+  return raw;
+}
+
+/*
+ * The CMS database can contain older duplicate rows when the same default
+ * cards were saved more than once. The public page must never display those
+ * rows multiple times. Keep the first occurrence of an identical card while
+ * still allowing genuinely different cards with the same title/name.
+ */
+function getItemSignature(item) {
+  if (!item || typeof item !== "object") return "";
+
+  const keys = [
+    "type",
+    "label",
+    "title",
+    "text",
+    "description",
+    "statement",
+    "name",
+    "role",
+    "image",
+    "imagePosition",
+    "year",
+    "number",
+    "icon",
+  ];
+
+  return keys
+    .map((key) => String(item[key] ?? "").trim().toLowerCase())
+    .join("|");
+}
+
+function splitHeading(value, fallback = "") {
+  const text = String(value || fallback || "").trim();
+  const parts = text.split(/\s+/);
+  if (parts.length <= 1) return { before: text, last: "" };
+  return { before: parts.slice(0, -1).join(" "), last: parts[parts.length - 1] };
+}
+
+function normalizeItems(data, fallback) {
+  if (!Array.isArray(data)) return fallback;
+
+  const seen = new Set();
+  const cleaned = [];
+
+  [...data]
+    .filter((item) => item && item.enabled !== false)
+    .sort((a, b) => Number(a.displayOrder ?? 0) - Number(b.displayOrder ?? 0))
+    .forEach((item) => {
+      const signature = getItemSignature(item);
+
+      // If there is no usable signature, keep the item. Otherwise skip
+      // exact content duplicates created by previous CMS saves.
+      if (!signature || seen.has(signature)) return;
+
+      seen.add(signature);
+      cleaned.push(item);
+    });
+
+  return cleaned;
+}
 
 /* =========================================================
    MAIN PAGE
 ========================================================= */
 
 function AboutPage() {
+  const [content, setContent] = useState(DEFAULT_CONTENT);
+  const [features, setFeatures] = useState(DEFAULT_FEATURES);
+  const [leaders, setLeaders] = useState(DEFAULT_LEADERS);
+  const [visionMission, setVisionMission] = useState(DEFAULT_VISION_MISSION);
+  const [history, setHistory] = useState(DEFAULT_HISTORY);
+  const [approach, setApproach] = useState(DEFAULT_APPROACH);
+  const [teamMembers, setTeamMembers] = useState(DEFAULT_TEAM);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const getJson = async (url) => {
+      try {
+        const response = await fetch(url, { cache: "no-store" });
+        if (!response.ok) return { ok: false, data: null };
+        return { ok: true, data: await response.json() };
+      } catch (error) {
+        console.error(`Failed to load ${url}:`, error);
+        return { ok: false, data: null };
+      }
+    };
+
+    const loadAboutPage = async () => {
+      const results = await Promise.all([
+        getJson(ABOUT_API),
+        getJson(`${ABOUT_API}/features`),
+        getJson(`${ABOUT_API}/leaders`),
+        getJson(`${ABOUT_API}/vision-mission`),
+        getJson(`${ABOUT_API}/history`),
+        getJson(`${ABOUT_API}/approach`),
+        getJson(`${ABOUT_API}/team`),
+      ]);
+
+      if (cancelled) return;
+
+      const [contentResult, featureResult, leaderResult, vmResult, historyResult, approachResult, teamResult] = results;
+
+      if (contentResult.ok && contentResult.data && typeof contentResult.data === "object") {
+        setContent((current) => ({ ...current, ...contentResult.data }));
+      }
+
+      if (featureResult.ok) setFeatures(normalizeItems(featureResult.data, DEFAULT_FEATURES));
+      if (leaderResult.ok) setLeaders(normalizeItems(leaderResult.data, DEFAULT_LEADERS));
+      if (vmResult.ok) setVisionMission(normalizeItems(vmResult.data, DEFAULT_VISION_MISSION));
+      if (historyResult.ok) setHistory(normalizeItems(historyResult.data, DEFAULT_HISTORY));
+      if (approachResult.ok) setApproach(normalizeItems(approachResult.data, DEFAULT_APPROACH));
+      if (teamResult.ok) setTeamMembers(normalizeItems(teamResult.data, DEFAULT_TEAM));
+    };
+
+    loadAboutPage();
+    return () => { cancelled = true; };
+  }, []);
+
+  if (content.enabled === false) return null;
+
+  const heroHeading = splitHeading(content.heroHeading, DEFAULT_CONTENT.heroHeading);
+  const whoHeading = splitHeading(content.whoWeAreHeading, DEFAULT_CONTENT.whoWeAreHeading);
+  const visionHeading = splitHeading(content.visionMissionHeading, DEFAULT_CONTENT.visionMissionHeading);
+  const historyHeading = splitHeading(content.historyHeading, DEFAULT_CONTENT.historyHeading);
+  const approachHeading = splitHeading(content.approachHeading, DEFAULT_CONTENT.approachHeading);
+  const teamHeading = splitHeading(content.teamHeading, DEFAULT_CONTENT.teamHeading);
+
   return (
     <main className="min-h-screen overflow-hidden bg-[#F8F5ED] text-[#070B1C]">
 
@@ -100,7 +286,7 @@ function AboutPage() {
           bg-[#F8F5ED]
           px-4
           pb-16
-          pt-14
+          pt-36
           sm:px-6
           sm:pb-20
           sm:pt-20
@@ -182,15 +368,17 @@ function AboutPage() {
 
             <h1
               className="
-                text-[clamp(2.5rem,7vw,5.8rem)]
+                text-[clamp(2.25rem,10vw,5.8rem)]
                 font-black
+                min-w-0
+                break-words
                 uppercase
                 leading-[0.9]
                 tracking-[0.06em]
                 text-[#B28A20]
               "
             >
-              About Us
+              {content.heroLabel}
             </h1>
 
           </div>
@@ -214,13 +402,16 @@ function AboutPage() {
                 font-black
                 leading-[1.04]
                 tracking-[-0.04em]
+                break-words
                 text-[#070B1C]
               "
             >
-              Building with{" "}
-              <span className="text-[#B28A20]">
-                purpose.
-              </span>
+              {heroHeading.before}{heroHeading.last ? " " : ""}
+              {heroHeading.last && (
+                <span className="text-[#B28A20]">
+                  {heroHeading.last}
+                </span>
+              )}
             </h2>
 
             <h2
@@ -230,11 +421,12 @@ function AboutPage() {
                 font-black
                 leading-[1.04]
                 tracking-[-0.04em]
+                break-words
                 text-[#070B1C]
                 sm:mt-6
               "
             >
-              Delivering with precision.
+              {content.heroHeadingHighlight}
             </h2>
 
           </div>
@@ -267,9 +459,7 @@ function AboutPage() {
                 lg:leading-9
               "
             >
-              Saam Infrastructure delivers dependable construction and
-              infrastructure solutions with quality, precision, safety
-              and long-term value at the core.
+              {content.heroDescription}
             </p>
 
           </div>
@@ -355,8 +545,8 @@ function AboutPage() {
             >
 
               <img
-                src={aboutConstruction}
-                alt="Saam Infrastructure construction site"
+                src={cmsImageUrl(content.whoWeAreImage, aboutConstruction)}
+                alt={content.whoWeAreImageAlt || DEFAULT_CONTENT.whoWeAreImageAlt}
                 className="
                   h-full
                   w-full
@@ -426,67 +616,13 @@ function AboutPage() {
 
             </div>
 
-            {/* QUALITY BADGE */}
-
-            <div
-              className="
-                absolute
-                -bottom-7
-                left-4
-                z-20
-                flex
-                items-center
-                gap-3
-                rounded-2xl
-                border
-                border-[#E3D6B8]
-                bg-white
-                px-4
-                py-3
-                shadow-[0_15px_35px_rgba(7,11,28,0.12)]
-                sm:left-8
-                sm:px-5
-                sm:py-4
-              "
-            >
-
-              <div
-                className="
-                  flex
-                  h-10
-                  w-10
-                  shrink-0
-                  items-center
-                  justify-center
-                  rounded-full
-                  bg-[#C9A03B]
-                  text-white
-                "
-              >
-                <CheckCircle2 size={20} />
-              </div>
-
-              <div>
-
-                <p className="text-sm font-black text-[#070B1C]">
-                  Quality First
-                </p>
-
-                <p className="text-xs text-[#64748B]">
-                  Every project. Every stage.
-                </p>
-
-              </div>
-
-            </div>
-
           </div>
 
           {/* CONTENT */}
 
           <div className="pt-5 lg:pt-0">
 
-            <SectionLabel text="Who We Are" />
+            <SectionLabel text={content.whoWeAreLabel} />
 
             <h2
               className="
@@ -500,10 +636,12 @@ function AboutPage() {
                 lg:text-6xl
               "
             >
-              Infrastructure built
-              <span className="block text-[#A9925E]">
-                for the future.
-              </span>
+              {whoHeading.before}{whoHeading.last ? " " : ""}
+              {whoHeading.last && (
+                <span className="block text-[#A9925E]">
+                  {whoHeading.last}
+                </span>
+              )}
             </h2>
 
             <p
@@ -515,10 +653,7 @@ function AboutPage() {
                 sm:text-lg
               "
             >
-              Saam Infrastructure is committed to delivering reliable
-              construction and infrastructure solutions that combine
-              engineering expertise, quality workmanship and thoughtful
-              execution.
+              {content.whoWeAreParagraph1}
             </p>
 
             <p
@@ -530,43 +665,29 @@ function AboutPage() {
                 sm:text-base
               "
             >
-              From planning and development to execution and completion,
-              we focus on creating durable spaces and infrastructure that
-              meet the needs of our clients and deliver lasting value.
+              {content.whoWeAreParagraph2}
             </p>
 
             <div className="mt-9 grid gap-7 sm:grid-cols-2">
 
-              <Feature
-                icon={CheckCircle2}
-                title="Quality"
-                text="High standards at every stage of construction."
-              />
-
-              <Feature
-                icon={Award}
-                title="Reliability"
-                text="Dependable planning and project execution."
-              />
-
-              <Feature
-                icon={ShieldCheck}
-                title="Safety"
-                text="Responsible practices with safety at the core."
-              />
-
-              <Feature
-                icon={Target}
-                title="Long-Term Value"
-                text="Solutions designed for durability and performance."
-              />
+              {features.map((feature) => {
+                const Icon = ICONS[feature.icon] || CheckCircle2;
+                return (
+                  <Feature
+                    key={feature.id || feature.title}
+                    icon={Icon}
+                    title={feature.title}
+                    text={feature.description}
+                  />
+                );
+              })}
 
             </div>
 
             <div className="mt-10">
 
               <a
-                href="#vision"
+                href={content.whoWeAreButtonLink || "#vision"}
                 className="
                   group
                   inline-flex
@@ -595,7 +716,7 @@ function AboutPage() {
               >
 
                 <span>
-                  Our Vision & Mission
+                  {content.whoWeAreButtonText}
                 </span>
 
                 <span
@@ -758,7 +879,7 @@ function AboutPage() {
 
             {leaders.map((leader, index) => (
               <LeaderCard
-                key={leader.name}
+                key={leader.id || `${leader.name}-${leader.role}-${index}`}
                 leader={leader}
                 index={index}
               />
@@ -794,7 +915,7 @@ function AboutPage() {
 
           <div className="max-w-3xl">
 
-            <SectionLabel text="Vision & Mission" />
+            <SectionLabel text={content.visionMissionLabel} />
 
             <h2
               className="
@@ -808,10 +929,12 @@ function AboutPage() {
                 lg:text-6xl
               "
             >
-              Creating infrastructure
-              <span className="block text-[#A9925E]">
-                that makes a difference.
-              </span>
+              {visionHeading.before}{visionHeading.last ? " " : ""}
+              {visionHeading.last && (
+                <span className="block text-[#A9925E]">
+                  {visionHeading.last}
+                </span>
+              )}
             </h2>
 
             <p
@@ -824,8 +947,7 @@ function AboutPage() {
                 sm:leading-8
               "
             >
-              Our vision and mission guide the way we approach every
-              project, partnership and construction challenge.
+              {content.visionMissionDescription}
             </p>
 
           </div>
@@ -840,21 +962,19 @@ function AboutPage() {
             "
           >
 
-            <VisionCard
-              number="01"
-              icon={Eye}
-              label="Our Vision"
-              title="Building a stronger tomorrow."
-              text="To become a trusted name in construction and infrastructure by creating high-quality, sustainable and dependable spaces that contribute to the growth and development of communities."
-            />
-
-            <VisionCard
-              number="02"
-              icon={Target}
-              label="Our Mission"
-              title="Delivering with purpose."
-              text="To deliver construction and infrastructure projects with quality workmanship, responsible practices, transparent communication and dependable execution while creating lasting value for our clients."
-            />
+            {visionMission.map((item, index) => {
+              const Icon = ICONS[item.icon] || (item.type === "mission" ? Target : Eye);
+              return (
+                <VisionCard
+                  key={item.id || `${item.type}-${item.displayOrder ?? index}`}
+                  number={String(index + 1).padStart(2, "0")}
+                  icon={Icon}
+                  label={item.label}
+                  title={item.title}
+                  text={item.text}
+                />
+              );
+            })}
 
           </div>
 
@@ -891,7 +1011,7 @@ function AboutPage() {
 
             <div>
 
-              <SectionLabel text="Our History" />
+              <SectionLabel text={content.historyLabel} />
 
               <h2
                 className="
@@ -903,10 +1023,12 @@ function AboutPage() {
                   sm:text-5xl
                 "
               >
-                Growing through
-                <span className="block text-[#A9925E]">
-                  every project.
-                </span>
+                {historyHeading.before}{historyHeading.last ? " " : ""}
+                {historyHeading.last && (
+                  <span className="block text-[#A9925E]">
+                    {historyHeading.last}
+                  </span>
+                )}
               </h2>
 
               <p
@@ -919,9 +1041,7 @@ function AboutPage() {
                   sm:text-base
                 "
               >
-                Our journey is built around a simple commitment —
-                delivering dependable construction solutions and
-                building relationships that last.
+                {content.historyDescription}
               </p>
 
             </div>
@@ -939,30 +1059,15 @@ function AboutPage() {
                 "
               />
 
-              <HistoryItem
-                year="01"
-                title="Foundation"
-                text="Saam Infrastructure began with a focus on providing reliable construction and infrastructure solutions with quality at the centre of every project."
-              />
-
-              <HistoryItem
-                year="02"
-                title="Building Experience"
-                text="With every project, we continued strengthening our capabilities through practical experience, responsible execution and close client collaboration."
-              />
-
-              <HistoryItem
-                year="03"
-                title="Expanding Capabilities"
-                text="Our growing experience allowed us to take on diverse construction, development and infrastructure requirements."
-              />
-
-              <HistoryItem
-                year="04"
-                title="Looking Ahead"
-                text="We continue to build towards a future focused on innovation, quality, sustainability and long-term value."
-                last
-              />
+              {history.map((item, index) => (
+                <HistoryItem
+                  key={item.id || `${item.year}-${item.displayOrder ?? index}`}
+                  year={item.year}
+                  title={item.title}
+                  text={item.text}
+                  last={index === history.length - 1}
+                />
+              ))}
 
             </div>
 
@@ -1019,7 +1124,7 @@ function AboutPage() {
 
             <div>
 
-              <SectionLabel text="Our Approach" />
+              <SectionLabel text={content.approachLabel} />
 
               <h2
                 className="
@@ -1033,10 +1138,12 @@ function AboutPage() {
                   lg:text-6xl
                 "
               >
-                Built on strong
-                <span className="block text-[#A9925E]">
-                  foundations.
-                </span>
+                {approachHeading.before}{approachHeading.last ? " " : ""}
+                {approachHeading.last && (
+                  <span className="block text-[#A9925E]">
+                    {approachHeading.last}
+                  </span>
+                )}
               </h2>
 
               <p
@@ -1050,9 +1157,7 @@ function AboutPage() {
                   sm:leading-8
                 "
               >
-                Every project begins with careful planning,
-                responsible execution and a clear understanding
-                of our client's goals.
+                {content.approachDescription}
               </p>
 
               <div className="mt-8 flex items-center gap-3">
@@ -1069,33 +1174,18 @@ function AboutPage() {
 
             <div className="grid gap-5 sm:grid-cols-2">
 
-              <ApproachCard
-                number="01"
-                icon={Sparkles}
-                title="Quality First"
-                text="We maintain high standards of workmanship and attention to detail throughout every project."
-              />
-
-              <ApproachCard
-                number="02"
-                icon={Handshake}
-                title="Client Focus"
-                text="We work closely with our clients to understand their goals and deliver practical solutions."
-              />
-
-              <ApproachCard
-                number="03"
-                icon={Shield}
-                title="Responsible Execution"
-                text="Our projects are approached with safety, coordination and dependable execution at every stage."
-              />
-
-              <ApproachCard
-                number="04"
-                icon={TrendingUp}
-                title="Lasting Value"
-                text="We aim to create durable infrastructure that delivers value long after project completion."
-              />
+              {approach.map((item, index) => {
+                const Icon = ICONS[item.icon] || Sparkles;
+                return (
+                  <ApproachCard
+                    key={item.id || `${item.number}-${item.displayOrder ?? index}`}
+                    number={item.number || String(index + 1).padStart(2, "0")}
+                    icon={Icon}
+                    title={item.title}
+                    text={item.text}
+                  />
+                );
+              })}
 
             </div>
 
@@ -1138,7 +1228,7 @@ function AboutPage() {
 
             <div className="max-w-3xl">
 
-              <SectionLabel text="Our Team" />
+              <SectionLabel text={content.teamLabel} />
 
               <h2
                 className="
@@ -1152,10 +1242,12 @@ function AboutPage() {
                   lg:text-6xl
                 "
               >
-                The people behind
-                <span className="block text-[#A9925E]">
-                  our projects.
-                </span>
+                {teamHeading.before}{teamHeading.last ? " " : ""}
+                {teamHeading.last && (
+                  <span className="block text-[#A9925E]">
+                    {teamHeading.last}
+                  </span>
+                )}
               </h2>
 
               <p
@@ -1168,9 +1260,7 @@ function AboutPage() {
                   sm:leading-8
                 "
               >
-                Our team brings together experience, technical knowledge
-                and a shared commitment to delivering dependable project
-                outcomes.
+                {content.teamDescription}
               </p>
 
             </div>
@@ -1187,7 +1277,7 @@ function AboutPage() {
 
           </div>
 
-          <TeamCarousel />
+          <TeamCarousel teamMembers={teamMembers} />
 
         </div>
 
@@ -1234,7 +1324,7 @@ function AboutPage() {
                 text-[#D7B44D]
               "
             >
-              Saam Infrastructure
+              {content.bottomStatementLabel}
             </p>
 
             <h2
@@ -1248,9 +1338,9 @@ function AboutPage() {
                 sm:text-4xl
               "
             >
-              Built with purpose.
+              {content.bottomStatementHeading}
               <span className="block text-[#D7B44D]">
-                Delivered with precision.
+                {content.bottomStatementHighlight}
               </span>
             </h2>
 
@@ -1406,7 +1496,7 @@ function LeaderCard({ leader, index }) {
         */}
 
         <img
-          src={leader.image}
+          src={cmsImageUrl(leader.image, "")}
           alt={`${leader.name} - ${leader.role}`}
           loading="lazy"
           decoding="async"
@@ -2107,7 +2197,7 @@ function ApproachCard({
    TEAM CAROUSEL
 ========================================================= */
 
-function TeamCarousel() {
+function TeamCarousel({ teamMembers }) {
   const carouselRef = useRef(null);
 
   useEffect(() => {
@@ -2217,10 +2307,10 @@ function TeamCarousel() {
         "
       >
 
-        {teamMembers.map((member) => (
+        {teamMembers.map((member, index) => (
 
           <div
-            key={member.name}
+            key={member.id || `${member.name}-${member.role}-${member.displayOrder ?? index}`}
             className="
               w-[88%]
               shrink-0
@@ -2370,7 +2460,7 @@ function TeamMember({
       >
 
         <img
-          src={image}
+          src={cmsImageUrl(image, "")}
           alt={name}
           loading="lazy"
           className="

@@ -5,37 +5,240 @@ import {
 } from "lucide-react";
 
 import { Link, NavLink } from "react-router-dom";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+
+/* =========================================================
+   CONFIG
+========================================================= */
+
+const API_BASE_URL = "http://localhost:8080";
+
+const HEADER_API = `${API_BASE_URL}/api/header`;
+const MENU_API = `${API_BASE_URL}/api/header/menu/enabled`;
+
+/* =========================================================
+   DEFAULT HEADER
+========================================================= */
+
+const DEFAULT_HEADER = {
+  enabled: true,
+  logoImage: "/saam-logo.png",
+  logoAlt: "Saam Infrastructure",
+  ctaEnabled: true,
+  ctaText: "Start Your Project",
+  ctaLink: "/contact",
+};
+
+/* =========================================================
+   DEFAULT NAVIGATION
+========================================================= */
+
+const DEFAULT_NAV_ITEMS = [
+  {
+    name: "Home",
+    path: "/",
+  },
+  {
+    name: "About",
+    path: "/about",
+  },
+  {
+    name: "Services",
+    path: "/services",
+  },
+  {
+    name: "Projects",
+    path: "/projects",
+  },
+  {
+    name: "Gallery",
+    path: "/gallery",
+  },
+  {
+    name: "Contact",
+    path: "/contact",
+  },
+];
+
+/* =========================================================
+   IMAGE URL HELPER
+========================================================= */
+
+const getImageUrl = (value) => {
+  if (!value || !value.trim()) {
+    return DEFAULT_HEADER.logoImage;
+  }
+
+  const image = value.trim();
+
+  /*
+   * Already an absolute URL
+   */
+  if (
+    image.startsWith("http://") ||
+    image.startsWith("https://") ||
+    image.startsWith("data:")
+  ) {
+    return image;
+  }
+
+  /*
+   * Backend image returned as:
+   * /images/header/xxxxx.png
+   */
+  if (image.startsWith("/")) {
+    return `${API_BASE_URL}${image}`;
+  }
+
+  return image;
+};
+
+/* =========================================================
+   COMPONENT
+========================================================= */
 
 function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  const navItems = [
-    {
-      name: "Home",
-      path: "/",
-    },
-    {
-      name: "About",
-      path: "/about",
-    },
-    {
-      name: "Services",
-      path: "/services",
-    },
-    {
-      name: "Projects",
-      path: "/projects",
-    },
-    {
-      name: "Gallery",
-      path: "/gallery",
-    },
-    {
-      name: "Contact",
-      path: "/contact",
-    },
-  ];
+  const [header, setHeader] = useState(DEFAULT_HEADER);
+
+  const [navItems, setNavItems] = useState(DEFAULT_NAV_ITEMS);
+
+  const [loaded, setLoaded] = useState(false);
+
+  /* =======================================================
+     LOAD HEADER + MENU
+  ======================================================= */
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const loadHeader = async () => {
+      try {
+        const [headerResponse, menuResponse] =
+          await Promise.all([
+            fetch(HEADER_API),
+            fetch(MENU_API),
+          ]);
+
+        /*
+         * HEADER
+         */
+
+        let headerData = DEFAULT_HEADER;
+
+        if (headerResponse.ok) {
+          const data = await headerResponse.json();
+
+          headerData = {
+            ...DEFAULT_HEADER,
+            ...data,
+          };
+        }
+
+        /*
+         * MENU
+         */
+
+        let menuData = DEFAULT_NAV_ITEMS;
+
+        if (menuResponse.ok) {
+          const data = await menuResponse.json();
+
+          if (Array.isArray(data) && data.length > 0) {
+            menuData = data.map((item) => ({
+              name: item.name,
+              path: item.path,
+            }));
+          }
+        }
+
+        if (!cancelled) {
+          setHeader(headerData);
+          setNavItems(menuData);
+          setLoaded(true);
+        }
+      } catch (error) {
+        console.error("Header load error:", error);
+
+        if (!cancelled) {
+          setHeader(DEFAULT_HEADER);
+          setNavItems(DEFAULT_NAV_ITEMS);
+          setLoaded(true);
+        }
+      }
+    };
+
+    loadHeader();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  /* =======================================================
+     HEADER DISABLED
+  ======================================================= */
+
+  if (loaded && header.enabled === false) {
+    return null;
+  }
+
+  /* =======================================================
+     HEADER VALUES
+  ======================================================= */
+
+  const logoUrl = getImageUrl(header.logoImage);
+
+  const logoAlt =
+    header.logoAlt ||
+    DEFAULT_HEADER.logoAlt;
+
+  const ctaEnabled =
+    header.ctaEnabled !== false;
+
+  const ctaText =
+    header.ctaText ||
+    DEFAULT_HEADER.ctaText;
+
+  const ctaLink =
+    header.ctaLink ||
+    DEFAULT_HEADER.ctaLink;
+
+  /* =======================================================
+     HOME CLICK
+  ======================================================= */
+
+  const handleHomeClick = (e) => {
+    /*
+     * Only intercept the Home link.
+     */
+
+    e.preventDefault();
+
+    setMobileMenuOpen(false);
+
+    if (window.location.pathname === "/") {
+      window.scrollTo({
+        top: 0,
+        behavior: "smooth",
+      });
+    } else {
+      window.location.href = "/";
+    }
+  };
+
+  /* =======================================================
+     CLOSE MOBILE MENU
+  ======================================================= */
+
+  const closeMobileMenu = () => {
+    setMobileMenuOpen(false);
+  };
+
+  /* =======================================================
+     RENDER
+  ======================================================= */
 
   return (
     <header
@@ -78,7 +281,7 @@ function Navbar() {
 
         <Link
           to="/"
-          onClick={() => setMobileMenuOpen(false)}
+          onClick={handleHomeClick}
           className="
             group
             flex
@@ -90,18 +293,35 @@ function Navbar() {
           "
         >
           <img
-            src="/saam-logo.png"
-            alt="Saam Infrastructure"
+            src={logoUrl}
+            alt={logoAlt}
+            onError={(event) => {
+              /*
+               * If a backend image is unavailable,
+               * fall back to the original logo.
+               */
+
+              if (
+                event.currentTarget.src !==
+                window.location.origin +
+                  DEFAULT_HEADER.logoImage
+              ) {
+                event.currentTarget.src =
+                  DEFAULT_HEADER.logoImage;
+              }
+            }}
             className="
               block
-              h-[66px]
+              h-[72px]
               w-auto
-              max-w-[175px]
+              max-w-[190px]
               object-contain
-              sm:h-[70px]
-              sm:max-w-[190px]
-              lg:h-[74px]
-              lg:max-w-[205px]
+              sm:h-[76px]
+              sm:max-w-[205px]
+              lg:h-[82px]
+              lg:max-w-[220px]
+              xl:h-[86px]
+              xl:max-w-[230px]
             "
           />
         </Link>
@@ -113,7 +333,7 @@ function Navbar() {
         <nav className="hidden items-center gap-7 lg:flex xl:gap-9">
           {navItems.map((item) => (
             <NavLink
-              key={item.name}
+              key={`${item.name}-${item.path}`}
               to={item.path}
               className={({ isActive }) =>
                 `group relative py-2 text-[14px] font-semibold transition-all duration-300 ${
@@ -155,49 +375,52 @@ function Navbar() {
             DESKTOP CTA
         ================================================= */}
 
-        <Link
-          to="/contact"
-          className="
-            group
-            hidden
-            items-center
-            gap-3
-            rounded-full
-            bg-[#C9A24A]
-            px-6
-            py-3.5
-            text-sm
-            font-bold
-            text-[#171916]
-            shadow-sm
-            transition-all
-            duration-300
-            hover:-translate-y-0.5
-            hover:bg-[#E0C36A]
-            hover:shadow-lg
-            lg:inline-flex
-            xl:px-7
-          "
-        >
-          Start Your Project
-
-          <span
+        {ctaEnabled && (
+          <Link
+            to={ctaLink}
+            onClick={closeMobileMenu}
             className="
-              flex
-              h-7
-              w-7
+              group
+              hidden
               items-center
-              justify-center
+              gap-3
               rounded-full
-              bg-[#171916]/10
-              transition-transform
+              bg-[#C9A24A]
+              px-6
+              py-3.5
+              text-sm
+              font-bold
+              text-[#171916]
+              shadow-sm
+              transition-all
               duration-300
-              group-hover:translate-x-1
+              hover:-translate-y-0.5
+              hover:bg-[#E0C36A]
+              hover:shadow-lg
+              lg:inline-flex
+              xl:px-7
             "
           >
-            <ArrowUpRight size={16} />
-          </span>
-        </Link>
+            {ctaText}
+
+            <span
+              className="
+                flex
+                h-7
+                w-7
+                items-center
+                justify-center
+                rounded-full
+                bg-[#171916]/10
+                transition-transform
+                duration-300
+                group-hover:translate-x-1
+              "
+            >
+              <ArrowUpRight size={16} />
+            </span>
+          </Link>
+        )}
 
         {/* =================================================
             MOBILE MENU BUTTON
@@ -205,7 +428,9 @@ function Navbar() {
 
         <button
           type="button"
-          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          onClick={() =>
+            setMobileMenuOpen(!mobileMenuOpen)
+          }
           className="
             flex
             h-11
@@ -231,9 +456,15 @@ function Navbar() {
           aria-expanded={mobileMenuOpen}
         >
           {mobileMenuOpen ? (
-            <X size={22} strokeWidth={2} />
+            <X
+              size={22}
+              strokeWidth={2}
+            />
           ) : (
-            <Menu size={22} strokeWidth={2} />
+            <Menu
+              size={22}
+              strokeWidth={2}
+            />
           )}
         </button>
       </div>
@@ -254,7 +485,7 @@ function Navbar() {
           lg:hidden
           ${
             mobileMenuOpen
-              ? "max-h-[620px] opacity-100"
+              ? "max-h-[700px] opacity-100"
               : "max-h-0 opacity-0"
           }
         `}
@@ -263,9 +494,9 @@ function Navbar() {
           <div className="flex flex-col">
             {navItems.map((item) => (
               <NavLink
-                key={item.name}
+                key={`${item.name}-${item.path}-mobile`}
                 to={item.path}
-                onClick={() => setMobileMenuOpen(false)}
+                onClick={closeMobileMenu}
                 className={({ isActive }) =>
                   `
                     border-b
@@ -292,50 +523,52 @@ function Navbar() {
               MOBILE CTA
           ================================================= */}
 
-          <Link
-            to="/contact"
-            onClick={() => setMobileMenuOpen(false)}
-            className="
-              group
-              mt-5
-              flex
-              w-full
-              items-center
-              justify-center
-              gap-3
-              rounded-full
-              bg-[#C9A24A]
-              px-6
-              py-4
-              text-sm
-              font-bold
-              text-[#171916]
-              shadow-sm
-              transition-all
-              duration-300
-              hover:bg-[#E0C36A]
-              active:scale-[0.98]
-            "
-          >
-            Start Your Project
-
-            <span
+          {ctaEnabled && (
+            <Link
+              to={ctaLink}
+              onClick={closeMobileMenu}
               className="
+                group
+                mt-5
                 flex
-                h-7
-                w-7
+                w-full
                 items-center
                 justify-center
+                gap-3
                 rounded-full
-                bg-[#171916]/10
-                transition-transform
+                bg-[#C9A24A]
+                px-6
+                py-4
+                text-sm
+                font-bold
+                text-[#171916]
+                shadow-sm
+                transition-all
                 duration-300
-                group-hover:translate-x-1
+                hover:bg-[#E0C36A]
+                active:scale-[0.98]
               "
             >
-              <ArrowUpRight size={16} />
-            </span>
-          </Link>
+              {ctaText}
+
+              <span
+                className="
+                  flex
+                  h-7
+                  w-7
+                  items-center
+                  justify-center
+                  rounded-full
+                  bg-[#171916]/10
+                  transition-transform
+                  duration-300
+                  group-hover:translate-x-1
+                "
+              >
+                <ArrowUpRight size={16} />
+              </span>
+            </Link>
+          )}
         </nav>
       </div>
     </header>

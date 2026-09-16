@@ -6,9 +6,9 @@ import {
   CheckCircle2,
   CircleDot,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
-import projects from "../data/projects";
+import fallbackProjects from "../data/projects";
 
 const filters = [
   "All",
@@ -33,14 +33,109 @@ function getStatusClass(status) {
   return "border-[#E6D49A] bg-[#FFF9E8] text-[#92751C]";
 }
 
+
+/* =========================================================
+   PROJECT API + IMAGE URL HELPERS
+========================================================= */
+
+const API_BASE_URL = "http://localhost:8080";
+const PROJECTS_API = `${API_BASE_URL}/api/projects-page`;
+
+function resolveImageUrl(value) {
+  if (!value) {
+    return "";
+  }
+
+  const url = String(value).trim();
+
+  if (
+    url.startsWith("http://") ||
+    url.startsWith("https://") ||
+    url.startsWith("blob:")
+  ) {
+    return url;
+  }
+
+  if (url.startsWith("/images/")) {
+    return `${API_BASE_URL}${url}`;
+  }
+
+  return url;
+}
+
+function normalizeProjects(data) {
+  if (!Array.isArray(data)) {
+    return [];
+  }
+
+  return [...data]
+    .filter(Boolean)
+    .filter((project) => project.enabled !== false)
+    .sort(
+      (a, b) =>
+        Number(a?.displayOrder ?? 0) -
+          Number(b?.displayOrder ?? 0) ||
+        Number(a?.id ?? 0) - Number(b?.id ?? 0)
+    );
+}
+
 function ProjectsPage() {
-  const [activeFilter, setActiveFilter] = useState("All");
+  const [activeFilter, setActiveFilter] =
+    useState("All");
+
+  const [projects, setProjects] =
+    useState(fallbackProjects);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadProjects() {
+      try {
+        const response = await fetch(
+          `${PROJECTS_API}/enabled`
+        );
+
+        if (!response.ok) {
+          throw new Error(
+            `Projects API returned ${response.status}`
+          );
+        }
+
+        const data = await response.json();
+
+        if (cancelled) {
+          return;
+        }
+
+        setProjects(
+          normalizeProjects(data)
+        );
+      } catch (error) {
+        console.error(
+          "Projects API error:",
+          error
+        );
+        // Keep the existing local fallback when
+        // the backend is unavailable.
+      }
+    }
+
+    loadProjects();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const filteredProjects =
     activeFilter === "All"
       ? projects
       : projects.filter(
-          (project) => project.category === activeFilter
+          (project) =>
+            String(
+              project.category || ""
+            ).toLowerCase() ===
+            activeFilter.toLowerCase()
         );
 
   return (
@@ -511,7 +606,7 @@ function ProjectsPage() {
               "
             >
 
-              {filteredProjects.map((project) => (
+              {filteredProjects.map((project, index) => (
 
                 <article
                   key={project.id}
@@ -564,8 +659,8 @@ function ProjectsPage() {
                   >
 
                     <img
-                      src={project.image}
-                      alt={project.title}
+                      src={resolveImageUrl(project.image)}
+                      alt={project.imageAlt || project.title}
                       loading="lazy"
                       className="
                         h-full
@@ -617,7 +712,7 @@ function ProjectsPage() {
                         group-hover:text-[#171815]
                       "
                     >
-                      {String(project.id).padStart(2, "0")}
+                      {String(index + 1).padStart(2, "0")}
                     </div>
 
                     {/* Category */}
@@ -729,7 +824,7 @@ function ProjectsPage() {
                           text-[#B1AEA3]
                         "
                       >
-                        #{String(project.id).padStart(2, "0")}
+                        #{String(index + 1).padStart(2, "0")}
                       </span>
 
                     </div>

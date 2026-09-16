@@ -1,3 +1,4 @@
+import { Fragment, useEffect, useState } from "react";
 import {
   ArrowUpRight,
   CheckCircle2,
@@ -8,29 +9,581 @@ import {
 
 import aboutConstruction from "../assets/images/about-construction.jpg";
 
-function About() {
-  const features = [
+/* =========================================================
+   API
+========================================================= */
+
+const API_BASE_URL = "http://localhost:8080";
+
+const HOME_CONTENT_API = `${API_BASE_URL}/api/home-content`;
+const ABOUT_FEATURES_API = `${API_BASE_URL}/api/about-features/enabled`;
+
+/* =========================================================
+   ICON MAP
+========================================================= */
+
+const ABOUT_ICONS = {
+  quality: CheckCircle2,
+  reliability: ShieldCheck,
+  safety: Award,
+  value: Building2,
+
+  // Common alternative values are also supported so older database
+  // records continue to display the correct icon.
+  checkcircle2: CheckCircle2,
+  checkcircle: CheckCircle2,
+  shieldcheck: ShieldCheck,
+  shield: ShieldCheck,
+  award: Award,
+  building2: Building2,
+  building: Building2,
+};
+
+/* =========================================================
+   DEFAULT ABOUT CONTENT
+========================================================= */
+
+const DEFAULT_ABOUT_CONTENT = {
+  aboutEnabled: true,
+
+  aboutLabel: "About Us",
+
+  aboutDescription:
+    "Engineering expertise, responsible execution and construction solutions designed for lasting value.",
+
+  aboutHeading: "Building with purpose.",
+
+  aboutHeadingHighlight: "Delivering with precision.",
+
+  aboutImage: "",
+
+  aboutImageAlt: "Saam Infrastructure construction site",
+
+  aboutBadge: "Saam Infrastructure",
+
+  aboutImageLabel: "Built to stand strong",
+
+  aboutImageTitle: "Strength in every detail.",
+
+  aboutWhoWeAre: "Who We Are",
+
+  aboutParagraph1:
+    "Saam Infrastructure is committed to delivering dependable construction and infrastructure solutions that combine engineering expertise, quality workmanship and thoughtful execution.",
+
+  aboutParagraph2:
+    "From planning and development to execution and completion, we focus on creating durable spaces and infrastructure that meet the needs of our clients and stand the test of time.",
+
+  aboutCtaText: "Discover Our Approach",
+
+  aboutCtaLink: "#services",
+
+  aboutBrandItems: ["Engineering", "Quality", "Trust"],
+
+  aboutFeatures: [
     {
+      id: 1,
       title: "Quality",
       description: "High standards at every stage of construction.",
-      icon: CheckCircle2,
+      icon: "quality",
+      enabled: true,
     },
     {
+      id: 2,
       title: "Reliability",
       description: "Dependable planning and project execution.",
-      icon: ShieldCheck,
+      icon: "reliability",
+      enabled: true,
     },
     {
+      id: 3,
       title: "Safety",
       description: "Responsible practices with safety at the core.",
-      icon: Award,
+      icon: "safety",
+      enabled: true,
     },
     {
+      id: 4,
       title: "Long-Term Value",
       description: "Solutions designed for durability and performance.",
-      icon: Building2,
+      icon: "value",
+      enabled: true,
     },
-  ];
+  ],
+};
+
+/* =========================================================
+   SAFE CONTENT NORMALIZER
+========================================================= */
+
+function normalizeAboutFeatures(features) {
+  if (!Array.isArray(features)) {
+    return [];
+  }
+
+  return features
+    .filter(Boolean)
+    .map((feature, index) => ({
+      id: feature?.id ?? index + 1,
+      title: feature?.title ?? "",
+      description: feature?.description ?? "",
+      icon: feature?.icon ?? "quality",
+      enabled: feature?.enabled !== false,
+    }))
+    .filter((feature) => feature.enabled !== false);
+}
+
+/* =========================================================
+   LOCAL STORAGE FALLBACK
+========================================================= */
+
+function getAboutContent() {
+  try {
+    const savedContent = localStorage.getItem("saamHomeContent");
+
+    if (!savedContent) {
+      return DEFAULT_ABOUT_CONTENT;
+    }
+
+    const parsed = JSON.parse(savedContent);
+
+    if (!parsed || typeof parsed !== "object") {
+      return DEFAULT_ABOUT_CONTENT;
+    }
+
+    const aboutFeatures = Array.isArray(parsed.aboutFeatures)
+      ? parsed.aboutFeatures.map((feature, index) => ({
+          id: feature?.id ?? index + 1,
+          title: feature?.title ?? "",
+          description: feature?.description ?? "",
+          icon: feature?.icon ?? "quality",
+          enabled: feature?.enabled !== false,
+        }))
+      : DEFAULT_ABOUT_CONTENT.aboutFeatures;
+
+    return {
+      ...DEFAULT_ABOUT_CONTENT,
+      ...parsed,
+      aboutFeatures,
+    };
+  } catch {
+    return DEFAULT_ABOUT_CONTENT;
+  }
+}
+
+/* =========================================================
+   IMAGE HELPER
+========================================================= */
+
+function getAboutImage(image) {
+  if (typeof image !== "string" || image.trim() === "") {
+    return aboutConstruction;
+  }
+
+  const value = image.trim();
+
+  // Base64/blob images can be used directly.
+  if (
+    value.startsWith("data:") ||
+    value.startsWith("blob:")
+  ) {
+    return value;
+  }
+
+  // Absolute URLs can be used directly.
+  if (
+    value.startsWith("http://") ||
+    value.startsWith("https://")
+  ) {
+    return value;
+  }
+
+  // Uploaded images are stored by the backend as public paths such as:
+  // /images/about/about-image-123.jpg
+  // The browser must request those files from Spring Boot, not Vite.
+  if (value.startsWith("/")) {
+    return `${API_BASE_URL}${value}`;
+  }
+
+  return `${API_BASE_URL}/${value}`;
+}
+
+/* =========================================================
+   ABOUT COMPONENT
+========================================================= */
+
+function About() {
+  const [content, setContent] = useState(getAboutContent);
+  const [loading, setLoading] = useState(true);
+
+  /* =======================================================
+     LOAD BACKEND CONTENT
+  ======================================================= */
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const loadAboutContent = async () => {
+      const localContent = getAboutContent();
+
+      let finalContent = {
+        ...DEFAULT_ABOUT_CONTENT,
+        ...localContent,
+      };
+
+      /* ---------------------------------------------------
+         LOAD HOME CONTENT
+      --------------------------------------------------- */
+
+      try {
+        const response = await fetch(HOME_CONTENT_API, {
+          method: "GET",
+          headers: {
+            Accept: "application/json",
+          },
+        });
+
+        if (response.ok) {
+          const homeData = await response.json();
+
+          if (homeData && typeof homeData === "object") {
+            finalContent = {
+              ...finalContent,
+
+              aboutEnabled:
+                homeData.aboutEnabled ?? finalContent.aboutEnabled,
+
+              aboutLabel:
+                homeData.aboutLabel ?? finalContent.aboutLabel,
+
+              aboutDescription:
+                homeData.aboutDescription ??
+                finalContent.aboutDescription,
+
+              aboutHeading:
+                homeData.aboutHeading ?? finalContent.aboutHeading,
+
+              aboutHeadingHighlight:
+                homeData.aboutHeadingHighlight ??
+                finalContent.aboutHeadingHighlight,
+
+              aboutImage:
+                homeData.aboutImage ?? finalContent.aboutImage,
+
+              aboutImageAlt:
+                homeData.aboutImageAlt ?? finalContent.aboutImageAlt,
+
+              aboutImageLabel:
+                homeData.aboutImageLabel ??
+                finalContent.aboutImageLabel,
+
+              aboutImageTitle:
+                homeData.aboutImageTitle ??
+                finalContent.aboutImageTitle,
+
+              aboutWhoWeAre:
+                homeData.aboutWhoWeAre ??
+                finalContent.aboutWhoWeAre,
+
+              aboutParagraph1:
+                homeData.aboutParagraph1 ??
+                finalContent.aboutParagraph1,
+
+              aboutParagraph2:
+                homeData.aboutParagraph2 ??
+                finalContent.aboutParagraph2,
+
+              aboutBadge:
+                homeData.aboutBadge ?? finalContent.aboutBadge,
+
+              aboutCtaText:
+                homeData.aboutCtaText ?? finalContent.aboutCtaText,
+
+              aboutCtaLink:
+                homeData.aboutCtaLink ?? finalContent.aboutCtaLink,
+
+              aboutBrandItems:
+                Array.isArray(homeData.aboutBrandItems)
+                  ? homeData.aboutBrandItems
+                  : finalContent.aboutBrandItems,
+            };
+          }
+        }
+      } catch {
+        console.warn(
+          "About Home Content API unavailable. Using local fallback."
+        );
+      }
+
+      /* ---------------------------------------------------
+         LOAD ABOUT FEATURES
+      --------------------------------------------------- */
+
+      try {
+        const response = await fetch(ABOUT_FEATURES_API, {
+          method: "GET",
+          headers: {
+            Accept: "application/json",
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error(
+            `About Features API returned ${response.status}`
+          );
+        }
+
+        const featureData = await response.json();
+
+        if (Array.isArray(featureData)) {
+          finalContent = {
+            ...finalContent,
+            aboutFeatures: normalizeAboutFeatures(featureData),
+          };
+        }
+      } catch {
+        console.warn(
+          "About Features API unavailable. Using local fallback."
+        );
+      }
+
+      if (cancelled) {
+        return;
+      }
+
+      setContent(finalContent);
+      setLoading(false);
+    };
+
+    loadAboutContent();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  /* =======================================================
+     LISTEN FOR ADMIN UPDATES
+  ======================================================= */
+
+  useEffect(() => {
+    const reloadFromBackend = async () => {
+      try {
+        const [homeResponse, featuresResponse] = await Promise.all([
+          fetch(HOME_CONTENT_API, {
+            method: "GET",
+            headers: {
+              Accept: "application/json",
+            },
+          }),
+
+          fetch(ABOUT_FEATURES_API, {
+            method: "GET",
+            headers: {
+              Accept: "application/json",
+            },
+          }),
+        ]);
+
+        const localContent = getAboutContent();
+
+        let updatedContent = {
+          ...DEFAULT_ABOUT_CONTENT,
+          ...localContent,
+        };
+
+        /* ---------------------------------------------------
+           HOME CONTENT
+        --------------------------------------------------- */
+
+        if (homeResponse.ok) {
+          const homeData = await homeResponse.json();
+
+          if (homeData && typeof homeData === "object") {
+            updatedContent = {
+              ...updatedContent,
+
+              aboutEnabled:
+                homeData.aboutEnabled ??
+                updatedContent.aboutEnabled,
+
+              aboutLabel:
+                homeData.aboutLabel ??
+                updatedContent.aboutLabel,
+
+              aboutDescription:
+                homeData.aboutDescription ??
+                updatedContent.aboutDescription,
+
+              aboutHeading:
+                homeData.aboutHeading ??
+                updatedContent.aboutHeading,
+
+              aboutHeadingHighlight:
+                homeData.aboutHeadingHighlight ??
+                updatedContent.aboutHeadingHighlight,
+
+              aboutImage:
+                homeData.aboutImage ??
+                updatedContent.aboutImage,
+
+              aboutImageAlt:
+                homeData.aboutImageAlt ??
+                updatedContent.aboutImageAlt,
+
+              aboutImageLabel:
+                homeData.aboutImageLabel ??
+                updatedContent.aboutImageLabel,
+
+              aboutImageTitle:
+                homeData.aboutImageTitle ??
+                updatedContent.aboutImageTitle,
+
+              aboutWhoWeAre:
+                homeData.aboutWhoWeAre ??
+                updatedContent.aboutWhoWeAre,
+
+              aboutParagraph1:
+                homeData.aboutParagraph1 ??
+                updatedContent.aboutParagraph1,
+
+              aboutParagraph2:
+                homeData.aboutParagraph2 ??
+                updatedContent.aboutParagraph2,
+
+              aboutBadge:
+                homeData.aboutBadge ??
+                updatedContent.aboutBadge,
+
+              aboutCtaText:
+                homeData.aboutCtaText ??
+                updatedContent.aboutCtaText,
+
+              aboutCtaLink:
+                homeData.aboutCtaLink ??
+                updatedContent.aboutCtaLink,
+
+              aboutBrandItems:
+                Array.isArray(homeData.aboutBrandItems)
+                  ? homeData.aboutBrandItems
+                  : updatedContent.aboutBrandItems,
+            };
+          }
+        }
+
+        /* ---------------------------------------------------
+           ABOUT FEATURES
+        --------------------------------------------------- */
+
+        if (featuresResponse.ok) {
+          const featuresData = await featuresResponse.json();
+
+          if (Array.isArray(featuresData)) {
+            updatedContent.aboutFeatures =
+              normalizeAboutFeatures(featuresData);
+          }
+        }
+
+        setContent(updatedContent);
+      } catch {
+        setContent(getAboutContent());
+      }
+    };
+
+    const reloadFromLocalStorage = () => {
+      setContent(getAboutContent());
+    };
+
+    window.addEventListener(
+      "saamHomeContentUpdated",
+      reloadFromBackend
+    );
+
+    window.addEventListener(
+      "storage",
+      reloadFromLocalStorage
+    );
+
+    return () => {
+      window.removeEventListener(
+        "saamHomeContentUpdated",
+        reloadFromBackend
+      );
+
+      window.removeEventListener(
+        "storage",
+        reloadFromLocalStorage
+      );
+    };
+  }, []);
+
+  /* =======================================================
+     LOADING
+  ======================================================= */
+
+  if (loading) {
+    return (
+      <section
+        id="about"
+        className="relative w-full overflow-hidden bg-[#F7F1E6]"
+      >
+        <div className="mx-auto flex min-h-[300px] max-w-7xl items-center justify-center px-4 py-16">
+          <div className="text-center">
+            <div className="mx-auto h-8 w-8 animate-spin rounded-full border-2 border-[#C9A227] border-t-transparent" />
+
+            <p className="mt-4 text-sm text-[#686961]">
+              Loading about section...
+            </p>
+          </div>
+        </div>
+
+        <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#C9A227]" />
+      </section>
+    );
+  }
+
+  /* =======================================================
+     HIDDEN SECTION
+  ======================================================= */
+
+  if (content.aboutEnabled === false) {
+    return null;
+  }
+
+  /* =======================================================
+     ENABLED FEATURES
+  ======================================================= */
+
+  const features = Array.isArray(content.aboutFeatures)
+    ? content.aboutFeatures
+        .filter((feature) => feature?.enabled !== false)
+        .map((feature) => ({
+          ...feature,
+          icon:
+            typeof feature?.icon === "string"
+              ? feature.icon.trim().toLowerCase()
+              : "quality",
+        }))
+    : [];
+
+  /* =======================================================
+     BRAND ITEMS
+  ======================================================= */
+
+  const brandItems =
+    Array.isArray(content.aboutBrandItems) &&
+    content.aboutBrandItems.length > 0
+      ? content.aboutBrandItems
+      : DEFAULT_ABOUT_CONTENT.aboutBrandItems;
+
+  /* =======================================================
+     IMAGE
+  ======================================================= */
+
+  const imageSrc = getAboutImage(content.aboutImage);
+
+  /* =======================================================
+     RENDER
+  ======================================================= */
 
   return (
     <section
@@ -49,11 +602,8 @@ function About() {
         xl:py-24
       "
     >
-      {/* =====================================================
-          BACKGROUND DECORATION
-      ====================================================== */}
+      {/* BACKGROUND DECORATION */}
 
-      {/* Gold Glow */}
       <div
         className="
           pointer-events-none
@@ -71,7 +621,6 @@ function About() {
         "
       />
 
-      {/* Dark Glow */}
       <div
         className="
           pointer-events-none
@@ -88,7 +637,6 @@ function About() {
         "
       />
 
-      {/* Architectural Grid */}
       <div
         className="
           pointer-events-none
@@ -100,7 +648,6 @@ function About() {
         "
       />
 
-      {/* Right Gold Accent */}
       <div
         className="
           pointer-events-none
@@ -116,15 +663,10 @@ function About() {
         "
       />
 
-      {/* =====================================================
-          MAIN CONTAINER
-      ====================================================== */}
+      {/* MAIN CONTAINER */}
 
       <div className="relative mx-auto max-w-7xl">
-
-        {/* =====================================================
-            HEADER
-        ====================================================== */}
+        {/* HEADER */}
 
         <div
           className="
@@ -137,7 +679,7 @@ function About() {
             xl:gap-16
           "
         >
-          {/* LEFT - ABOUT US */}
+          {/* LEFT */}
 
           <div className="min-w-0">
             <div
@@ -150,8 +692,6 @@ function About() {
                 sm:gap-4
               "
             >
-              {/* Gold Line */}
-
               <span
                 className="
                   h-[3px]
@@ -162,8 +702,6 @@ function About() {
                   lg:w-12
                 "
               />
-
-              {/* ABOUT US */}
 
               <h1
                 className="
@@ -182,11 +720,10 @@ function About() {
                   2xl:text-[4.6rem]
                 "
               >
-                About Us
+                {content.aboutLabel ||
+                  DEFAULT_ABOUT_CONTENT.aboutLabel}
               </h1>
             </div>
-
-            {/* Description */}
 
             <p
               className="
@@ -200,19 +737,14 @@ function About() {
                 sm:leading-7
               "
             >
-              Engineering expertise, responsible execution and
-              construction solutions designed for lasting value.
+              {content.aboutDescription ||
+                DEFAULT_ABOUT_CONTENT.aboutDescription}
             </p>
           </div>
 
-          {/* RIGHT - SUPPORTING HEADING */}
+          {/* RIGHT */}
 
-          <div
-            className="
-              min-w-0
-              lg:pb-1
-            "
-          >
+          <div className="min-w-0 lg:pb-1">
             <h2
               className="
                 max-w-3xl
@@ -227,15 +759,16 @@ function About() {
                 xl:text-[2.9rem]
               "
             >
-              Building with purpose.
+              {content.aboutHeading ||
+                DEFAULT_ABOUT_CONTENT.aboutHeading}
+
               <br />
 
               <span className="text-[#7C8792]">
-                Delivering with precision.
+                {content.aboutHeadingHighlight ||
+                  DEFAULT_ABOUT_CONTENT.aboutHeadingHighlight}
               </span>
             </h2>
-
-            {/* Gold Accent */}
 
             <div
               className="
@@ -267,9 +800,7 @@ function About() {
           </div>
         </div>
 
-        {/* =====================================================
-            MAIN ABOUT AREA
-        ====================================================== */}
+        {/* MAIN ABOUT AREA */}
 
         <div
           className="
@@ -280,14 +811,11 @@ function About() {
             sm:mt-12
             lg:mt-14
             lg:grid-cols-2
-            lg:gap-0
             lg:items-stretch
+            lg:gap-0
           "
         >
-
-          {/* =================================================
-              IMAGE AREA
-          ================================================== */}
+          {/* IMAGE AREA */}
 
           <div
             className="
@@ -301,14 +829,7 @@ function About() {
               lg:pr-3
             "
           >
-
-            {/* =================================================
-                SMALL GOLD FRAME
-
-                Reduced from the previous large frame.
-                This is the yellow background/shadow requested
-                by your manager.
-            ================================================== */}
+            {/* GOLD FRAME */}
 
             <div
               className="
@@ -329,9 +850,7 @@ function About() {
               "
             />
 
-            {/* =================================================
-                IMAGE CARD
-            ================================================== */}
+            {/* IMAGE CARD */}
 
             <div
               className="
@@ -353,12 +872,14 @@ function About() {
                 lg:rounded-br-[78px]
               "
             >
-
-              {/* Image */}
+              {/* IMAGE */}
 
               <img
-                src={aboutConstruction}
-                alt="Saam Infrastructure construction site"
+                src={imageSrc}
+                alt={
+                  content.aboutImageAlt ||
+                  DEFAULT_ABOUT_CONTENT.aboutImageAlt
+                }
                 className="
                   absolute
                   inset-0
@@ -371,9 +892,17 @@ function About() {
                   ease-out
                   group-hover:scale-[1.04]
                 "
+                onError={(event) => {
+                  const imageElement = event.currentTarget;
+
+                  if (!imageElement.dataset.fallbackApplied) {
+                    imageElement.dataset.fallbackApplied = "true";
+                    imageElement.src = aboutConstruction;
+                  }
+                }}
               />
 
-              {/* Dark Overlay */}
+              {/* DARK OVERLAY */}
 
               <div
                 className="
@@ -386,7 +915,7 @@ function About() {
                 "
               />
 
-              {/* Gold Overlay */}
+              {/* GOLD OVERLAY */}
 
               <div
                 className="
@@ -401,9 +930,7 @@ function About() {
                 "
               />
 
-              {/* =================================================
-                  TOP BRAND BADGE
-              ================================================== */}
+              {/* TOP BRAND BADGE */}
 
               <div
                 className="
@@ -457,14 +984,13 @@ function About() {
                       sm:text-[9px]
                     "
                   >
-                    Saam Infrastructure
+                    {content.aboutBadge ||
+                      DEFAULT_ABOUT_CONTENT.aboutBadge}
                   </span>
                 </div>
               </div>
 
-              {/* =================================================
-                  IMAGE DECORATION
-              ================================================== */}
+              {/* IMAGE DECORATION */}
 
               <div
                 className="
@@ -499,9 +1025,7 @@ function About() {
                 "
               />
 
-              {/* =================================================
-                  IMAGE BOTTOM CONTENT
-              ================================================== */}
+              {/* IMAGE BOTTOM CONTENT */}
 
               <div
                 className="
@@ -526,7 +1050,8 @@ function About() {
                     lg:text-xs
                   "
                 >
-                  Built to stand strong
+                  {content.aboutImageLabel ||
+                    DEFAULT_ABOUT_CONTENT.aboutImageLabel}
                 </p>
 
                 <div
@@ -563,12 +1088,13 @@ function About() {
                       lg:text-[1.7rem]
                     "
                   >
-                    Strength in every detail.
+                    {content.aboutImageTitle ||
+                      DEFAULT_ABOUT_CONTENT.aboutImageTitle}
                   </p>
                 </div>
               </div>
 
-              {/* Bottom Gold Line */}
+              {/* BOTTOM GOLD LINE */}
 
               <div
                 className="
@@ -584,9 +1110,7 @@ function About() {
             </div>
           </div>
 
-          {/* =================================================
-              DARK CONTENT PANEL
-          ================================================== */}
+          {/* DARK CONTENT PANEL */}
 
           <div
             className="
@@ -611,8 +1135,7 @@ function About() {
               xl:p-10
             "
           >
-
-            {/* Decorative Circle - Top */}
+            {/* DECORATIVE CIRCLE - TOP */}
 
             <div
               className="
@@ -630,7 +1153,7 @@ function About() {
               "
             />
 
-            {/* Decorative Circle - Bottom */}
+            {/* DECORATIVE CIRCLE - BOTTOM */}
 
             <div
               className="
@@ -646,9 +1169,7 @@ function About() {
               "
             />
 
-            {/* =================================================
-                WHO WE ARE
-            ================================================== */}
+            {/* WHO WE ARE */}
 
             <div
               className="
@@ -679,13 +1200,12 @@ function About() {
                   md:text-xs
                 "
               >
-                Who We Are
+                {content.aboutWhoWeAre ||
+                  DEFAULT_ABOUT_CONTENT.aboutWhoWeAre}
               </span>
             </div>
 
-            {/* =================================================
-                TEXT
-            ================================================== */}
+            {/* TEXT */}
 
             <div
               className="
@@ -706,10 +1226,8 @@ function About() {
                   lg:leading-7
                 "
               >
-                Saam Infrastructure is committed to delivering
-                dependable construction and infrastructure solutions
-                that combine engineering expertise, quality
-                workmanship and thoughtful execution.
+                {content.aboutParagraph1 ||
+                  DEFAULT_ABOUT_CONTENT.aboutParagraph1}
               </p>
 
               <p
@@ -724,116 +1242,128 @@ function About() {
                   lg:text-[14px]
                 "
               >
-                From planning and development to execution and
-                completion, we focus on creating durable spaces and
-                infrastructure that meet the needs of our clients
-                and stand the test of time.
+                {content.aboutParagraph2 ||
+                  DEFAULT_ABOUT_CONTENT.aboutParagraph2}
               </p>
             </div>
 
-            {/* =================================================
-                FEATURES
-            ================================================== */}
+            {/* FEATURES */}
 
-            <div
-              className="
-                relative
-                z-10
-                mt-5
-                grid
-                grid-cols-1
-                gap-2.5
-                sm:mt-7
-                sm:grid-cols-2
-                sm:gap-3
-              "
-            >
-              {features.map((feature) => {
-                const Icon = feature.icon;
+            {features.length > 0 && (
+              <div
+                className="
+                  relative
+                  z-10
+                  mt-5
+                  grid
+                  grid-cols-1
+                  gap-2.5
+                  sm:mt-7
+                  sm:grid-cols-2
+                  sm:gap-3
+                "
+              >
+                {features.map((feature) => {
+                  const iconKey =
+                    typeof feature.icon === "string"
+                      ? feature.icon
+                          .trim()
+                          .toLowerCase()
+                          .replace(/[^a-z0-9]/g, "")
+                      : "quality";
 
-                return (
-                  <div
-                    key={feature.title}
-                    className="
-                      group
-                      rounded-xl
-                      border
-                      border-white/10
-                      bg-white/[0.035]
-                      p-3
-                      transition-all
-                      duration-300
-                      hover:-translate-y-1
-                      hover:border-[#C9A227]/50
-                      hover:bg-[#C9A227]/10
-                      sm:rounded-2xl
-                      sm:p-3.5
-                    "
-                  >
-                    <div className="flex items-start gap-2.5 sm:gap-3">
+                  const Icon =
+                    ABOUT_ICONS[iconKey] ||
+                    CheckCircle2;
 
-                      {/* Icon */}
-
+                  return (
+                    <div
+                      key={feature.id}
+                      className="
+                        group
+                        rounded-xl
+                        border
+                        border-white/10
+                        bg-white/[0.035]
+                        p-3
+                        transition-all
+                        duration-300
+                        hover:-translate-y-1
+                        hover:border-[#C9A227]/50
+                        hover:bg-[#C9A227]/10
+                        sm:rounded-2xl
+                        sm:p-3.5
+                      "
+                    >
                       <div
                         className="
                           flex
-                          h-8
-                          w-8
-                          shrink-0
-                          items-center
-                          justify-center
-                          rounded-lg
-                          border
-                          border-[#C9A227]/40
-                          bg-[#C9A227]/10
-                          text-[#C9A227]
-                          transition-all
-                          duration-300
-                          group-hover:bg-[#C9A227]
-                          group-hover:text-[#171815]
-                          sm:h-9
-                          sm:w-9
-                          sm:rounded-xl
+                          items-start
+                          gap-2.5
+                          sm:gap-3
                         "
                       >
-                        <Icon size={16} />
-                      </div>
+                        {/* ICON */}
 
-                      {/* Content */}
-
-                      <div className="min-w-0">
-                        <h3
+                        <div
                           className="
-                            text-[13px]
-                            font-bold
-                            text-white
-                            sm:text-sm
+                            flex
+                            h-8
+                            w-8
+                            shrink-0
+                            items-center
+                            justify-center
+                            rounded-lg
+                            border
+                            border-[#C9A227]/40
+                            bg-[#C9A227]/10
+                            text-[#C9A227]
+                            transition-all
+                            duration-300
+                            group-hover:bg-[#C9A227]
+                            group-hover:text-[#171815]
+                            sm:h-9
+                            sm:w-9
+                            sm:rounded-xl
                           "
                         >
-                          {feature.title}
-                        </h3>
+                          <Icon size={16} />
+                        </div>
 
-                        <p
-                          className="
-                            mt-1
-                            text-[11px]
-                            leading-5
-                            text-slate-400
-                            sm:text-xs
-                          "
-                        >
-                          {feature.description}
-                        </p>
+                        {/* CONTENT */}
+
+                        <div className="min-w-0">
+                          <h3
+                            className="
+                              text-[13px]
+                              font-bold
+                              text-white
+                              sm:text-sm
+                            "
+                          >
+                            {feature.title}
+                          </h3>
+
+                          <p
+                            className="
+                              mt-1
+                              text-[11px]
+                              leading-5
+                              text-slate-400
+                              sm:text-xs
+                            "
+                          >
+                            {feature.description}
+                          </p>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                );
-              })}
-            </div>
+                  );
+                })}
+              </div>
+            )}
 
-            {/* =================================================
-                CTA
-            ================================================== */}
+            {/* CTA */}
 
             <div
               className="
@@ -844,7 +1374,10 @@ function About() {
               "
             >
               <a
-                href="#services"
+                href={
+                  content.aboutCtaLink ||
+                  DEFAULT_ABOUT_CONTENT.aboutCtaLink
+                }
                 className="
                   group
                   inline-flex
@@ -872,7 +1405,8 @@ function About() {
                 "
               >
                 <span>
-                  Discover Our Approach
+                  {content.aboutCtaText ||
+                    DEFAULT_ABOUT_CONTENT.aboutCtaText}
                 </span>
 
                 <span
@@ -898,85 +1432,64 @@ function About() {
               </a>
             </div>
 
-            {/* =================================================
-                BRAND LINE
-            ================================================== */}
+            {/* BRAND LINE */}
 
-            <div
-              className="
-                relative
-                z-10
-                mt-5
-                border-t
-                border-white/10
-                pt-4
-                sm:mt-7
-                sm:pt-5
-              "
-            >
+            {brandItems.length > 0 && (
               <div
                 className="
-                  flex
-                  items-center
-                  gap-2
-                  sm:gap-3
+                  relative
+                  z-10
+                  mt-5
+                  border-t
+                  border-white/10
+                  pt-4
+                  sm:mt-7
+                  sm:pt-5
                 "
               >
-                <span
+                <div
                   className="
-                    whitespace-nowrap
-                    text-[7px]
-                    font-bold
-                    uppercase
-                    tracking-[0.14em]
-                    text-slate-500
-                    sm:text-[9px]
+                    flex
+                    items-center
+                    gap-2
+                    sm:gap-3
                   "
                 >
-                  Engineering
-                </span>
+                  {brandItems.map((item, index) => (
+                    <Fragment key={`${item}-${index}`}>
+                      {index > 0 && (
+                        <span
+                          className="
+                            h-px
+                            flex-1
+                            bg-white/10
+                          "
+                        />
+                      )}
 
-                <span className="h-px flex-1 bg-white/10" />
-
-                <span
-                  className="
-                    whitespace-nowrap
-                    text-[7px]
-                    font-bold
-                    uppercase
-                    tracking-[0.14em]
-                    text-slate-500
-                    sm:text-[9px]
-                  "
-                >
-                  Quality
-                </span>
-
-                <span className="h-px flex-1 bg-white/10" />
-
-                <span
-                  className="
-                    whitespace-nowrap
-                    text-[7px]
-                    font-bold
-                    uppercase
-                    tracking-[0.14em]
-                    text-slate-500
-                    sm:text-[9px]
-                  "
-                >
-                  Trust
-                </span>
+                      <span
+                        className="
+                          whitespace-nowrap
+                          text-[7px]
+                          font-bold
+                          uppercase
+                          tracking-[0.14em]
+                          text-slate-500
+                          sm:text-[9px]
+                        "
+                      >
+                        {item}
+                      </span>
+                    </Fragment>
+                  ))}
+                </div>
               </div>
-            </div>
-
+            )}
           </div>
         </div>
       </div>
 
-      {/* =====================================================
-          BOTTOM GOLD LINE
-      ====================================================== */}
+      {/* BOTTOM GOLD LINE */}
 
       <div
         className="

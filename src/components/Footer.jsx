@@ -6,9 +6,190 @@ import {
 } from "lucide-react";
 
 import { Link } from "react-router-dom";
-import saamLogo from "../assets/images/saam-logo.png";
+import { useEffect, useState } from "react";
+
+/* =========================================================
+   CONFIG
+========================================================= */
+
+const API_BASE_URL = "http://localhost:8080";
+const FOOTER_API = `${API_BASE_URL}/api/footer`;
+
+/* =========================================================
+   DEFAULT FOOTER
+========================================================= */
+
+const DEFAULT_FOOTER = {
+  enabled: true,
+
+  companyName: "Saam Infrastructure",
+
+  description:
+    "Reliable construction and infrastructure solutions delivered with quality, precision, safety and long-term value.",
+
+  address:
+    "Plot No. 2, Dhawale Building, Old Dighori Square, Umred Rd, Dighori, Nagpur, Maharashtra 440034",
+
+  phone: "+91 98227 35116",
+
+  email: "saaminfrastructure@gmail.com",
+
+  copyrightText:
+    "© 2026 Saam Infrastructure. All rights reserved.",
+
+  quickLinksTitle: "Quick Links",
+
+  servicesTitle: "Our Services",
+
+  contactTitle: "Contact Us",
+
+  facebookUrl:
+    "https://www.facebook.com/saaminfrastructure",
+
+  instagramUrl:
+    "https://www.instagram.com/saaminfrastructure",
+
+  linkedinUrl:
+    "https://www.linkedin.com/company/saam-infrastructure/",
+
+  youtubeUrl:
+    "https://www.youtube.com/@saaminfrastructure",
+
+  logoImage: "/saam-logo.png",
+
+  logoAlt: "Saam Infrastructure",
+};
+
+/* =========================================================
+   DEFAULT NAVIGATION
+========================================================= */
+
+const DEFAULT_NAV_ITEMS = [
+  { name: "Home", path: "/" },
+  { name: "About Us", path: "/about" },
+  { name: "Services", path: "/services" },
+  { name: "Projects", path: "/projects" },
+  { name: "Gallery", path: "/gallery" },
+  { name: "Contact", path: "/contact" },
+];
+
+/* =========================================================
+   DEFAULT SERVICES
+========================================================= */
+
+const DEFAULT_SERVICES = [
+  "Civil Construction",
+  "Commercial Projects",
+  "Residential Construction",
+  "Infrastructure Development",
+  "Renovation & Development",
+  "Engineering & Project Management",
+];
+
+/* =========================================================
+   COMPONENT
+========================================================= */
 
 function Footer() {
+  const [footer, setFooter] = useState(DEFAULT_FOOTER);
+  const [loaded, setLoaded] = useState(false);
+
+  /* =======================================================
+     CONVERT BACKEND IMAGE PATH TO FULL URL
+  ======================================================= */
+
+  const getImageUrl = (image) => {
+    if (!image || typeof image !== "string") {
+      return "/saam-logo.png";
+    }
+
+    const trimmed = image.trim();
+
+    if (!trimmed) {
+      return "/saam-logo.png";
+    }
+
+    /*
+      Already a complete URL
+      Example:
+      http://localhost:8080/images/footer/logo.png
+      https://example.com/logo.png
+    */
+    if (
+      trimmed.startsWith("http://") ||
+      trimmed.startsWith("https://") ||
+      trimmed.startsWith("data:") ||
+      trimmed.startsWith("blob:")
+    ) {
+      return trimmed;
+    }
+
+    /*
+      Backend returns:
+      /images/footer/logo.png
+
+      Convert to:
+      http://localhost:8080/images/footer/logo.png
+    */
+    if (trimmed.startsWith("/")) {
+      return `${API_BASE_URL}${trimmed}`;
+    }
+
+    /*
+      In case backend returns:
+      images/footer/logo.png
+    */
+    return `${API_BASE_URL}/${trimmed}`;
+  };
+
+  /* =======================================================
+     INITIAL LOAD
+  ======================================================= */
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const fetchFooter = async () => {
+      try {
+        const response = await fetch(FOOTER_API);
+
+        if (!response.ok) {
+          throw new Error(
+            `Footer API failed: ${response.status}`
+          );
+        }
+
+        const data = await response.json();
+
+        if (!cancelled) {
+          setFooter({
+            ...DEFAULT_FOOTER,
+            ...data,
+          });
+
+          setLoaded(true);
+        }
+      } catch (error) {
+        console.error("Footer load error:", error);
+
+        if (!cancelled) {
+          setFooter(DEFAULT_FOOTER);
+          setLoaded(true);
+        }
+      }
+    };
+
+    fetchFooter();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  /* =======================================================
+     HOME CLICK
+  ======================================================= */
+
   const handleHomeClick = (e) => {
     e.preventDefault();
 
@@ -22,23 +203,66 @@ function Footer() {
     }
   };
 
-  const navItems = [
-    { name: "Home", path: "/" },
-    { name: "About Us", path: "/about" },
-    { name: "Services", path: "/services" },
-    { name: "Projects", path: "/projects" },
-    { name: "Gallery", path: "/gallery" },
-    { name: "Contact", path: "/contact" },
-  ];
+  /* =======================================================
+     DON'T SHOW FOOTER WHEN DISABLED
+  ======================================================= */
 
-  const services = [
-    "Civil Construction",
-    "Commercial Projects",
-    "Residential Construction",
-    "Infrastructure Development",
-    "Renovation & Development",
-    "Engineering & Project Management",
-  ];
+  if (loaded && footer.enabled === false) {
+    return null;
+  }
+
+  /* =======================================================
+     NAVIGATION
+  ======================================================= */
+
+  const navItems = DEFAULT_NAV_ITEMS;
+
+  /* =======================================================
+     SERVICES
+  ======================================================= */
+
+  const services = DEFAULT_SERVICES;
+
+  /* =======================================================
+     SAFE SOCIAL URL
+  ======================================================= */
+
+  const getSocialUrl = (value) => {
+    if (
+      !value ||
+      typeof value !== "string" ||
+      value.trim() === "#" ||
+      value.trim() === ""
+    ) {
+      return null;
+    }
+
+    return value.trim();
+  };
+
+  const facebookUrl = getSocialUrl(footer.facebookUrl);
+  const instagramUrl = getSocialUrl(footer.instagramUrl);
+  const linkedinUrl = getSocialUrl(footer.linkedinUrl);
+  const youtubeUrl = getSocialUrl(footer.youtubeUrl);
+
+  /* =======================================================
+     ADDRESS DISPLAY
+  ======================================================= */
+
+  const addressParts = (
+    footer.address || DEFAULT_FOOTER.address
+  )
+    .split(",")
+    .map((part) => part.trim())
+    .filter(Boolean);
+
+  /* =======================================================
+     FOOTER LOGO URL
+  ======================================================= */
+
+  const footerLogoUrl = getImageUrl(
+    footer.logoImage || DEFAULT_FOOTER.logoImage
+  );
 
   return (
     <footer className="w-full overflow-hidden bg-[#171916] text-white">
@@ -49,7 +273,6 @@ function Footer() {
 
       <section className="relative overflow-hidden border-b border-[#C9A24A]/20 bg-[#171916]">
 
-        {/* Decorative glow */}
         <div
           className="
             pointer-events-none
@@ -109,9 +332,11 @@ function Footer() {
           >
 
             {/* CTA CONTENT */}
+
             <div className="min-w-0 max-w-3xl">
 
               <div className="flex items-center gap-3">
+
                 <span className="h-px w-8 bg-[#C9A24A] sm:w-12" />
 
                 <p
@@ -127,6 +352,7 @@ function Footer() {
                 >
                   Start Your Project
                 </p>
+
               </div>
 
               <h2
@@ -167,9 +393,11 @@ function Footer() {
                 Let's discuss your construction and infrastructure
                 requirements and find the right solution for your project.
               </p>
+
             </div>
 
             {/* CTA BUTTON */}
+
             <Link
               to="/contact"
               className="
@@ -229,7 +457,6 @@ function Footer() {
         </div>
       </section>
 
-
       {/* =====================================================
           MAIN FOOTER
       ====================================================== */}
@@ -253,24 +480,17 @@ function Footer() {
           "
         >
 
-          {/* =================================================
-              FOUR SECTION DESKTOP ROW
-          ================================================= */}
-
           <div
             className="
               grid
               grid-cols-1
               gap-12
-
               sm:grid-cols-2
               sm:gap-x-10
               sm:gap-y-14
-
               lg:grid-cols-4
               lg:items-start
               lg:gap-x-7
-
               xl:gap-x-10
               2xl:gap-x-14
             "
@@ -284,9 +504,7 @@ function Footer() {
               className="
                 min-w-0
                 text-center
-
                 sm:text-left
-
                 lg:-mt-5
               "
             >
@@ -309,8 +527,17 @@ function Footer() {
                 "
               >
                 <img
-                  src={saamLogo}
-                  alt="Saam Infrastructure"
+                  src={footerLogoUrl}
+                  alt={
+                    footer.logoAlt ||
+                    footer.companyName ||
+                    "Saam Infrastructure"
+                  }
+                  onError={(e) => {
+                    if (e.currentTarget.src !== window.location.origin + "/saam-logo.png") {
+                      e.currentTarget.src = "/saam-logo.png";
+                    }
+                  }}
                   className="
                     block
                     h-auto
@@ -320,10 +547,8 @@ function Footer() {
                     drop-shadow-[0_8px_20px_rgba(201,162,74,0.10)]
                     transition-all
                     duration-500
-
                     group-hover:scale-[1.04]
                     group-hover:drop-shadow-[0_12px_28px_rgba(201,162,74,0.18)]
-
                     sm:w-[195px]
                     lg:w-[190px]
                     xl:w-[205px]
@@ -341,7 +566,6 @@ function Footer() {
                   w-12
                   rounded-full
                   bg-[#C9A24A]
-
                   sm:mx-0
                 "
               />
@@ -356,17 +580,14 @@ function Footer() {
                   text-sm
                   leading-7
                   text-[#A9AAA2]
-
                   sm:mx-0
                   sm:max-w-[270px]
-
                   lg:max-w-[245px]
                   xl:max-w-[270px]
                 "
               >
-                Reliable construction and infrastructure solutions
-                delivered with quality, precision, safety and
-                long-term value.
+                {footer.description ||
+                  DEFAULT_FOOTER.description}
               </p>
 
               {/* SOCIAL MEDIA */}
@@ -393,190 +614,193 @@ function Footer() {
                     items-center
                     justify-center
                     gap-2.5
-
                     sm:justify-start
                   "
                 >
 
                   {/* FACEBOOK */}
 
-                  <a
-                    href="https://www.facebook.com/saaminfrastructure"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label="Facebook"
-                    className="
-                      flex
-                      h-10
-                      w-10
-                      shrink-0
-                      items-center
-                      justify-center
-                      rounded-xl
-                      border
-                      border-[#393A34]
-                      bg-transparent
-                      text-[#A9AAA2]
-                      transition-all
-                      duration-300
-                      hover:-translate-y-1
-                      hover:border-[#C9A24A]
-                      hover:bg-[#C9A24A]
-                      hover:text-[#171916]
-                    "
-                  >
-                    <svg
-                      width="17"
-                      height="17"
-                      viewBox="0 0 24 24"
-                      fill="currentColor"
+                  {facebookUrl && (
+                    <a
+                      href={facebookUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label="Facebook"
+                      className="
+                        flex
+                        h-10
+                        w-10
+                        shrink-0
+                        items-center
+                        justify-center
+                        rounded-xl
+                        border
+                        border-[#393A34]
+                        bg-transparent
+                        text-[#A9AAA2]
+                        transition-all
+                        duration-300
+                        hover:-translate-y-1
+                        hover:border-[#C9A24A]
+                        hover:bg-[#C9A24A]
+                        hover:text-[#171916]
+                      "
                     >
-                      <path d="M14 8h3V4h-3c-3.3 0-5 2-5 5v3H6v4h3v4h4v-4h3l1-4h-4V9c0-.7.3-1 1-1Z" />
-                    </svg>
-                  </a>
-
+                      <svg
+                        width="17"
+                        height="17"
+                        viewBox="0 0 24 24"
+                        fill="currentColor"
+                      >
+                        <path d="M14 8h3V4h-3c-3.3 0-5 2-5 5v3H6v4h3v4h4v-4h3l1-4h-4V9c0-.7.3-1 1-1Z" />
+                      </svg>
+                    </a>
+                  )}
 
                   {/* INSTAGRAM */}
 
-                  <a
-                    href="https://www.instagram.com/saaminfrastructure"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label="Instagram"
-                    className="
-                      flex
-                      h-10
-                      w-10
-                      shrink-0
-                      items-center
-                      justify-center
-                      rounded-xl
-                      border
-                      border-[#393A34]
-                      bg-transparent
-                      text-[#A9AAA2]
-                      transition-all
-                      duration-300
-                      hover:-translate-y-1
-                      hover:border-[#C9A24A]
-                      hover:bg-[#C9A24A]
-                      hover:text-[#171916]
-                    "
-                  >
-                    <svg
-                      width="18"
-                      height="18"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
+                  {instagramUrl && (
+                    <a
+                      href={instagramUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label="Instagram"
+                      className="
+                        flex
+                        h-10
+                        w-10
+                        shrink-0
+                        items-center
+                        justify-center
+                        rounded-xl
+                        border
+                        border-[#393A34]
+                        bg-transparent
+                        text-[#A9AAA2]
+                        transition-all
+                        duration-300
+                        hover:-translate-y-1
+                        hover:border-[#C9A24A]
+                        hover:bg-[#C9A24A]
+                        hover:text-[#171916]
+                      "
                     >
-                      <rect
-                        x="3"
-                        y="3"
+                      <svg
                         width="18"
                         height="18"
-                        rx="5"
-                      />
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <rect
+                          x="3"
+                          y="3"
+                          width="18"
+                          height="18"
+                          rx="5"
+                        />
 
-                      <circle
-                        cx="12"
-                        cy="12"
-                        r="4"
-                      />
+                        <circle
+                          cx="12"
+                          cy="12"
+                          r="4"
+                        />
 
-                      <circle
-                        cx="17.5"
-                        cy="6.5"
-                        r="0.8"
-                        fill="currentColor"
-                        stroke="none"
-                      />
-                    </svg>
-                  </a>
-
+                        <circle
+                          cx="17.5"
+                          cy="6.5"
+                          r="0.8"
+                          fill="currentColor"
+                          stroke="none"
+                        />
+                      </svg>
+                    </a>
+                  )}
 
                   {/* LINKEDIN */}
 
-                  <a
-                    href="https://www.linkedin.com/company/saam-infrastructure/"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label="LinkedIn"
-                    className="
-                      flex
-                      h-10
-                      w-10
-                      shrink-0
-                      items-center
-                      justify-center
-                      rounded-xl
-                      border
-                      border-[#393A34]
-                      bg-transparent
-                      text-[#A9AAA2]
-                      transition-all
-                      duration-300
-                      hover:-translate-y-1
-                      hover:border-[#C9A24A]
-                      hover:bg-[#C9A24A]
-                      hover:text-[#171916]
-                    "
-                  >
-                    <svg
-                      width="18"
-                      height="18"
-                      viewBox="0 0 24 24"
-                      fill="currentColor"
+                  {linkedinUrl && (
+                    <a
+                      href={linkedinUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label="LinkedIn"
+                      className="
+                        flex
+                        h-10
+                        w-10
+                        shrink-0
+                        items-center
+                        justify-center
+                        rounded-xl
+                        border
+                        border-[#393A34]
+                        bg-transparent
+                        text-[#A9AAA2]
+                        transition-all
+                        duration-300
+                        hover:-translate-y-1
+                        hover:border-[#C9A24A]
+                        hover:bg-[#C9A24A]
+                        hover:text-[#171916]
+                      "
                     >
-                      <path d="M6.5 8.5A2.5 2.5 0 1 0 6.5 3a2.5 2.5 0 0 0 0 5.5ZM4 10h5v10H4V10Zm7 0h5v1.5c.8-1.1 2-1.9 3.7-1.9 3 0 4.3 2 4.3 5.3V20h-5v-4.5c0-1.3 0-3-1.8-3s-2.2 1.4-2.2 2.9V20h-5V10Z" />
-                    </svg>
-                  </a>
-
+                      <svg
+                        width="18"
+                        height="18"
+                        viewBox="0 0 24 24"
+                        fill="currentColor"
+                      >
+                        <path d="M6.5 8.5A2.5 2.5 0 1 0 6.5 3a2.5 2.5 0 0 0 0 5.5ZM4 10h5v10H4V10Zm7 0h5v1.5c.8-1.1 2-1.9 3.7-1.9 3 0 4.3 2 4.3 5.3V20h-5v-4.5c0-1.3 0-3-1.8-3s-2.2 1.4-2.2 2.9V20h-5V10Z" />
+                      </svg>
+                    </a>
+                  )}
 
                   {/* YOUTUBE */}
 
-                  <a
-                    href="https://www.youtube.com/@saaminfrastructure"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label="YouTube"
-                    className="
-                      flex
-                      h-10
-                      w-10
-                      shrink-0
-                      items-center
-                      justify-center
-                      rounded-xl
-                      border
-                      border-[#393A34]
-                      bg-transparent
-                      text-[#A9AAA2]
-                      transition-all
-                      duration-300
-                      hover:-translate-y-1
-                      hover:border-[#C9A24A]
-                      hover:bg-[#C9A24A]
-                      hover:text-[#171916]
-                    "
-                  >
-                    <svg
-                      width="19"
-                      height="19"
-                      viewBox="0 0 24 24"
-                      fill="currentColor"
+                  {youtubeUrl && (
+                    <a
+                      href={youtubeUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label="YouTube"
+                      className="
+                        flex
+                        h-10
+                        w-10
+                        shrink-0
+                        items-center
+                        justify-center
+                        rounded-xl
+                        border
+                        border-[#393A34]
+                        bg-transparent
+                        text-[#A9AAA2]
+                        transition-all
+                        duration-300
+                        hover:-translate-y-1
+                        hover:border-[#C9A24A]
+                        hover:bg-[#C9A24A]
+                        hover:text-[#171916]
+                      "
                     >
-                      <path d="M23 12s0-3.4-.4-5a2.9 2.9 0 0 0-2-2c-1.7-.4-8.6-.4-8.6-.4s-6.9 0-8.6.4a2.9 2.9 0 0 0-2 2C1 8.6 1 12 1 12s0 3.4.4 5a2.9 2.9 0 0 0 2 2c1.7.4 8.6.4 8.6.4s6.9 0 8.6-.4a2.9 2.9 0 0 0 2-2c.4-1.6.4-5 .4-5ZM10 15.5v-7l6 3.5-6 3.5Z" />
-                    </svg>
-                  </a>
+                      <svg
+                        width="19"
+                        height="19"
+                        viewBox="0 0 24 24"
+                        fill="currentColor"
+                      >
+                        <path d="M23 12s0-3.4-.4-5a2.9 2.9 0 0 0-2-2c-1.7-.4-8.6-.4-8.6-.4s-6.9 0-8.6.4a2.9 2.9 0 0 0-2 2C1 8.6 1 12 1 12s0 3.4.4 5a2.9 2.9 0 0 0 2 2c1.7.4 8.6.4 8.6.4s6.9 0 8.6-.4a2.9 2.9 0 0 0 2-2c.4-1.6.4-5 .4-5ZM10 15.5v-7l6 3.5-6 3.5Z" />
+                      </svg>
+                    </a>
+                  )}
 
                 </div>
               </div>
             </div>
-
 
             {/* =================================================
                 2. QUICK LINKS
@@ -599,7 +823,8 @@ function Footer() {
                   text-[#C9A24A]
                 "
               >
-                Quick Links
+                {footer.quickLinksTitle ||
+                  DEFAULT_FOOTER.quickLinksTitle}
               </h3>
 
               <nav
@@ -609,10 +834,10 @@ function Footer() {
                   flex-col
                   items-center
                   gap-4
-
                   sm:items-start
                 "
               >
+
                 {navItems.map((item) => (
                   <Link
                     key={item.name}
@@ -652,9 +877,9 @@ function Footer() {
                     />
                   </Link>
                 ))}
+
               </nav>
             </div>
-
 
             {/* =================================================
                 3. OUR SERVICES
@@ -677,7 +902,8 @@ function Footer() {
                   text-[#C9A24A]
                 "
               >
-                Our Services
+                {footer.servicesTitle ||
+                  DEFAULT_FOOTER.servicesTitle}
               </h3>
 
               <div
@@ -687,10 +913,10 @@ function Footer() {
                   flex-col
                   items-center
                   gap-4
-
                   sm:items-start
                 "
               >
+
                 {services.map((service) => (
                   <Link
                     key={service}
@@ -724,15 +950,14 @@ function Footer() {
                         duration-300
                         group-hover:translate-x-0
                         group-hover:opacity-100
-
                         sm:block
                       "
                     />
                   </Link>
                 ))}
+
               </div>
             </div>
-
 
             {/* =================================================
                 4. CONTACT US
@@ -755,177 +980,191 @@ function Footer() {
                   text-[#C9A24A]
                 "
               >
-                Contact Us
+                {footer.contactTitle ||
+                  DEFAULT_FOOTER.contactTitle}
               </h3>
 
               <div className="mt-6 space-y-5">
 
                 {/* PHONE */}
 
-                <a
-                  href="tel:+919822735116"
-                  className="
-                    group
-                    flex
-                    items-start
-                    justify-center
-                    gap-3
-                    text-sm
-                    leading-6
-                    text-[#A9AAA2]
-                    transition-colors
-                    duration-300
-                    hover:text-[#C9A24A]
-
-                    sm:justify-start
-                  "
-                >
-                  <span
+                {footer.phone && (
+                  <a
+                    href={`tel:${footer.phone.replace(
+                      /[^+\d]/g,
+                      ""
+                    )}`}
                     className="
+                      group
                       flex
-                      h-9
-                      w-9
-                      shrink-0
-                      items-center
+                      items-start
                       justify-center
-                      rounded-lg
-                      border
-                      border-[#393A34]
-                      bg-[#1D1F1B]
-                      transition-all
+                      gap-3
+                      text-sm
+                      leading-6
+                      text-[#A9AAA2]
+                      transition-colors
                       duration-300
-                      group-hover:border-[#C9A24A]/50
-                      group-hover:bg-[#C9A24A]/10
+                      hover:text-[#C9A24A]
+                      sm:justify-start
                     "
                   >
-                    <Phone
-                      size={17}
-                      className="text-[#C9A24A]"
-                    />
-                  </span>
+                    <span
+                      className="
+                        flex
+                        h-9
+                        w-9
+                        shrink-0
+                        items-center
+                        justify-center
+                        rounded-lg
+                        border
+                        border-[#393A34]
+                        bg-[#1D1F1B]
+                        transition-all
+                        duration-300
+                        group-hover:border-[#C9A24A]/50
+                        group-hover:bg-[#C9A24A]/10
+                      "
+                    >
+                      <Phone
+                        size={17}
+                        className="text-[#C9A24A]"
+                      />
+                    </span>
 
-                  <span className="pt-1.5">
-                    +91 98227 35116
-                  </span>
-                </a>
-
+                    <span className="pt-1.5">
+                      {footer.phone}
+                    </span>
+                  </a>
+                )}
 
                 {/* EMAIL */}
 
-                <a
-                  href="mailto:saaminfrastructure@gmail.com"
-                  className="
-                    group
-                    flex
-                    items-start
-                    justify-center
-                    gap-3
-                    text-sm
-                    leading-6
-                    text-[#A9AAA2]
-                    transition-colors
-                    duration-300
-                    hover:text-[#C9A24A]
-
-                    sm:justify-start
-                  "
-                >
-                  <span
+                {footer.email && (
+                  <a
+                    href={`mailto:${footer.email}`}
                     className="
+                      group
                       flex
-                      h-9
-                      w-9
-                      shrink-0
-                      items-center
+                      items-start
                       justify-center
-                      rounded-lg
-                      border
-                      border-[#393A34]
-                      bg-[#1D1F1B]
-                      transition-all
+                      gap-3
+                      text-sm
+                      leading-6
+                      text-[#A9AAA2]
+                      transition-colors
                       duration-300
-                      group-hover:border-[#C9A24A]/50
-                      group-hover:bg-[#C9A24A]/10
+                      hover:text-[#C9A24A]
+                      sm:justify-start
                     "
                   >
-                    <Mail
-                      size={17}
-                      className="text-[#C9A24A]"
-                    />
-                  </span>
+                    <span
+                      className="
+                        flex
+                        h-9
+                        w-9
+                        shrink-0
+                        items-center
+                        justify-center
+                        rounded-lg
+                        border
+                        border-[#393A34]
+                        bg-[#1D1F1B]
+                        transition-all
+                        duration-300
+                        group-hover:border-[#C9A24A]/50
+                        group-hover:bg-[#C9A24A]/10
+                      "
+                    >
+                      <Mail
+                        size={17}
+                        className="text-[#C9A24A]"
+                      />
+                    </span>
 
-                  <span
-                    className="
-                      min-w-0
-                      break-all
-                      pt-1.5
-                      text-left
-                    "
-                  >
-                    saaminfrastructure@gmail.com
-                  </span>
-                </a>
-
+                    <span
+                      className="
+                        min-w-0
+                        break-all
+                        pt-1.5
+                        text-left
+                      "
+                    >
+                      {footer.email}
+                    </span>
+                  </a>
+                )}
 
                 {/* ADDRESS */}
 
-                <a
-                  href="https://www.google.com/maps/search/?api=1&query=Plot+No.+2%2C+Dhawale+Building%2C+Old+Dighori+Square%2C+Umred+Rd%2C+Dighori%2C+Nagpur%2C+Maharashtra+440034"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="
-                    group
-                    flex
-                    items-start
-                    justify-center
-                    gap-3
-                    text-sm
-                    leading-6
-                    text-[#A9AAA2]
-                    transition-colors
-                    duration-300
-                    hover:text-[#C9A24A]
-
-                    sm:justify-start
-                  "
-                >
-                  <span
+                {footer.address && (
+                  <a
+                    href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+                      footer.address
+                    )}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
                     className="
+                      group
                       flex
-                      h-9
-                      w-9
-                      shrink-0
-                      items-center
+                      items-start
                       justify-center
-                      rounded-lg
-                      border
-                      border-[#393A34]
-                      bg-[#1D1F1B]
-                      transition-all
+                      gap-3
+                      text-sm
+                      leading-6
+                      text-[#A9AAA2]
+                      transition-colors
                       duration-300
-                      group-hover:border-[#C9A24A]/50
-                      group-hover:bg-[#C9A24A]/10
+                      hover:text-[#C9A24A]
+                      sm:justify-start
                     "
                   >
-                    <MapPin
-                      size={17}
-                      className="text-[#C9A24A]"
-                    />
-                  </span>
+                    <span
+                      className="
+                        flex
+                        h-9
+                        w-9
+                        shrink-0
+                        items-center
+                        justify-center
+                        rounded-lg
+                        border
+                        border-[#393A34]
+                        bg-[#1D1F1B]
+                        transition-all
+                        duration-300
+                        group-hover:border-[#C9A24A]/50
+                        group-hover:bg-[#C9A24A]/10
+                      "
+                    >
+                      <MapPin
+                        size={17}
+                        className="text-[#C9A24A]"
+                      />
+                    </span>
 
-                  <span className="pt-1 text-left">
-                    Plot No. 2, Dhawale Building,
-                    <br />
-                    Old Dighori Square, Umred Rd,
-                    <br />
-                    Dighori, Nagpur,
-                    <br />
-                    Maharashtra 440034
-                  </span>
-                </a>
+                    <span className="pt-1 text-left">
+
+                      {addressParts.length > 0
+                        ? addressParts.map(
+                            (part, index) => (
+                              <span key={index}>
+                                {part}
+                                {index <
+                                addressParts.length - 1 ? (
+                                  <br />
+                                ) : null}
+                              </span>
+                            )
+                          )
+                        : DEFAULT_FOOTER.address}
+
+                    </span>
+                  </a>
+                )}
 
               </div>
-
 
               {/* GET A QUOTE */}
 
@@ -956,7 +1195,6 @@ function Footer() {
                   hover:border-[#E0C36A]
                   hover:bg-[#E0C36A]
                   hover:shadow-[0_15px_30px_rgba(201,162,74,0.25)]
-
                   mx-auto
                   sm:mx-0
                 "
@@ -991,7 +1229,6 @@ function Footer() {
         </div>
       </section>
 
-
       {/* =====================================================
           COPYRIGHT
       ====================================================== */}
@@ -1010,26 +1247,21 @@ function Footer() {
             py-5
             text-xs
             text-[#77786F]
-
             sm:px-6
             sm:text-sm
-
             md:px-8
-
             lg:flex-row
             lg:items-center
             lg:justify-between
             lg:px-10
-
             xl:px-12
-
             2xl:px-16
           "
         >
 
           <p className="text-center lg:text-left">
-            © {new Date().getFullYear()} Saam Infrastructure.
-            All rights reserved.
+            {footer.copyrightText ||
+              DEFAULT_FOOTER.copyrightText}
           </p>
 
           <p className="text-center lg:text-right">
@@ -1046,13 +1278,13 @@ function Footer() {
                 hover:text-[#C9A24A]
               "
             >
-              Saam Infrastructure
+              {footer.companyName ||
+                DEFAULT_FOOTER.companyName}
             </button>
           </p>
 
         </div>
       </div>
-
 
       {/* =====================================================
           GOLD BOTTOM ACCENT

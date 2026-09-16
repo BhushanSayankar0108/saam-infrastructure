@@ -20,16 +20,30 @@ import {
   Maximize2,
 } from "lucide-react";
 
-import projects from "../data/projects";
+import fallbackProjects from "../data/projects";
 
-// =========================================================
-// STATUS CONFIG
-// =========================================================
+/* =========================================================
+   CONFIG
+========================================================= */
+
+const API_BASE_URL = "http://localhost:8080";
+const PROJECTS_API = `${API_BASE_URL}/api/projects-page`;
+
+/* =========================================================
+   STATUS CONFIG
+========================================================= */
 
 function getStatusConfig(status) {
-  const value = String(status || "").toLowerCase().trim();
+  const value = String(
+    status || ""
+  )
+    .toLowerCase()
+    .trim();
 
-  if (value === "completed" || value.includes("completed")) {
+  if (
+    value === "completed" ||
+    value.includes("completed")
+  ) {
     return {
       label: "Completed",
       className:
@@ -38,7 +52,10 @@ function getStatusConfig(status) {
     };
   }
 
-  if (value === "ongoing" || value.includes("ongoing")) {
+  if (
+    value === "ongoing" ||
+    value.includes("ongoing")
+  ) {
     return {
       label: "Ongoing",
       className:
@@ -55,12 +72,13 @@ function getStatusConfig(status) {
   };
 }
 
-// =========================================================
-// IMAGE FALLBACK
-// =========================================================
+/* =========================================================
+   IMAGE FALLBACK
+========================================================= */
 
 function handleImageError(event) {
-  event.currentTarget.style.display = "none";
+  event.currentTarget.style.display =
+    "none";
 
   const fallback =
     event.currentTarget.parentElement?.querySelector(
@@ -72,83 +90,323 @@ function handleImageError(event) {
   }
 }
 
-// =========================================================
-// PROJECT DETAILS PAGE
-// =========================================================
+/* =========================================================
+   SORT
+========================================================= */
+
+function sortItems(items) {
+  if (!Array.isArray(items)) {
+    return [];
+  }
+
+  return [...items].sort(
+    (a, b) =>
+      Number(a?.displayOrder ?? 0) -
+        Number(b?.displayOrder ?? 0) ||
+      Number(a?.id ?? 0) -
+        Number(b?.id ?? 0)
+  );
+}
+
+/* =========================================================
+   IMAGE URL
+========================================================= */
+
+function resolveImageUrl(value) {
+  if (!value) {
+    return "";
+  }
+
+  const url = String(value).trim();
+
+  if (
+    url.startsWith("http://") ||
+    url.startsWith("https://") ||
+    url.startsWith("blob:")
+  ) {
+    return url;
+  }
+
+  if (url.startsWith("/images/")) {
+    return `${API_BASE_URL}${url}`;
+  }
+
+  return url;
+}
+
+/* =========================================================
+   PROJECT SERIAL NUMBER
+========================================================= */
+
+function getProjectSerialNumber(project) {
+  const displayOrder =
+    Number(project?.displayOrder);
+
+  if (
+    Number.isFinite(displayOrder) &&
+    displayOrder >= 0
+  ) {
+    return String(
+      displayOrder + 1
+    ).padStart(2, "0");
+  }
+
+  const fallbackIndex =
+    fallbackProjects.findIndex(
+      (item) =>
+        String(item.id) ===
+        String(project?.id)
+    );
+
+  return String(
+    (fallbackIndex >= 0
+      ? fallbackIndex
+      : 0) + 1
+  ).padStart(2, "0");
+}
+
+/* =========================================================
+   FIND LOCAL FALLBACK
+========================================================= */
+
+function getLocalProject(id) {
+  return fallbackProjects.find(
+    (item) =>
+      String(item.id) ===
+      String(id)
+  );
+}
+
+/* =========================================================
+   PROJECT DETAILS PAGE
+========================================================= */
 
 function ProjectDetailsPage() {
   const { id } = useParams();
 
-  // =======================================================
-  // LIGHTBOX STATE
-  // =======================================================
+  /* =======================================================
+     PROJECT STATE
+  ======================================================= */
 
-  const [lightboxOpen, setLightboxOpen] = useState(false);
-  const [activeImage, setActiveImage] = useState(0);
+  const [project, setProject] =
+    useState(null);
 
-  // =======================================================
-  // MOBILE CAROUSEL STATE
-  // =======================================================
+  const [loading, setLoading] =
+    useState(true);
 
-  const [mobileImage, setMobileImage] = useState(0);
+  /* =======================================================
+     LIGHTBOX STATE
+  ======================================================= */
 
-  // =======================================================
-  // FIND PROJECT
-  // =======================================================
+  const [lightboxOpen, setLightboxOpen] =
+    useState(false);
 
-  const project = projects.find(
-    (item) => String(item.id) === String(id)
-  );
+  const [activeImage, setActiveImage] =
+    useState(0);
 
-  // =======================================================
-  // PROJECT PROGRESS IMAGES
-  // =======================================================
+  /* =======================================================
+     MOBILE CAROUSEL STATE
+  ======================================================= */
 
-  // IMPORTANT:
-  // This is calculated safely even if project is not found.
+  const [mobileImage, setMobileImage] =
+    useState(0);
+
+  /* =======================================================
+     LOAD PROJECT
+  ======================================================= */
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadProject() {
+      setLoading(true);
+
+      try {
+        const projectResponse =
+          await fetch(
+            `${PROJECTS_API}/${id}`
+          );
+
+        if (!projectResponse.ok) {
+          throw new Error(
+            "Project not found."
+          );
+        }
+
+        const projectData =
+          await projectResponse.json();
+
+        /*
+         * Disabled projects should not be exposed
+         * on the public website.
+         */
+        if (
+          projectData?.enabled ===
+          false
+        ) {
+          throw new Error(
+            "Project is disabled."
+          );
+        }
+
+        const [
+          featuresResponse,
+          progressResponse,
+        ] = await Promise.all([
+          fetch(
+            `${PROJECTS_API}/${id}/features`
+          ),
+          fetch(
+            `${PROJECTS_API}/${id}/progress-images/enabled`
+          ),
+        ]);
+
+        let features = [];
+        let progressImages = [];
+
+        if (featuresResponse.ok) {
+          const featureData =
+            await featuresResponse.json();
+
+          if (
+            Array.isArray(featureData)
+          ) {
+            features =
+              sortItems(
+                featureData
+              ).map(
+                (item) =>
+                  item.feature
+              );
+          }
+        }
+
+        if (progressResponse.ok) {
+          const progressData =
+            await progressResponse.json();
+
+          if (
+            Array.isArray(progressData)
+          ) {
+            progressImages =
+              sortItems(
+                progressData
+              );
+          }
+        }
+
+        if (cancelled) {
+          return;
+        }
+
+        /*
+         * Preserve the exact shape the existing
+         * ProjectDetails UI expects.
+         */
+        setProject({
+          ...projectData,
+          features,
+          progressImages,
+        });
+      } catch (error) {
+        if (cancelled) {
+          return;
+        }
+
+        console.error(
+          "Project Details API error:",
+          error
+        );
+
+        /*
+         * Fallback to existing local project data
+         * when the backend is unavailable.
+         */
+        const localProject =
+          getLocalProject(id);
+
+        if (localProject) {
+          setProject({
+            ...localProject,
+            features:
+              Array.isArray(
+                localProject.features
+              )
+                ? localProject.features
+                : [],
+            progressImages:
+              Array.isArray(
+                localProject.progressImages
+              )
+                ? localProject.progressImages
+                : [],
+          });
+        } else {
+          setProject(null);
+        }
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      }
+    }
+
+    loadProject();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [id]);
+
+  /* =======================================================
+     PROJECT PROGRESS IMAGES
+  ======================================================= */
+
   const progressImages =
-    project?.progressImages?.length > 0
+    project?.progressImages?.length >
+    0
       ? project.progressImages
       : project
         ? [
             {
               id: 1,
               image: project.image,
-              title: "Project Progress",
+              title:
+                "Project Progress",
               description:
                 "Current project construction progress.",
-              status: project.status,
+              status:
+                project.status,
             },
           ]
         : [];
 
-  // =======================================================
-  // LIGHTBOX KEYBOARD CONTROLS
-  // =======================================================
+  /* =======================================================
+     LIGHTBOX KEYBOARD CONTROLS
+  ======================================================= */
 
-  // IMPORTANT:
-  // This hook MUST be above the "if (!project)" return.
   useEffect(() => {
-    if (!lightboxOpen || progressImages.length === 0) {
+    if (
+      !lightboxOpen ||
+      progressImages.length === 0
+    ) {
       return;
     }
 
     const handleKeyDown = (event) => {
-      // ESCAPE
       if (event.key === "Escape") {
         setLightboxOpen(false);
       }
 
-      // NEXT IMAGE
       if (event.key === "ArrowRight") {
         setActiveImage((current) =>
-          current >= progressImages.length - 1
+          current >=
+          progressImages.length - 1
             ? 0
             : current + 1
         );
       }
 
-      // PREVIOUS IMAGE
       if (event.key === "ArrowLeft") {
         setActiveImage((current) =>
           current <= 0
@@ -158,25 +416,52 @@ function ProjectDetailsPage() {
       }
     };
 
-    document.addEventListener("keydown", handleKeyDown);
+    document.addEventListener(
+      "keydown",
+      handleKeyDown
+    );
 
-    // Prevent background scrolling
-    document.body.style.overflow = "hidden";
+    document.body.style.overflow =
+      "hidden";
 
     return () => {
-      document.removeEventListener("keydown", handleKeyDown);
-      document.body.style.overflow = "";
-    };
-  }, [lightboxOpen, progressImages.length]);
+      document.removeEventListener(
+        "keydown",
+        handleKeyDown
+      );
 
-  // =======================================================
-  // PROJECT NOT FOUND
-  // =======================================================
+      document.body.style.overflow =
+        "";
+    };
+  }, [
+    lightboxOpen,
+    progressImages.length,
+  ]);
+
+  /* =======================================================
+     LOADING
+  ======================================================= */
+
+  if (loading) {
+    /*
+     * Keep this visually quiet so the finalized page
+     * does not get redesigned while the CMS loads.
+     */
+    return (
+      <main className="min-h-screen overflow-x-hidden bg-[#F8F7F2] pt-[88px]" />
+    );
+  }
+
+  /* =======================================================
+     PROJECT NOT FOUND
+  ======================================================= */
 
   if (!project) {
     return (
       <main className="min-h-screen overflow-x-hidden bg-[#F8F7F2] pt-[88px]">
+
         <section className="flex min-h-[75vh] items-center justify-center px-5 py-12">
+
           <div className="relative w-full max-w-xl overflow-hidden rounded-[2rem] border border-[#DDD9CC] bg-white p-8 text-center shadow-[0_20px_60px_rgba(23,24,21,0.08)] sm:p-12">
 
             {/* DECORATION */}
@@ -220,7 +505,9 @@ function ProjectDetailsPage() {
               >
                 <ArrowLeft size={17} />
 
-                <span>Back to Projects</span>
+                <span>
+                  Back to Projects
+                </span>
 
                 <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#171815] text-white">
                   <ArrowUpRight size={14} />
@@ -230,49 +517,56 @@ function ProjectDetailsPage() {
             </div>
           </div>
         </section>
+
       </main>
     );
   }
 
-  // =======================================================
-  // STATUS
-  // =======================================================
+  /* =======================================================
+     STATUS
+  ======================================================= */
 
-  const status = getStatusConfig(project.status);
-  const StatusIcon = status.icon;
+  const status =
+    getStatusConfig(
+      project.status
+    );
 
-  // =======================================================
-  // OPEN LIGHTBOX
-  // =======================================================
+  const StatusIcon =
+    status.icon;
+
+  /* =======================================================
+     OPEN LIGHTBOX
+  ======================================================= */
 
   const openLightbox = (index) => {
     setActiveImage(index);
     setLightboxOpen(true);
   };
 
-  // =======================================================
-  // CLOSE LIGHTBOX
-  // =======================================================
+  /* =======================================================
+     CLOSE LIGHTBOX
+  ======================================================= */
 
   const closeLightbox = () => {
     setLightboxOpen(false);
   };
 
-  // =======================================================
-  // NEXT IMAGE
-  // =======================================================
+  /* =======================================================
+     NEXT IMAGE
+  ======================================================= */
 
   const nextImage = () => {
     setActiveImage((current) =>
-      current >= progressImages.length - 1
+      current >=
+      progressImages.length - 1
         ? 0
         : current + 1
     );
   };
 
-  // =======================================================
-  // PREVIOUS IMAGE
-  // =======================================================
+  /* =======================================================
+     PREVIOUS IMAGE
+  ======================================================= */
 
   const previousImage = () => {
     setActiveImage((current) =>
@@ -282,21 +576,22 @@ function ProjectDetailsPage() {
     );
   };
 
-  // =======================================================
-  // MOBILE NEXT
-  // =======================================================
+  /* =======================================================
+     MOBILE NEXT
+  ======================================================= */
 
   const nextMobileImage = () => {
     setMobileImage((current) =>
-      current >= progressImages.length - 1
+      current >=
+      progressImages.length - 1
         ? 0
         : current + 1
     );
   };
 
-  // =======================================================
-  // MOBILE PREVIOUS
-  // =======================================================
+  /* =======================================================
+     MOBILE PREVIOUS
+  ======================================================= */
 
   const previousMobileImage = () => {
     setMobileImage((current) =>
@@ -320,8 +615,11 @@ function ProjectDetailsPage() {
           {/* HERO IMAGE */}
 
           <img
-            src={project.image}
-            alt={project.title}
+            src={resolveImageUrl(project.image)}
+            alt={
+              project.imageAlt ||
+              project.title
+            }
             onError={handleImageError}
             className="h-full w-full object-cover"
           />
@@ -388,7 +686,8 @@ function ProjectDetailsPage() {
 
                 <span className="h-2 w-2 rounded-full bg-[#C9A227]" />
 
-                Project {String(project.id).padStart(2, "0")}
+                Project{" "}
+                {getProjectSerialNumber(project)}
 
               </div>
 
@@ -592,24 +891,31 @@ function ProjectDetailsPage() {
 
               <div className="mt-8 grid gap-3 sm:grid-cols-2">
 
-                {project.features.map((feature) => (
+                {Array.isArray(
+                  project.features
+                ) &&
+                  project.features.map(
+                    (
+                      feature,
+                      index
+                    ) => (
 
-                  <div
-                    key={feature}
-                    className="group flex min-w-0 items-start gap-3 rounded-2xl border border-[#E3DFD4] bg-[#F8F7F2] p-4 transition-all duration-300 hover:-translate-y-1 hover:border-[#C9A227] hover:bg-[#FFF9E8]"
-                  >
+                      <div
+                        key={`${feature}-${index}`}
+                        className="group flex min-w-0 items-start gap-3 rounded-2xl border border-[#E3DFD4] bg-[#F8F7F2] p-4 transition-all duration-300 hover:-translate-y-1 hover:border-[#C9A227] hover:bg-[#FFF9E8]"
+                      >
 
-                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white text-[#C9A227] shadow-sm">
-                      <CheckCircle2 size={17} />
-                    </span>
+                        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white text-[#C9A227] shadow-sm">
+                          <CheckCircle2 size={17} />
+                        </span>
 
-                    <span className="pt-1 break-words text-sm font-semibold leading-6 text-[#252621]">
-                      {feature}
-                    </span>
+                        <span className="pt-1 break-words text-sm font-semibold leading-6 text-[#252621]">
+                          {feature}
+                        </span>
 
-                  </div>
-
-                ))}
+                      </div>
+                    )
+                  )}
 
               </div>
 
@@ -645,11 +951,14 @@ function ProjectDetailsPage() {
             <TimelineCard
               icon={CheckCircle2}
               label={
-                status.label === "Completed"
+                status.label ===
+                "Completed"
                   ? "Project Completed"
                   : "Expected Completion"
               }
-              value={project.completionDate}
+              value={
+                project.completionDate
+              }
               number="02"
             />
 
@@ -716,7 +1025,8 @@ function ProjectDetailsPage() {
 
                 <p className="text-xs text-[#999990]">
                   {progressImages.length}{" "}
-                  {progressImages.length === 1
+                  {progressImages.length ===
+                  1
                     ? "update"
                     : "updates"}
                 </p>
@@ -746,22 +1056,30 @@ function ProjectDetailsPage() {
 
               {(() => {
                 const progress =
-                  progressImages[mobileImage] ||
+                  progressImages[
+                    mobileImage
+                  ] ||
                   progressImages[0];
 
                 if (!progress) {
                   return null;
                 }
 
-                const imageStatus = getStatusConfig(
-                  progress.status || project.status
-                );
+                const imageStatus =
+                  getStatusConfig(
+                    progress.status ||
+                      project.status
+                  );
 
-                const ImageStatusIcon = imageStatus.icon;
+                const ImageStatusIcon =
+                  imageStatus.icon;
 
                 return (
                   <div
-                    key={progress.id || mobileImage}
+                    key={
+                      progress.id ||
+                      mobileImage
+                    }
                     className="relative overflow-hidden rounded-[1.5rem] border border-[#DDD9CC] bg-[#F8F7F2] shadow-[0_10px_35px_rgba(23,24,21,0.07)]"
                   >
 
@@ -769,25 +1087,37 @@ function ProjectDetailsPage() {
 
                     <button
                       type="button"
-                      onClick={() => openLightbox(mobileImage)}
+                      onClick={() =>
+                        openLightbox(
+                          mobileImage
+                        )
+                      }
                       className="relative block w-full cursor-zoom-in text-left"
                       aria-label={`Open ${
                         progress.title ||
-                        `progress image ${mobileImage + 1}`
+                        `progress image ${
+                          mobileImage + 1
+                        }`
                       }`}
                     >
 
                       <div className="relative aspect-[4/3] overflow-hidden bg-[#DDD9CC]">
 
                         <img
-                          src={progress.image}
+                          src={
+                            resolveImageUrl(
+                              progress.image
+                            )
+                          }
                           alt={
                             progress.title ||
                             `${project.title} progress ${
                               mobileImage + 1
                             }`
                           }
-                          onError={handleImageError}
+                          onError={
+                            handleImageError
+                          }
                           className="h-full w-full object-cover transition-transform duration-500"
                         />
 
@@ -818,7 +1148,12 @@ function ProjectDetailsPage() {
                         {/* NUMBER */}
 
                         <div className="absolute left-3 top-3 flex h-8 w-8 items-center justify-center rounded-lg border border-white/20 bg-black/40 text-xs font-black text-white backdrop-blur-md">
-                          {String(mobileImage + 1).padStart(2, "0")}
+                          {String(
+                            mobileImage + 1
+                          ).padStart(
+                            2,
+                            "0"
+                          )}
                         </div>
 
                         {/* STATUS */}
@@ -826,7 +1161,9 @@ function ProjectDetailsPage() {
                         <div
                           className={`absolute right-3 top-3 inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1.5 text-[9px] font-black uppercase tracking-[0.08em] backdrop-blur-md ${imageStatus.className}`}
                         >
-                          <ImageStatusIcon size={11} />
+                          <ImageStatusIcon
+                            size={11}
+                          />
 
                           {imageStatus.label}
                         </div>
@@ -834,7 +1171,9 @@ function ProjectDetailsPage() {
                         {/* ZOOM */}
 
                         <div className="absolute bottom-3 right-3 flex h-9 w-9 items-center justify-center rounded-full border border-white/20 bg-black/40 text-white backdrop-blur-md">
-                          <Maximize2 size={15} />
+                          <Maximize2
+                            size={15}
+                          />
                         </div>
 
                       </div>
@@ -854,14 +1193,18 @@ function ProjectDetailsPage() {
 
                       {progress.description && (
                         <p className="mt-2 line-clamp-2 text-xs leading-5 text-[#686961]">
-                          {progress.description}
+                          {
+                            progress.description
+                          }
                         </p>
                       )}
 
                       {progress.date && (
                         <div className="mt-3 flex items-center gap-2 border-t border-[#E3DFD4] pt-3 text-[10px] font-bold uppercase tracking-[0.12em] text-[#999990]">
 
-                          <CalendarDays size={12} />
+                          <CalendarDays
+                            size={12}
+                          />
 
                           {progress.date}
 
@@ -876,26 +1219,35 @@ function ProjectDetailsPage() {
 
               {/* MOBILE PREVIOUS */}
 
-              {progressImages.length > 1 && (
+              {progressImages.length >
+                1 && (
                 <>
                   <button
                     type="button"
-                    onClick={previousMobileImage}
+                    onClick={
+                      previousMobileImage
+                    }
                     aria-label="Previous progress image"
                     className="absolute left-3 top-[42%] z-10 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-white/30 bg-black/45 text-white shadow-lg backdrop-blur-md transition-all active:scale-95"
                   >
-                    <ChevronLeft size={21} />
+                    <ChevronLeft
+                      size={21}
+                    />
                   </button>
 
                   {/* MOBILE NEXT */}
 
                   <button
                     type="button"
-                    onClick={nextMobileImage}
+                    onClick={
+                      nextMobileImage
+                    }
                     aria-label="Next progress image"
                     className="absolute right-3 top-[42%] z-10 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-white/30 bg-black/45 text-white shadow-lg backdrop-blur-md transition-all active:scale-95"
                   >
-                    <ChevronRight size={21} />
+                    <ChevronRight
+                      size={21}
+                    />
                   </button>
                 </>
               )}
@@ -904,24 +1256,34 @@ function ProjectDetailsPage() {
 
             {/* MOBILE DOTS */}
 
-            {progressImages.length > 1 && (
+            {progressImages.length >
+              1 && (
               <div className="mt-5 flex items-center justify-center gap-2">
 
-                {progressImages.map((_, index) => (
+                {progressImages.map(
+                  (_, index) => (
 
-                  <button
-                    key={index}
-                    type="button"
-                    onClick={() => setMobileImage(index)}
-                    aria-label={`Go to image ${index + 1}`}
-                    className={`h-2 rounded-full transition-all duration-300 ${
-                      mobileImage === index
-                        ? "w-7 bg-[#C9A227]"
-                        : "w-2 bg-[#D7D2C5]"
-                    }`}
-                  />
+                    <button
+                      key={index}
+                      type="button"
+                      onClick={() =>
+                        setMobileImage(
+                          index
+                        )
+                      }
+                      aria-label={`Go to image ${
+                        index + 1
+                      }`}
+                      className={`h-2 rounded-full transition-all duration-300 ${
+                        mobileImage ===
+                        index
+                          ? "w-7 bg-[#C9A227]"
+                          : "w-2 bg-[#D7D2C5]"
+                      }`}
+                    />
 
-                ))}
+                  )
+                )}
 
               </div>
             )}
@@ -938,135 +1300,172 @@ function ProjectDetailsPage() {
 
           <div className="mt-6 hidden gap-4 sm:grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
 
-            {progressImages.map((progress, index) => {
+            {progressImages.map(
+              (progress, index) => {
 
-              const imageStatus = getStatusConfig(
-                progress.status || project.status
-              );
+                const imageStatus =
+                  getStatusConfig(
+                    progress.status ||
+                      project.status
+                  );
 
-              const ImageStatusIcon = imageStatus.icon;
+                const ImageStatusIcon =
+                  imageStatus.icon;
 
-              return (
-                <div
-                  key={progress.id || index}
-                  className="group relative min-w-0 overflow-hidden rounded-[1.5rem] border border-[#DDD9CC] bg-[#F8F7F2] shadow-[0_10px_35px_rgba(23,24,21,0.05)] transition-all duration-300 hover:-translate-y-1 hover:border-[#C9A227] hover:shadow-[0_20px_45px_rgba(23,24,21,0.10)]"
-                >
-
-                  {/* IMAGE BUTTON */}
-
-                  <button
-                    type="button"
-                    onClick={() => openLightbox(index)}
-                    className="relative block w-full cursor-zoom-in text-left"
-                    aria-label={`Open ${
-                      progress.title ||
-                      `progress image ${index + 1}`
-                    }`}
+                return (
+                  <div
+                    key={
+                      progress.id ||
+                      index
+                    }
+                    className="group relative min-w-0 overflow-hidden rounded-[1.5rem] border border-[#DDD9CC] bg-[#F8F7F2] shadow-[0_10px_35px_rgba(23,24,21,0.05)] transition-all duration-300 hover:-translate-y-1 hover:border-[#C9A227] hover:shadow-[0_20px_45px_rgba(23,24,21,0.10)]"
                   >
 
-                    <div className="relative aspect-[4/3] overflow-hidden bg-[#DDD9CC]">
+                    {/* IMAGE BUTTON */}
 
-                      <img
-                        src={progress.image}
-                        alt={
-                          progress.title ||
-                          `${project.title} progress ${
+                    <button
+                      type="button"
+                      onClick={() =>
+                        openLightbox(
+                          index
+                        )
+                      }
+                      className="relative block w-full cursor-zoom-in text-left"
+                      aria-label={`Open ${
+                        progress.title ||
+                        `progress image ${
+                          index + 1
+                        }`
+                      }`}
+                    >
+
+                      <div className="relative aspect-[4/3] overflow-hidden bg-[#DDD9CC]">
+
+                        <img
+                          src={
+                            resolveImageUrl(
+                              progress.image
+                            )
+                          }
+                          alt={
+                            progress.title ||
+                            `${project.title} progress ${
+                              index + 1
+                            }`
+                          }
+                          onError={
+                            handleImageError
+                          }
+                          loading="lazy"
+                          className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                        />
+
+                        {/* FALLBACK */}
+
+                        <div
+                          data-image-fallback
+                          className="absolute inset-0 hidden items-center justify-center bg-[#E7E4DA]"
+                        >
+                          <div className="text-center">
+
+                            <Camera
+                              size={32}
+                              className="mx-auto text-[#A98216]"
+                            />
+
+                            <p className="mt-2 px-4 text-xs font-bold text-[#686961]">
+                              Image unavailable
+                            </p>
+
+                          </div>
+                        </div>
+
+                        {/* OVERLAY */}
+
+                        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#11130F]/70 via-transparent to-transparent opacity-80" />
+
+                        {/* NUMBER */}
+
+                        <div className="absolute left-3 top-3 flex h-8 w-8 items-center justify-center rounded-lg border border-white/20 bg-black/35 text-xs font-black text-white backdrop-blur-md">
+                          {String(
                             index + 1
-                          }`
-                        }
-                        onError={handleImageError}
-                        loading="lazy"
-                        className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
-                      />
+                          ).padStart(
+                            2,
+                            "0"
+                          )}
+                        </div>
 
-                      {/* FALLBACK */}
+                        {/* STATUS */}
 
-                      <div
-                        data-image-fallback
-                        className="absolute inset-0 hidden items-center justify-center bg-[#E7E4DA]"
-                      >
-                        <div className="text-center">
+                        <div
+                          className={`absolute right-3 top-3 inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1.5 text-[9px] font-black uppercase tracking-[0.08em] backdrop-blur-md ${imageStatus.className}`}
+                        >
 
-                          <Camera
-                            size={32}
-                            className="mx-auto text-[#A98216]"
+                          <ImageStatusIcon
+                            size={11}
                           />
 
-                          <p className="mt-2 px-4 text-xs font-bold text-[#686961]">
-                            Image unavailable
-                          </p>
+                          {imageStatus.label}
 
                         </div>
-                      </div>
 
-                      {/* OVERLAY */}
+                        {/* CAMERA */}
 
-                      <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#11130F]/70 via-transparent to-transparent opacity-80" />
+                        <div className="absolute bottom-3 left-3 flex h-8 w-8 items-center justify-center rounded-lg border border-white/20 bg-black/30 text-white backdrop-blur-md">
+                          <Camera
+                            size={14}
+                          />
+                        </div>
 
-                      {/* NUMBER */}
+                        {/* ZOOM */}
 
-                      <div className="absolute left-3 top-3 flex h-8 w-8 items-center justify-center rounded-lg border border-white/20 bg-black/35 text-xs font-black text-white backdrop-blur-md">
-                        {String(index + 1).padStart(2, "0")}
-                      </div>
-
-                      {/* STATUS */}
-
-                      <div
-                        className={`absolute right-3 top-3 inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1.5 text-[9px] font-black uppercase tracking-[0.08em] backdrop-blur-md ${imageStatus.className}`}
-                      >
-
-                        <ImageStatusIcon size={11} />
-
-                        {imageStatus.label}
+                        <div className="absolute bottom-3 right-3 flex h-8 w-8 items-center justify-center rounded-lg border border-white/20 bg-black/35 text-white opacity-0 backdrop-blur-md transition-opacity duration-300 group-hover:opacity-100">
+                          <Maximize2
+                            size={14}
+                          />
+                        </div>
 
                       </div>
 
-                      {/* CAMERA */}
+                    </button>
 
-                      <div className="absolute bottom-3 left-3 flex h-8 w-8 items-center justify-center rounded-lg border border-white/20 bg-black/30 text-white backdrop-blur-md">
-                        <Camera size={14} />
-                      </div>
+                    {/* CONTENT */}
 
-                      {/* ZOOM */}
+                    <div className="p-4">
 
-                      <div className="absolute bottom-3 right-3 flex h-8 w-8 items-center justify-center rounded-lg border border-white/20 bg-black/35 text-white opacity-0 backdrop-blur-md transition-opacity duration-300 group-hover:opacity-100">
-                        <Maximize2 size={14} />
-                      </div>
+                      <h3 className="text-sm font-black text-[#171815] sm:text-base">
+                        {progress.title ||
+                          `Progress Update ${
+                            index + 1
+                          }`}
+                      </h3>
+
+                      {progress.description && (
+                        <p className="mt-2 line-clamp-2 text-xs leading-5 text-[#686961]">
+                          {
+                            progress.description
+                          }
+                        </p>
+                      )}
+
+                      {progress.date && (
+                        <div className="mt-3 flex items-center gap-2 border-t border-[#E3DFD4] pt-3 text-[10px] font-bold uppercase tracking-[0.12em] text-[#999990]">
+
+                          <CalendarDays
+                            size={12}
+                          />
+
+                          {progress.date}
+
+                        </div>
+                      )}
 
                     </div>
 
-                  </button>
-
-                  {/* CONTENT */}
-
-                  <div className="p-4">
-
-                    <h3 className="text-sm font-black text-[#171815] sm:text-base">
-                      {progress.title ||
-                        `Progress Update ${index + 1}`}
-                    </h3>
-
-                    {progress.description && (
-                      <p className="mt-2 line-clamp-2 text-xs leading-5 text-[#686961]">
-                        {progress.description}
-                      </p>
-                    )}
-
-                    {progress.date && (
-                      <div className="mt-3 flex items-center gap-2 border-t border-[#E3DFD4] pt-3 text-[10px] font-bold uppercase tracking-[0.12em] text-[#999990]">
-
-                        <CalendarDays size={12} />
-
-                        {progress.date}
-
-                      </div>
-                    )}
-
                   </div>
-
-                </div>
-              );
-            })}
+                );
+              }
+            )}
 
           </div>
 
@@ -1077,21 +1476,30 @@ function ProjectDetailsPage() {
           <div className="mt-10 grid gap-4 md:grid-cols-3">
 
             <StatusCard
-              active={status.label === "Upcoming"}
+              active={
+                status.label ===
+                "Upcoming"
+              }
               icon={Circle}
               title="Upcoming"
               description="Project planned for future execution."
             />
 
             <StatusCard
-              active={status.label === "Ongoing"}
+              active={
+                status.label ===
+                "Ongoing"
+              }
               icon={Clock3}
               title="Ongoing"
               description="Construction work is currently in progress."
             />
 
             <StatusCard
-              active={status.label === "Completed"}
+              active={
+                status.label ===
+                "Completed"
+              }
               icon={CheckCircle2}
               title="Completed"
               description="Project construction has been successfully completed."
@@ -1169,139 +1577,182 @@ function ProjectDetailsPage() {
           IMAGE LIGHTBOX
       ===================================================== */}
 
-      {lightboxOpen && progressImages.length > 0 && (
-        <div
-          className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/95 p-3 sm:p-6"
-          onClick={closeLightbox}
-        >
-
-          {/* =================================================
-              LIGHTBOX TOP BAR
-          ================================================= */}
-
+      {lightboxOpen &&
+        progressImages.length >
+          0 && (
           <div
-            className="absolute left-0 right-0 top-0 z-20 flex items-center justify-between px-4 py-4 sm:px-6 sm:py-5"
-            onClick={(event) => event.stopPropagation()}
+            className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/95 p-3 sm:p-6"
+            onClick={closeLightbox}
           >
 
-            {/* COUNTER */}
+            {/* =================================================
+                LIGHTBOX TOP BAR
+            ================================================= */}
 
-            <div className="rounded-full border border-white/15 bg-black/40 px-4 py-2 text-xs font-black text-white/80 backdrop-blur-md sm:text-sm">
-              {activeImage + 1} / {progressImages.length}
-            </div>
-
-            {/* CLOSE */}
-
-            <button
-              type="button"
-              onClick={closeLightbox}
-              aria-label="Close image viewer"
-              className="flex h-11 w-11 items-center justify-center rounded-full border border-white/20 bg-black/40 text-white backdrop-blur-md transition-all duration-300 hover:border-[#C9A227] hover:bg-[#C9A227] hover:text-[#171815] active:scale-95"
-            >
-              <X size={22} />
-            </button>
-
-          </div>
-
-          {/* =================================================
-              IMAGE AREA
-          ================================================= */}
-
-          <div
-            className="relative flex h-full w-full items-center justify-center"
-            onClick={(event) => event.stopPropagation()}
-          >
-
-            {/* MAIN IMAGE */}
-
-            <img
-              src={progressImages[activeImage].image}
-              alt={
-                progressImages[activeImage].title ||
-                `${project.title} progress ${
-                  activeImage + 1
-                }`
+            <div
+              className="absolute left-0 right-0 top-0 z-20 flex items-center justify-between px-4 py-4 sm:px-6 sm:py-5"
+              onClick={(event) =>
+                event.stopPropagation()
               }
-              className="max-h-[82vh] max-w-[94vw] rounded-xl object-contain shadow-[0_30px_100px_rgba(0,0,0,0.5)] sm:max-h-[85vh] sm:max-w-[88vw]"
-            />
+            >
 
-            {/* =================================================
-                PREVIOUS
-            ================================================= */}
+              {/* COUNTER */}
 
-            {progressImages.length > 1 && (
+              <div className="rounded-full border border-white/15 bg-black/40 px-4 py-2 text-xs font-black text-white/80 backdrop-blur-md sm:text-sm">
+                {activeImage + 1} /{" "}
+                {
+                  progressImages.length
+                }
+              </div>
+
+              {/* CLOSE */}
+
               <button
                 type="button"
-                onClick={previousImage}
-                aria-label="Previous image"
-                className="absolute left-1 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-white/20 bg-black/55 text-white shadow-xl backdrop-blur-md transition-all duration-300 hover:border-[#C9A227] hover:bg-[#C9A227] hover:text-[#171815] active:scale-95 sm:left-4 sm:h-14 sm:w-14"
+                onClick={closeLightbox}
+                aria-label="Close image viewer"
+                className="flex h-11 w-11 items-center justify-center rounded-full border border-white/20 bg-black/40 text-white backdrop-blur-md transition-all duration-300 hover:border-[#C9A227] hover:bg-[#C9A227] hover:text-[#171815] active:scale-95"
               >
-                <ChevronLeft size={25} />
+                <X size={22} />
               </button>
-            )}
+
+            </div>
 
             {/* =================================================
-                NEXT
+                IMAGE AREA
             ================================================= */}
 
-            {progressImages.length > 1 && (
-              <button
-                type="button"
-                onClick={nextImage}
-                aria-label="Next image"
-                className="absolute right-1 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-white/20 bg-black/55 text-white shadow-xl backdrop-blur-md transition-all duration-300 hover:border-[#C9A227] hover:bg-[#C9A227] hover:text-[#171815] active:scale-95 sm:right-4 sm:h-14 sm:w-14"
-              >
-                <ChevronRight size={25} />
-              </button>
-            )}
+            <div
+              className="relative flex h-full w-full items-center justify-center"
+              onClick={(event) =>
+                event.stopPropagation()
+              }
+            >
 
-          </div>
+              {/* MAIN IMAGE */}
 
-          {/* =================================================
-              IMAGE INFORMATION
-          ================================================= */}
+              <img
+                src={resolveImageUrl(
+                progressImages[
+                  activeImage
+                ].image
+              )}
+                alt={
+                  progressImages[
+                    activeImage
+                  ].title ||
+                  `${project.title} progress ${
+                    activeImage + 1
+                  }`
+                }
+                className="max-h-[82vh] max-w-[94vw] rounded-xl object-contain shadow-[0_30px_100px_rgba(0,0,0,0.5)] sm:max-h-[85vh] sm:max-w-[88vw]"
+              />
 
-          <div
-            className="absolute bottom-0 left-0 right-0 z-20 bg-gradient-to-t from-black/80 to-transparent px-5 pb-5 pt-14 sm:px-8 sm:pb-7"
-            onClick={(event) => event.stopPropagation()}
-          >
+              {/* PREVIOUS */}
 
-            <div className="mx-auto max-w-4xl">
-
-              <h3 className="text-base font-black text-white sm:text-xl">
-                {progressImages[activeImage].title ||
-                  `Progress Update ${activeImage + 1}`}
-              </h3>
-
-              {progressImages[activeImage].description && (
-                <p className="mt-1 max-w-2xl text-xs leading-5 text-white/65 sm:text-sm sm:leading-6">
-                  {progressImages[activeImage].description}
-                </p>
+              {progressImages.length >
+                1 && (
+                <button
+                  type="button"
+                  onClick={
+                    previousImage
+                  }
+                  aria-label="Previous image"
+                  className="absolute left-1 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-white/20 bg-black/55 text-white shadow-xl backdrop-blur-md transition-all duration-300 hover:border-[#C9A227] hover:bg-[#C9A227] hover:text-[#171815] active:scale-95 sm:left-4 sm:h-14 sm:w-14"
+                >
+                  <ChevronLeft
+                    size={25}
+                  />
+                </button>
               )}
 
-              {progressImages[activeImage].date && (
-                <div className="mt-3 flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.15em] text-white/50 sm:text-xs">
+              {/* NEXT */}
 
-                  <CalendarDays size={13} />
-
-                  {progressImages[activeImage].date}
-
-                </div>
+              {progressImages.length >
+                1 && (
+                <button
+                  type="button"
+                  onClick={
+                    nextImage
+                  }
+                  aria-label="Next image"
+                  className="absolute right-1 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-white/20 bg-black/55 text-white shadow-xl backdrop-blur-md transition-all duration-300 hover:border-[#C9A227] hover:bg-[#C9A227] hover:text-[#171815] active:scale-95 sm:right-4 sm:h-14 sm:w-14"
+                >
+                  <ChevronRight
+                    size={25}
+                  />
+                </button>
               )}
 
             </div>
-          </div>
 
-        </div>
-      )}
+            {/* =================================================
+                IMAGE INFORMATION
+            ================================================= */}
+
+            <div
+              className="absolute bottom-0 left-0 right-0 z-20 bg-gradient-to-t from-black/80 to-transparent px-5 pb-5 pt-14 sm:px-8 sm:pb-7"
+              onClick={(event) =>
+                event.stopPropagation()
+              }
+            >
+
+              <div className="mx-auto max-w-4xl">
+
+                <h3 className="text-base font-black text-white sm:text-xl">
+                  {
+                    progressImages[
+                      activeImage
+                    ].title
+                  ||
+                    `Progress Update ${
+                      activeImage + 1
+                    }`}
+                </h3>
+
+                {progressImages[
+                  activeImage
+                ].description && (
+                  <p className="mt-1 max-w-2xl text-xs leading-5 text-white/65 sm:text-sm sm:leading-6">
+                    {
+                      progressImages[
+                        activeImage
+                      ].description
+                    }
+                  </p>
+                )}
+
+                {progressImages[
+                  activeImage
+                ].date && (
+                  <div className="mt-3 flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.15em] text-white/50 sm:text-xs">
+
+                    <CalendarDays
+                      size={13}
+                    />
+
+                    {
+                      progressImages[
+                        activeImage
+                      ].date
+                    }
+
+                  </div>
+                )}
+
+              </div>
+            </div>
+
+          </div>
+        )}
 
     </main>
   );
 }
 
-// =========================================================
-// SECTION LABEL
-// =========================================================
+/* =========================================================
+   SECTION LABEL
+========================================================= */
 
 function SectionLabel({ text }) {
   return (
@@ -1317,9 +1768,9 @@ function SectionLabel({ text }) {
   );
 }
 
-// =========================================================
-// PROJECT META
-// =========================================================
+/* =========================================================
+   PROJECT META
+========================================================= */
 
 function ProjectMeta({
   icon: Icon,
@@ -1404,9 +1855,9 @@ function ProjectMeta({
   );
 }
 
-// =========================================================
-// TIMELINE CARD
-// =========================================================
+/* =========================================================
+   TIMELINE CARD
+========================================================= */
 
 function TimelineCard({
   icon: Icon,
@@ -1453,11 +1904,15 @@ function TimelineCard({
 
         <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-[#C9A227]" />
 
-        <span>Saam Infrastructure</span>
+        <span>
+          Saam Infrastructure
+        </span>
 
         <ChevronRight size={13} />
 
-        <span>Project Timeline</span>
+        <span>
+          Project Timeline
+        </span>
 
       </div>
 
@@ -1465,9 +1920,9 @@ function TimelineCard({
   );
 }
 
-// =========================================================
-// STATUS CARD
-// =========================================================
+/* =========================================================
+   STATUS CARD
+========================================================= */
 
 function StatusCard({
   active,
@@ -1562,8 +2017,8 @@ function StatusCard({
   );
 }
 
-// =========================================================
-// EXPORT
-// =========================================================
+/* =========================================================
+   EXPORT
+========================================================= */
 
 export default ProjectDetailsPage;

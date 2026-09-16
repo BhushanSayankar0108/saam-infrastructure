@@ -1,3 +1,5 @@
+import { useEffect, useState } from "react";
+
 import {
   Building2,
   Landmark,
@@ -5,17 +7,35 @@ import {
   Share2,
   Wrench,
   Ruler,
+  Route,
+  Factory,
+  HardHat,
+  Construction,
+  Workflow,
+  BriefcaseBusiness,
   ArrowUpRight,
 } from "lucide-react";
 
-const services = [
+/* =========================================================
+   BACKEND API
+========================================================= */
+
+const SERVICES_API =
+  "http://localhost:8080/api/services/enabled";
+
+/* =========================================================
+   DEFAULT SERVICES
+========================================================= */
+
+const DEFAULT_SERVICES = [
   {
     number: "01",
     slug: "civil-construction",
     title: "Civil Construction",
     description:
       "Reliable civil construction solutions built with quality materials, skilled workmanship and attention to every detail.",
-    icon: Building2,
+    icon: "building",
+    enabled: true,
   },
   {
     number: "02",
@@ -23,7 +43,8 @@ const services = [
     title: "Commercial Projects",
     description:
       "Modern commercial spaces designed and executed with a focus on functionality, durability and long-term value.",
-    icon: Landmark,
+    icon: "landmark",
+    enabled: true,
   },
   {
     number: "03",
@@ -31,7 +52,8 @@ const services = [
     title: "Residential Construction",
     description:
       "Strong and thoughtfully planned residential projects created to provide comfortable and lasting spaces.",
-    icon: House,
+    icon: "house",
+    enabled: true,
   },
   {
     number: "04",
@@ -39,7 +61,8 @@ const services = [
     title: "Infrastructure Development",
     description:
       "Infrastructure development solutions focused on dependable execution, safety and sustainable growth.",
-    icon: Share2,
+    icon: "share",
+    enabled: true,
   },
   {
     number: "05",
@@ -47,7 +70,8 @@ const services = [
     title: "Renovation & Development",
     description:
       "Renovation and development services that improve existing spaces while maintaining quality and structural integrity.",
-    icon: Wrench,
+    icon: "wrench",
+    enabled: true,
   },
   {
     number: "06",
@@ -55,11 +79,419 @@ const services = [
     title: "Engineering & Project Management",
     description:
       "Professional planning and project management focused on efficient execution, coordination and timely delivery.",
-    icon: Ruler,
+    icon: "ruler",
+    enabled: true,
   },
 ];
 
+/* =========================================================
+   ICON MAPPING
+========================================================= */
+
+const ICONS = {
+  building: Building2,
+  building2: Building2,
+
+  landmark: Landmark,
+
+  house: House,
+  residential: House,
+
+  share: Share2,
+  infrastructure: Share2,
+
+  wrench: Wrench,
+
+  ruler: Ruler,
+  engineering: Ruler,
+
+  road: Route,
+  highway: Route,
+
+  bridge: Construction,
+  construction: Construction,
+
+  factory: Factory,
+  industrial: Factory,
+
+  hardhat: HardHat,
+  "hard-hat": HardHat,
+
+  workflow: Workflow,
+
+  business: BriefcaseBusiness,
+  commercial: BriefcaseBusiness,
+};
+
+/* =========================================================
+   DEFAULT HOME CONTENT
+========================================================= */
+
+const DEFAULT_HOME_CONTENT = {
+  servicesEnabled: true,
+
+  servicesLabel: "Our Services",
+
+  servicesDescription:
+    "Comprehensive construction and infrastructure solutions delivered with precision, quality and responsibility.",
+
+  servicesHeading: "Building solutions.",
+
+  servicesHeadingHighlight:
+    "Creating lasting value.",
+
+  servicesIntro:
+    "From concept and planning to execution and completion, we deliver dependable solutions built for the future.",
+
+  servicesCtaLabel: "View All Services",
+
+  servicesCtaLink: "/services",
+
+  servicesCtaEyebrow: "Built for performance",
+
+  servicesCtaDescription:
+    "From planning to completion, we bring engineering expertise, quality workmanship and dependable execution to every project.",
+
+  services: DEFAULT_SERVICES,
+};
+
+/* =========================================================
+   LOAD HOME CONTENT FROM LOCAL STORAGE
+========================================================= */
+
+function getHomeContent() {
+  try {
+    const savedContent =
+      localStorage.getItem("saamHomeContent");
+
+    if (!savedContent) {
+      return DEFAULT_HOME_CONTENT;
+    }
+
+    const parsed = JSON.parse(savedContent);
+
+    if (!parsed || typeof parsed !== "object") {
+      return DEFAULT_HOME_CONTENT;
+    }
+
+    return {
+      ...DEFAULT_HOME_CONTENT,
+      ...parsed,
+
+      services: Array.isArray(parsed.services)
+        ? parsed.services
+        : DEFAULT_SERVICES,
+    };
+  } catch (error) {
+    console.error(
+      "Failed to load Services CMS content:",
+      error
+    );
+
+    return DEFAULT_HOME_CONTENT;
+  }
+}
+
+/* =========================================================
+   FETCH SERVICES FROM BACKEND
+========================================================= */
+
+async function fetchServicesFromBackend() {
+  const response = await fetch(SERVICES_API, {
+    method: "GET",
+    headers: {
+      Accept: "application/json",
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error(
+      `Services API returned ${response.status}`
+    );
+  }
+
+  const data = await response.json();
+
+  if (!Array.isArray(data)) {
+    throw new Error(
+      "Invalid services response from backend."
+    );
+  }
+
+  return data.filter(
+    (service) =>
+      service &&
+      service.enabled !== false
+  );
+}
+
+/* =========================================================
+   NORMALIZE SERVICE
+========================================================= */
+
+function normalizeService(service, index) {
+  return {
+    ...service,
+
+    number: String(index + 1).padStart(2, "0"),
+
+    slug:
+      service?.slug ||
+      `service-${index + 1}`,
+
+    title:
+      service?.title ||
+      "Construction Service",
+
+    description:
+      service?.description ||
+      "Professional construction and infrastructure solutions delivered with quality and reliability.",
+
+    icon:
+      service?.icon ||
+      "building",
+
+    enabled:
+      service?.enabled !== false,
+  };
+}
+
+/* =========================================================
+   BUILD HOMEPAGE SERVICES
+
+   BACKEND IS THE SOURCE OF TRUTH.
+
+   If backend is available:
+   -> Use backend services only.
+
+   If backend is unavailable:
+   -> Use localStorage CMS services.
+   -> If none exist, use default services.
+
+   Maximum 6 services are displayed on homepage.
+========================================================= */
+
+function buildHomepageServices(
+  backendServices,
+  cmsServices,
+  backendAvailable
+) {
+  let sourceServices = [];
+
+  /* =======================================================
+     BACKEND AVAILABLE
+  ======================================================= */
+
+  if (backendAvailable) {
+    sourceServices = Array.isArray(
+      backendServices
+    )
+      ? backendServices.filter(
+          (service) =>
+            service &&
+            service.enabled !== false
+        )
+      : [];
+  }
+
+  /* =======================================================
+     BACKEND UNAVAILABLE
+  ======================================================= */
+
+  if (
+    !backendAvailable ||
+    sourceServices.length === 0
+  ) {
+    if (!backendAvailable) {
+      sourceServices = Array.isArray(
+        cmsServices
+      )
+        ? cmsServices.filter(
+            (service) =>
+              service &&
+              service.enabled !== false
+          )
+        : [];
+    }
+
+    /*
+     * Only use defaults when backend is unavailable
+     * AND there is no CMS/localStorage service data.
+     *
+     * IMPORTANT:
+     * If backend is available but contains zero services,
+     * we DO NOT bring the default services back.
+     */
+    if (
+      !backendAvailable &&
+      sourceServices.length === 0
+    ) {
+      sourceServices =
+        DEFAULT_SERVICES.filter(
+          (service) =>
+            service &&
+            service.enabled !== false
+        );
+    }
+  }
+
+  /* =======================================================
+     NORMALIZE AND LIMIT TO 6
+  ======================================================= */
+
+  return sourceServices
+    .map((service, index) =>
+      normalizeService(service, index)
+    )
+    .slice(0, 6);
+}
+
+/* =========================================================
+   SERVICES COMPONENT
+========================================================= */
+
 function Services() {
+  const [homeContent, setHomeContent] =
+    useState(getHomeContent);
+
+  const [services, setServices] =
+    useState([]);
+
+  const [loading, setLoading] =
+    useState(true);
+
+  /* =======================================================
+     LOAD SERVICES
+  ======================================================= */
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const loadServices = async () => {
+      setLoading(true);
+
+      let backendServices = [];
+      let backendAvailable = false;
+
+      try {
+        backendServices =
+          await fetchServicesFromBackend();
+
+        backendAvailable = true;
+
+        console.log(
+          "Services loaded from backend:",
+          backendServices
+        );
+      } catch (error) {
+        console.warn(
+          "Backend services unavailable. Using local CMS/default data.",
+          error
+        );
+      }
+
+      if (cancelled) {
+        return;
+      }
+
+      const currentHomeContent =
+        getHomeContent();
+
+      setHomeContent(currentHomeContent);
+
+      const finalServices =
+        buildHomepageServices(
+          backendServices,
+          currentHomeContent.services,
+          backendAvailable
+        );
+
+      setServices(finalServices);
+
+      console.log(
+        "Final homepage services:",
+        finalServices
+      );
+
+      setLoading(false);
+    };
+
+    loadServices();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  /* =======================================================
+     LISTEN FOR CMS CONTENT CHANGES
+  ======================================================= */
+
+  useEffect(() => {
+    const handleContentUpdate = () => {
+      const updatedContent =
+        getHomeContent();
+
+      setHomeContent(updatedContent);
+    };
+
+    window.addEventListener(
+      "storage",
+      handleContentUpdate
+    );
+
+    window.addEventListener(
+      "saamHomeContentUpdated",
+      handleContentUpdate
+    );
+
+    return () => {
+      window.removeEventListener(
+        "storage",
+        handleContentUpdate
+      );
+
+      window.removeEventListener(
+        "saamHomeContentUpdated",
+        handleContentUpdate
+      );
+    };
+  }, []);
+
+  /* =======================================================
+     GET SERVICE ICON
+  ======================================================= */
+
+  const getServiceIcon = (iconName) => {
+    if (!iconName) {
+      return Building2;
+    }
+
+    const normalizedIcon =
+      String(iconName)
+        .trim()
+        .toLowerCase();
+
+    return (
+      ICONS[normalizedIcon] ||
+      Building2
+    );
+  };
+
+  /* =======================================================
+     SECTION VISIBILITY
+  ======================================================= */
+
+  if (
+    homeContent.servicesEnabled === false
+  ) {
+    return null;
+  }
+
+  /* =======================================================
+     RENDER
+  ======================================================= */
+
   return (
     <section
       id="services"
@@ -81,7 +513,8 @@ function Services() {
           BACKGROUND DECORATION
       ====================================================== */}
 
-      {/* Gold Glow */}
+      {/* GOLD GLOW */}
+
       <div
         className="
           pointer-events-none
@@ -99,7 +532,8 @@ function Services() {
         "
       />
 
-      {/* Blue Glow */}
+      {/* BLUE GLOW */}
+
       <div
         className="
           pointer-events-none
@@ -117,7 +551,8 @@ function Services() {
         "
       />
 
-      {/* Architectural Grid */}
+      {/* ARCHITECTURAL GRID */}
+
       <div
         className="
           pointer-events-none
@@ -132,7 +567,8 @@ function Services() {
         "
       />
 
-      {/* Right Gold Accent */}
+      {/* RIGHT GOLD ACCENT */}
+
       <div
         className="
           pointer-events-none
@@ -153,9 +589,9 @@ function Services() {
 
       <div className="relative mx-auto max-w-7xl">
 
-        {/* =====================================================
+        {/* =================================================
             HEADER
-        ====================================================== */}
+        ================================================== */}
 
         <div
           className="
@@ -169,13 +605,9 @@ function Services() {
             xl:gap-14
           "
         >
-
-          {/* =================================================
-              LEFT — H1 OUR SERVICES
-          ================================================== */}
+          {/* LEFT */}
 
           <div className="min-w-0">
-
             <div
               className="
                 flex
@@ -186,9 +618,6 @@ function Services() {
                 sm:gap-4
               "
             >
-
-              {/* Gold Line */}
-
               <span
                 className="
                   h-[3px]
@@ -199,8 +628,6 @@ function Services() {
                   lg:w-14
                 "
               />
-
-              {/* H1 */}
 
               <h1
                 className="
@@ -217,12 +644,10 @@ function Services() {
                   xl:text-[4.8rem]
                 "
               >
-                Our Services
+                {homeContent.servicesLabel ||
+                  "Our Services"}
               </h1>
-
             </div>
-
-            {/* Description */}
 
             <p
               className="
@@ -236,16 +661,12 @@ function Services() {
                 sm:leading-7
               "
             >
-              Comprehensive construction and infrastructure
-              solutions delivered with precision, quality and
-              responsibility.
+              {homeContent.servicesDescription ||
+                DEFAULT_HOME_CONTENT.servicesDescription}
             </p>
-
           </div>
 
-          {/* =================================================
-              RIGHT — H2
-          ================================================== */}
+          {/* RIGHT */}
 
           <div
             className="
@@ -253,7 +674,6 @@ function Services() {
               lg:pb-1
             "
           >
-
             <h2
               className="
                 max-w-full
@@ -267,15 +687,16 @@ function Services() {
                 xl:text-[3.2rem]
               "
             >
-              Building solutions.
+              {homeContent.servicesHeading ||
+                "Building solutions."}
+
               <br />
 
               <span className="text-[#7C8792]">
-                Creating lasting value.
+                {homeContent.servicesHeadingHighlight ||
+                  "Creating lasting value."}
               </span>
             </h2>
-
-            {/* Gold Accent */}
 
             <div
               className="
@@ -287,7 +708,6 @@ function Services() {
                 lg:mt-6
               "
             >
-
               <span
                 className="
                   h-[2px]
@@ -305,9 +725,7 @@ function Services() {
                   bg-[#C9A227]
                 "
               />
-
             </div>
-
           </div>
         </div>
 
@@ -334,7 +752,6 @@ function Services() {
             sm:py-3.5
           "
         >
-
           <div
             className="
               flex
@@ -364,318 +781,373 @@ function Services() {
               sm:leading-6
             "
           >
-            From concept and planning to execution and completion,
-            we deliver dependable solutions built for the future.
+            {homeContent.servicesIntro ||
+              DEFAULT_HOME_CONTENT.servicesIntro}
           </p>
-
         </div>
+
+        {/* =====================================================
+            LOADING MESSAGE
+        ====================================================== */}
+
+        {loading && (
+          <div
+            className="
+              mt-8
+              flex
+              items-center
+              justify-center
+              rounded-2xl
+              border
+              border-[#CBD5DE]
+              bg-white/70
+              px-5
+              py-8
+              text-sm
+              text-[#52606D]
+            "
+          >
+            Loading services...
+          </div>
+        )}
 
         {/* =====================================================
             SERVICES GRID
         ====================================================== */}
 
-        <div
-          className="
-            mt-8
-            grid
-            grid-cols-1
-            gap-4
-            sm:mt-10
-            sm:grid-cols-2
-            sm:gap-5
-            xl:grid-cols-3
-          "
-        >
+        {!loading &&
+          services.length > 0 && (
+            <div
+              className="
+                mt-8
+                grid
+                grid-cols-1
+                gap-4
+                sm:mt-10
+                sm:grid-cols-2
+                sm:gap-5
+                xl:grid-cols-3
+              "
+            >
+              {services.map(
+                (service, index) => {
+                  const Icon =
+                    getServiceIcon(
+                      service.icon
+                    );
 
-          {services.map((service) => {
-            const Icon = service.icon;
+                  const serviceNumber =
+                    String(index + 1).padStart(
+                      2,
+                      "0"
+                    );
 
-            return (
-              <article
-                id={service.slug}
-                key={service.number}
-                className="
-                  group
-                  relative
-                  flex
-                  min-h-[310px]
-                  scroll-mt-24
-                  flex-col
-                  overflow-hidden
-                  rounded-[24px]
-                  border
-                  border-[#D0D9E1]
-                  bg-white
-                  p-5
-                  text-[#17202A]
-                  shadow-[0_8px_30px_rgba(23,32,42,0.06)]
-                  transition-all
-                  duration-500
-                  hover:-translate-y-2
-                  hover:border-[#C9A227]
-                  hover:shadow-[0_20px_45px_rgba(23,32,42,0.12)]
-                  sm:min-h-[335px]
-                  sm:rounded-[28px]
-                  sm:p-7
-                "
-              >
-
-                {/* GOLD TOP ACCENT */}
-
-                <div
-                  className="
-                    absolute
-                    left-0
-                    top-0
-                    h-[3px]
-                    w-0
-                    bg-[#C9A227]
-                    transition-all
-                    duration-500
-                    group-hover:w-full
-                  "
-                />
-
-                {/* DECORATIVE CIRCLE */}
-
-                <div
-                  className="
-                    pointer-events-none
-                    absolute
-                    -right-16
-                    -top-16
-                    h-40
-                    w-40
-                    rounded-full
-                    border
-                    border-[#C9A227]/10
-                    transition-all
-                    duration-500
-                    group-hover:scale-125
-                    group-hover:border-[#C9A227]/20
-                  "
-                />
-
-                {/* TOP ROW */}
-
-                <div
-                  className="
-                    relative
-                    z-10
-                    flex
-                    items-start
-                    justify-between
-                  "
-                >
-
-                  {/* NUMBER */}
-
-                  <div
-                    className="
-                      flex
-                      h-10
-                      min-w-10
-                      items-center
-                      justify-center
-                      rounded-full
-                      border
-                      border-[#C9A227]/60
-                      bg-[#F3F6F8]
-                      px-3
-                      text-[11px]
-                      font-bold
-                      tracking-[0.12em]
-                      text-[#A9820F]
-                      transition-all
-                      duration-300
-                      group-hover:border-[#C9A227]
-                      group-hover:bg-[#C9A227]
-                      group-hover:text-[#17202A]
-                    "
-                  >
-                    {service.number}
-                  </div>
-
-                  {/* ICON */}
-
-                  <div
-                    className="
-                      flex
-                      h-12
-                      w-12
-                      items-center
-                      justify-center
-                      rounded-2xl
-                      border
-                      border-[#D5DEE5]
-                      bg-[#F3F6F8]
-                      text-[#A9820F]
-                      transition-all
-                      duration-500
-                      group-hover:-rotate-3
-                      group-hover:scale-105
-                      group-hover:border-[#C9A227]
-                      group-hover:bg-[#C9A227]
-                      group-hover:text-[#17202A]
-                      group-hover:shadow-[0_8px_20px_rgba(201,162,39,0.25)]
-                      sm:h-14
-                      sm:w-14
-                    "
-                  >
-                    <Icon
-                      size={23}
-                      strokeWidth={1.8}
+                  return (
+                    <article
+                      key={
+                        service.id ||
+                        service.slug ||
+                        `service-${index}`
+                      }
+                      id={service.slug}
                       className="
-                        transition-transform
-                        duration-300
-                        group-hover:scale-110
+                        group
+                        relative
+                        flex
+                        min-h-[310px]
+                        scroll-mt-24
+                        flex-col
+                        overflow-hidden
+                        rounded-[24px]
+                        border
+                        border-[#D0D9E1]
+                        bg-white
+                        p-5
+                        text-[#17202A]
+                        shadow-[0_8px_30px_rgba(23,32,42,0.06)]
+                        transition-all
+                        duration-500
+                        hover:-translate-y-2
+                        hover:border-[#C9A227]
+                        hover:shadow-[0_20px_45px_rgba(23,32,42,0.12)]
+                        sm:min-h-[335px]
+                        sm:rounded-[28px]
+                        sm:p-7
                       "
-                    />
-                  </div>
+                    >
+                      {/* GOLD TOP ACCENT */}
 
-                </div>
+                      <div
+                        className="
+                          absolute
+                          left-0
+                          top-0
+                          h-[3px]
+                          w-0
+                          bg-[#C9A227]
+                          transition-all
+                          duration-500
+                          group-hover:w-full
+                        "
+                      />
 
-                {/* CONTENT */}
+                      {/* DECORATIVE CIRCLE */}
 
-                <div
-                  className="
-                    relative
-                    z-10
-                    mt-8
-                    flex
-                    flex-1
-                    flex-col
-                    sm:mt-10
-                  "
-                >
+                      <div
+                        className="
+                          pointer-events-none
+                          absolute
+                          -right-16
+                          -top-16
+                          h-40
+                          w-40
+                          rounded-full
+                          border
+                          border-[#C9A227]/10
+                          transition-all
+                          duration-500
+                          group-hover:scale-125
+                          group-hover:border-[#C9A227]/20
+                        "
+                      />
 
-                  <h3
-                    className="
-                      max-w-sm
-                      text-xl
-                      font-bold
-                      leading-tight
-                      tracking-tight
-                      text-[#17202A]
-                      transition-colors
-                      duration-300
-                      group-hover:text-[#A9820F]
-                      sm:text-2xl
-                    "
-                  >
-                    {service.title}
-                  </h3>
+                      {/* TOP ROW */}
 
-                  <p
-                    className="
-                      mt-3
-                      max-w-md
-                      text-sm
-                      leading-6
-                      text-[#52606D]
-                      sm:mt-4
-                      sm:leading-7
-                    "
-                  >
-                    {service.description}
-                  </p>
+                      <div
+                        className="
+                          relative
+                          z-10
+                          flex
+                          items-start
+                          justify-between
+                        "
+                      >
+                        {/* NUMBER */}
 
-                </div>
+                        <div
+                          className="
+                            flex
+                            h-10
+                            min-w-10
+                            items-center
+                            justify-center
+                            rounded-full
+                            border
+                            border-[#C9A227]/60
+                            bg-[#F3F6F8]
+                            px-3
+                            text-[11px]
+                            font-bold
+                            tracking-[0.12em]
+                            text-[#A9820F]
+                            transition-all
+                            duration-300
+                            group-hover:border-[#C9A227]
+                            group-hover:bg-[#C9A227]
+                            group-hover:text-[#17202A]
+                          "
+                        >
+                          {serviceNumber}
+                        </div>
 
-                {/* BOTTOM */}
+                        {/* ICON */}
 
-                <div
-                  className="
-                    relative
-                    z-10
-                    mt-6
-                    flex
-                    items-center
-                    justify-between
-                    border-t
-                    border-[#D8E0E6]
-                    pt-4
-                    sm:mt-7
-                    sm:pt-5
-                  "
-                >
+                        <div
+                          className="
+                            flex
+                            h-12
+                            w-12
+                            items-center
+                            justify-center
+                            rounded-2xl
+                            border
+                            border-[#D5DEE5]
+                            bg-[#F3F6F8]
+                            text-[#A9820F]
+                            transition-all
+                            duration-500
+                            group-hover:-rotate-3
+                            group-hover:scale-105
+                            group-hover:border-[#C9A227]
+                            group-hover:bg-[#C9A227]
+                            group-hover:text-[#17202A]
+                            group-hover:shadow-[0_8px_20px_rgba(201,162,39,0.25)]
+                            sm:h-14
+                            sm:w-14
+                          "
+                        >
+                          <Icon
+                            size={23}
+                            strokeWidth={1.8}
+                            className="
+                              transition-transform
+                              duration-300
+                              group-hover:scale-110
+                            "
+                          />
+                        </div>
+                      </div>
 
-                  {/* LEARN MORE */}
+                      {/* CONTENT */}
 
-                  <a
-                    href={`/services#${service.slug}`}
-                    aria-label={`Learn more about ${service.title}`}
-                    className="
-                      text-[9px]
-                      font-bold
-                      uppercase
-                      tracking-[0.2em]
-                      text-[#7C8792]
-                      transition-colors
-                      duration-300
-                      hover:text-[#A9820F]
-                      sm:text-[10px]
-                    "
-                  >
-                    Learn More
-                  </a>
+                      <div
+                        className="
+                          relative
+                          z-10
+                          mt-8
+                          flex
+                          flex-1
+                          flex-col
+                          sm:mt-10
+                        "
+                      >
+                        <h3
+                          className="
+                            max-w-sm
+                            text-xl
+                            font-bold
+                            leading-tight
+                            tracking-tight
+                            text-[#17202A]
+                            transition-colors
+                            duration-300
+                            group-hover:text-[#A9820F]
+                            sm:text-2xl
+                          "
+                        >
+                          {service.title}
+                        </h3>
 
-                  {/* ARROW */}
+                        <p
+                          className="
+                            mt-3
+                            max-w-md
+                            text-sm
+                            leading-6
+                            text-[#52606D]
+                            sm:mt-4
+                            sm:leading-7
+                          "
+                        >
+                          {service.description}
+                        </p>
+                      </div>
 
-                  <a
-                    href={`/services#${service.slug}`}
-                    aria-label={`Open ${service.title}`}
-                    className="
-                      flex
-                      h-9
-                      w-9
-                      items-center
-                      justify-center
-                      rounded-full
-                      border
-                      border-[#D5DEE5]
-                      text-[#7C8792]
-                      transition-all
-                      duration-300
-                      hover:-translate-y-1
-                      hover:translate-x-1
-                      hover:border-[#C9A227]
-                      hover:bg-[#C9A227]
-                      hover:text-[#17202A]
-                      sm:h-10
-                      sm:w-10
-                    "
-                  >
-                    <ArrowUpRight size={17} />
-                  </a>
+                      {/* BOTTOM */}
 
-                </div>
+                      <div
+                        className="
+                          relative
+                          z-10
+                          mt-6
+                          flex
+                          items-center
+                          justify-between
+                          border-t
+                          border-[#D8E0E6]
+                          pt-4
+                          sm:mt-7
+                          sm:pt-5
+                        "
+                      >
+                        <a
+                          href={`/services#${service.slug}`}
+                          aria-label={`Learn more about ${service.title}`}
+                          className="
+                            text-[9px]
+                            font-bold
+                            uppercase
+                            tracking-[0.2em]
+                            text-[#7C8792]
+                            transition-colors
+                            duration-300
+                            hover:text-[#A9820F]
+                            sm:text-[10px]
+                          "
+                        >
+                          Learn More
+                        </a>
 
-                {/* DECORATIVE CORNER */}
+                        <a
+                          href={`/services#${service.slug}`}
+                          aria-label={`Open ${service.title}`}
+                          className="
+                            flex
+                            h-9
+                            w-9
+                            items-center
+                            justify-center
+                            rounded-full
+                            border
+                            border-[#D5DEE5]
+                            text-[#7C8792]
+                            transition-all
+                            duration-300
+                            hover:-translate-y-1
+                            hover:translate-x-1
+                            hover:border-[#C9A227]
+                            hover:bg-[#C9A227]
+                            hover:text-[#17202A]
+                            sm:h-10
+                            sm:w-10
+                          "
+                        >
+                          <ArrowUpRight
+                            size={17}
+                          />
+                        </a>
+                      </div>
 
-                <div
-                  className="
-                    pointer-events-none
-                    absolute
-                    bottom-0
-                    right-0
-                    h-14
-                    w-14
-                    rounded-tl-[30px]
-                    bg-[#6B8EAE]/5
-                    transition-all
-                    duration-500
-                    group-hover:h-20
-                    group-hover:w-20
-                    group-hover:bg-[#C9A227]/10
-                  "
-                />
+                      {/* DECORATIVE CORNER */}
 
-              </article>
-            );
-          })}
+                      <div
+                        className="
+                          pointer-events-none
+                          absolute
+                          bottom-0
+                          right-0
+                          h-14
+                          w-14
+                          rounded-tl-[30px]
+                          bg-[#6B8EAE]/5
+                          transition-all
+                          duration-500
+                          group-hover:h-20
+                          group-hover:w-20
+                          group-hover:bg-[#C9A227]/10
+                        "
+                      />
+                    </article>
+                  );
+                }
+              )}
+            </div>
+          )}
 
-        </div>
+        {/* =====================================================
+            EMPTY STATE
+        ====================================================== */}
+
+        {!loading &&
+          services.length === 0 && (
+            <div
+              className="
+                mt-8
+                rounded-2xl
+                border
+                border-[#CBD5DE]
+                bg-white
+                px-5
+                py-10
+                text-center
+                text-sm
+                text-[#52606D]
+              "
+            >
+              No services are currently
+              available.
+            </div>
+          )}
 
         {/* =====================================================
             BOTTOM CTA
@@ -702,11 +1174,7 @@ function Services() {
             lg:justify-between
           "
         >
-
-          {/* TEXT */}
-
           <div>
-
             <p
               className="
                 text-[10px]
@@ -717,7 +1185,8 @@ function Services() {
                 sm:text-xs
               "
             >
-              Built for performance
+              {homeContent.servicesCtaEyebrow ||
+                "Built for performance"}
             </p>
 
             <p
@@ -731,17 +1200,16 @@ function Services() {
                 sm:leading-7
               "
             >
-              From planning to completion, we bring engineering
-              expertise, quality workmanship and dependable execution
-              to every project.
+              {homeContent.servicesCtaDescription ||
+                DEFAULT_HOME_CONTENT.servicesCtaDescription}
             </p>
-
           </div>
 
-          {/* BUTTON */}
-
           <a
-            href="/services"
+            href={
+              homeContent.servicesCtaLink ||
+              "/services"
+            }
             className="
               group
               inline-flex
@@ -768,9 +1236,9 @@ function Services() {
               sm:py-4
             "
           >
-
             <span>
-              View All Services
+              {homeContent.servicesCtaLabel ||
+                "View All Services"}
             </span>
 
             <span
@@ -797,11 +1265,8 @@ function Services() {
                 "
               />
             </span>
-
           </a>
-
         </div>
-
       </div>
 
       {/* =====================================================
@@ -818,7 +1283,6 @@ function Services() {
           bg-[#C9A227]
         "
       />
-
     </section>
   );
 }

@@ -2,66 +2,792 @@ import { useEffect, useState } from "react";
 import { ArrowDownRight, ArrowUpRight } from "lucide-react";
 import { Link } from "react-router-dom";
 
-const slides = [
-  {
-    image:
-      "https://images.unsplash.com/photo-1541888946425-d81bb19240f5?auto=format&fit=crop&w=2200&q=90",
-    label: "Built with Purpose",
-    title: "Engineering Excellence",
-    description:
-      "Creating spaces that stand strong for generations with precision, quality and thoughtful engineering.",
-  },
-  {
-    image:
-      "https://images.unsplash.com/photo-1503387762-592deb58ef4e?auto=format&fit=crop&w=2200&q=90",
-    label: "Construction Excellence",
-    title: "Building the Future",
-    description:
-      "Reliable construction solutions designed for lasting performance, safety and long-term value.",
-  },
-  {
-    image:
-      "https://images.unsplash.com/photo-1511818966892-d7d671e672a2?auto=format&fit=crop&w=2200&q=90",
-    label: "Infrastructure",
-    title: "Strong Foundations",
-    description:
-      "Infrastructure delivered with precision, responsibility and a commitment to creating better spaces.",
-  },
-  {
-    image:
-      "https://images.unsplash.com/photo-1565793298595-6a879b1d9492?auto=format&fit=crop&w=2200&q=90",
-    label: "Project Execution",
-    title: "Quality That Lasts",
-    description:
-      "From planning to completion, every detail matters. We focus on dependable execution and lasting quality.",
-  },
-];
+/* =========================================================
+   API CONFIGURATION
+========================================================= */
+
+const API_BASE_URL = "http://localhost:8080";
+
+/* =========================================================
+   DEFAULT HERO CONTENT
+========================================================= */
+
+const DEFAULT_HOME_CONTENT = {
+  heroEnabled: true,
+
+  heroSecondaryHeading: "One Strong Foundation at a Time.",
+
+  exploreButtonText: "Explore Projects",
+  exploreButtonLink: "/projects",
+
+  quoteButtonText: "Get a Quote",
+  quoteButtonLink: "/contact",
+
+  slides: [
+    {
+      id: 1,
+      image:
+        "https://images.unsplash.com/photo-1541888946425-d81bb19240f5?auto=format&fit=crop&w=2200&q=90",
+      label: "Built with Purpose",
+      title: "Engineering Excellence",
+      description:
+        "Creating spaces that stand strong for generations with precision, quality and thoughtful engineering.",
+      enabled: true,
+    },
+
+    {
+      id: 2,
+      image:
+        "https://images.unsplash.com/photo-1503387762-592deb58ef4e?auto=format&fit=crop&w=2200&q=90",
+      label: "Construction Excellence",
+      title: "Building the Future",
+      description:
+        "Reliable construction solutions designed for lasting performance, safety and long-term value.",
+      enabled: true,
+    },
+
+    {
+      id: 3,
+      image:
+        "https://images.unsplash.com/photo-1511818966892-d7d671e672a2?auto=format&fit=crop&w=2200&q=90",
+      label: "Infrastructure",
+      title: "Strong Foundations",
+      description:
+        "Infrastructure delivered with precision, responsibility and a commitment to creating better spaces.",
+      enabled: true,
+    },
+
+    {
+      id: 4,
+      image:
+        "https://images.unsplash.com/photo-1565793298595-6a879b1d9492?auto=format&fit=crop&w=2200&q=90",
+      label: "Project Execution",
+      title: "Quality That Lasts",
+      description:
+        "From planning to completion, every detail matters. We focus on dependable execution and lasting quality.",
+      enabled: true,
+    },
+  ],
+};
+
+/* =========================================================
+   GET IMAGE URL
+========================================================= */
+
+function getImageUrl(image, cacheVersion = "") {
+  if (!image) {
+    return "";
+  }
+
+  const trimmedImage = String(image).trim();
+
+  if (!trimmedImage) {
+    return "";
+  }
+
+  /*
+    External images such as Unsplash.
+    Do not modify the URL unless cache busting is requested.
+  */
+  if (
+    trimmedImage.startsWith("http://") ||
+    trimmedImage.startsWith("https://") ||
+    trimmedImage.startsWith("data:")
+  ) {
+    if (cacheVersion) {
+      return `${trimmedImage}${
+        trimmedImage.includes("?") ? "&" : "?"
+      }v=${cacheVersion}`;
+    }
+
+    return trimmedImage;
+  }
+
+  /*
+    Backend image.
+
+    Example:
+    /images/heroes/example.png
+
+    becomes:
+    http://localhost:8080/images/heroes/example.png
+  */
+
+  let finalUrl = trimmedImage.startsWith("/")
+    ? `${API_BASE_URL}${trimmedImage}`
+    : `${API_BASE_URL}/${trimmedImage}`;
+
+  /*
+    Cache busting.
+    This is important when the backend keeps the same
+    filename but the actual image file has been replaced.
+  */
+
+  if (cacheVersion) {
+    finalUrl += `${
+      finalUrl.includes("?") ? "&" : "?"
+    }v=${cacheVersion}`;
+  }
+
+  return finalUrl;
+}
+
+/* =========================================================
+   GET LOCAL STORAGE CONTENT
+========================================================= */
+
+function getHomeContent() {
+  try {
+    const savedContent = localStorage.getItem(
+      "saamHomeContent"
+    );
+
+    if (!savedContent) {
+      return DEFAULT_HOME_CONTENT;
+    }
+
+    const parsedContent = JSON.parse(savedContent);
+
+    return {
+      ...DEFAULT_HOME_CONTENT,
+      ...parsedContent,
+
+      slides:
+        Array.isArray(parsedContent.slides) &&
+        parsedContent.slides.length > 0
+          ? parsedContent.slides
+          : DEFAULT_HOME_CONTENT.slides,
+    };
+  } catch (error) {
+    console.error(
+      "Failed to load Hero content from localStorage:",
+      error
+    );
+
+    return DEFAULT_HOME_CONTENT;
+  }
+}
+
+/* =========================================================
+   CREATE CONTENT SIGNATURE
+
+   Used to detect whether backend content has actually changed.
+========================================================= */
+
+function createContentSignature(content) {
+  try {
+    return JSON.stringify({
+      heroEnabled: content?.heroEnabled,
+
+      heroSecondaryHeading:
+        content?.heroSecondaryHeading,
+
+      exploreButtonText:
+        content?.exploreButtonText,
+
+      exploreButtonLink:
+        content?.exploreButtonLink,
+
+      quoteButtonText:
+        content?.quoteButtonText,
+
+      quoteButtonLink:
+        content?.quoteButtonLink,
+
+      slides: Array.isArray(content?.slides)
+        ? content.slides.map((slide) => ({
+            id: slide.id,
+            image: slide.image,
+            label: slide.label,
+            title: slide.title,
+            description: slide.description,
+            enabled: slide.enabled,
+          }))
+        : [],
+    });
+  } catch {
+    return "";
+  }
+}
+
+/* =========================================================
+   HERO COMPONENT
+========================================================= */
 
 function Hero() {
+  const [homeContent, setHomeContent] = useState(() =>
+    getHomeContent()
+  );
+
   const [currentSlide, setCurrentSlide] = useState(0);
 
-  const slide = slides[currentSlide];
+  /*
+    IMPORTANT:
 
-  // ============================================================
-  // AUTOMATIC CAROUSEL
-  // Changes every 5 seconds
-  // ============================================================
+    Do NOT use Date.now() directly inside useState.
+
+    Start with 0 and update it only after backend data
+    has successfully loaded.
+  */
+
+  const [imageCacheVersion, setImageCacheVersion] =
+    useState(0);
+
+  /*
+    Used to determine whether backend content has changed.
+  */
+
+  const [contentSignature, setContentSignature] =
+    useState(() =>
+      createContentSignature(getHomeContent())
+    );
+
+  /* =========================================================
+     LOAD BACKEND CONTENT
+  ========================================================= */
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % slides.length);
-    }, 5000);
+    let cancelled = false;
 
-    return () => clearInterval(interval);
+    const loadContent = async () => {
+      try {
+        console.log(
+          "========================================"
+        );
+
+        console.log(
+          "Loading latest Hero content from backend..."
+        );
+
+        console.log(
+          "========================================"
+        );
+
+        const [homeResponse, heroSlidesResponse] =
+          await Promise.all([
+            fetch(
+              `${API_BASE_URL}/api/home-content?_=${Date.now()}`,
+              {
+                method: "GET",
+                cache: "no-store",
+                headers: {
+                  Accept: "application/json",
+                  "Cache-Control": "no-cache",
+                  Pragma: "no-cache",
+                },
+              }
+            ),
+
+            fetch(
+              `${API_BASE_URL}/api/home-content/hero-slides/enabled?_=${Date.now()}`,
+              {
+                method: "GET",
+                cache: "no-store",
+                headers: {
+                  Accept: "application/json",
+                  "Cache-Control": "no-cache",
+                  Pragma: "no-cache",
+                },
+              }
+            ),
+          ]);
+
+        if (!homeResponse.ok) {
+          throw new Error(
+            `Home content request failed: ${homeResponse.status}`
+          );
+        }
+
+        if (!heroSlidesResponse.ok) {
+          throw new Error(
+            `Hero slides request failed: ${heroSlidesResponse.status}`
+          );
+        }
+
+        const backendHome =
+          await homeResponse.json();
+
+        const backendSlides =
+          await heroSlidesResponse.json();
+
+        console.log(
+          "Backend Home Content:",
+          backendHome
+        );
+
+        console.log(
+          "Backend Hero Slides:",
+          backendSlides
+        );
+
+        if (cancelled) {
+          return;
+        }
+
+        /*
+          Merge backend data.
+        */
+
+        const mergedContent = {
+          ...DEFAULT_HOME_CONTENT,
+          ...(backendHome || {}),
+
+          slides:
+            Array.isArray(backendSlides) &&
+            backendSlides.length > 0
+              ? backendSlides
+              : getHomeContent().slides,
+        };
+
+        console.log(
+          "Final Hero Content:",
+          mergedContent
+        );
+
+        /*
+          Determine whether content changed.
+        */
+
+        const newSignature =
+          createContentSignature(mergedContent);
+
+        /*
+          Only update the image cache version when
+          backend content has actually changed.
+
+          This prevents unnecessary image reloads.
+        */
+
+        if (newSignature !== contentSignature) {
+          console.log(
+            "Hero content changed. Refreshing images..."
+          );
+
+          setImageCacheVersion(
+            (previousVersion) =>
+              previousVersion + 1
+          );
+
+          setContentSignature(newSignature);
+        }
+
+        /*
+          Update React state.
+        */
+
+        setHomeContent(mergedContent);
+
+        /*
+          Save backend data locally as cache.
+        */
+
+        try {
+          localStorage.setItem(
+            "saamHomeContent",
+            JSON.stringify(mergedContent)
+          );
+        } catch (storageError) {
+          console.warn(
+            "Could not save Hero content to localStorage:",
+            storageError
+          );
+        }
+
+        /*
+          Make sure current slide remains valid.
+        */
+
+        setCurrentSlide((previousSlide) => {
+          const slides =
+            Array.isArray(mergedContent.slides)
+              ? mergedContent.slides.filter(
+                  (slide) =>
+                    slide.enabled !== false
+                )
+              : [];
+
+          if (slides.length === 0) {
+            return 0;
+          }
+
+          if (previousSlide >= slides.length) {
+            return 0;
+          }
+
+          return previousSlide;
+        });
+      } catch (error) {
+        console.error(
+          "Failed to load Hero content from backend:",
+          error
+        );
+      }
+    };
+
+    /*
+      Initial backend load.
+    */
+
+    loadContent();
+
+    /*
+      Refresh when browser tab becomes visible again.
+
+      Example:
+      User changes image in admin tab,
+      then returns to website tab.
+    */
+
+    const handleVisibilityChange = () => {
+      if (
+        document.visibilityState === "visible"
+      ) {
+        loadContent();
+      }
+    };
+
+    document.addEventListener(
+      "visibilitychange",
+      handleVisibilityChange
+    );
+
+    /*
+      Refresh when website window gets focus.
+    */
+
+    const handleWindowFocus = () => {
+      loadContent();
+    };
+
+    window.addEventListener(
+      "focus",
+      handleWindowFocus
+    );
+
+    /*
+      Listen for localStorage changes from another tab.
+    */
+
+    const handleStorageChange = (event) => {
+      if (
+        event.key === "saamHomeContent" ||
+        event.key === null
+      ) {
+        loadContent();
+      }
+    };
+
+    window.addEventListener(
+      "storage",
+      handleStorageChange
+    );
+
+    /*
+      Listen for custom event from AdminHome.
+
+      This is useful when admin and website are open
+      inside the same browser tab/application.
+    */
+
+    const handleCMSUpdate = () => {
+      console.log(
+        "CMS update event received. Reloading Hero..."
+      );
+
+      loadContent();
+    };
+
+    window.addEventListener(
+      "saamHomeContentUpdated",
+      handleCMSUpdate
+    );
+
+    /*
+      Cleanup.
+    */
+
+    return () => {
+      cancelled = true;
+
+      document.removeEventListener(
+        "visibilitychange",
+        handleVisibilityChange
+      );
+
+      window.removeEventListener(
+        "focus",
+        handleWindowFocus
+      );
+
+      window.removeEventListener(
+        "storage",
+        handleStorageChange
+      );
+
+      window.removeEventListener(
+        "saamHomeContentUpdated",
+        handleCMSUpdate
+      );
+    };
+  }, [contentSignature]);
+
+  /* =========================================================
+     BACKEND AUTO REFRESH
+
+     Checks the backend every 10 seconds.
+
+     This means the public website can detect a CMS
+     update without manually refreshing the page.
+  ========================================================= */
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const checkForUpdates = async () => {
+      if (cancelled) {
+        return;
+      }
+
+      try {
+        const response = await fetch(
+          `${API_BASE_URL}/api/home-content/hero-slides/enabled?_=${Date.now()}`,
+          {
+            method: "GET",
+            cache: "no-store",
+            headers: {
+              Accept: "application/json",
+              "Cache-Control": "no-cache",
+              Pragma: "no-cache",
+            },
+          }
+        );
+
+        if (!response.ok) {
+          return;
+        }
+
+        const backendSlides =
+          await response.json();
+
+        if (
+          !Array.isArray(backendSlides) ||
+          backendSlides.length === 0
+        ) {
+          return;
+        }
+
+        if (cancelled) {
+          return;
+        }
+
+        /*
+          Compare only slide data.
+        */
+
+        setHomeContent((previousContent) => {
+          const oldSlidesSignature =
+            JSON.stringify(
+              Array.isArray(previousContent.slides)
+                ? previousContent.slides.map(
+                    (slide) => ({
+                      id: slide.id,
+                      image: slide.image,
+                      label: slide.label,
+                      title: slide.title,
+                      description:
+                        slide.description,
+                      enabled:
+                        slide.enabled,
+                    })
+                  )
+                : []
+            );
+
+          const newSlidesSignature =
+            JSON.stringify(
+              backendSlides.map((slide) => ({
+                id: slide.id,
+                image: slide.image,
+                label: slide.label,
+                title: slide.title,
+                description:
+                  slide.description,
+                enabled: slide.enabled,
+              }))
+            );
+
+          if (
+            oldSlidesSignature !==
+            newSlidesSignature
+          ) {
+            console.log(
+              "Hero slides changed. Updating website..."
+            );
+
+            /*
+              Force browser to request new image.
+            */
+
+            setImageCacheVersion(
+              (previousVersion) =>
+                previousVersion + 1
+            );
+
+            const updatedContent = {
+              ...previousContent,
+              slides: backendSlides,
+            };
+
+            try {
+              localStorage.setItem(
+                "saamHomeContent",
+                JSON.stringify(updatedContent)
+              );
+            } catch {
+              // Ignore localStorage errors.
+            }
+
+            return updatedContent;
+          }
+
+          return previousContent;
+        });
+      } catch (error) {
+        console.warn(
+          "Hero auto-refresh failed:",
+          error
+        );
+      }
+    };
+
+    /*
+      Check every 10 seconds.
+    */
+
+    const interval = setInterval(
+      checkForUpdates,
+      10000
+    );
+
+    return () => {
+      cancelled = true;
+      clearInterval(interval);
+    };
   }, []);
 
-  // ============================================================
-  // DOT NAVIGATION
-  // ============================================================
+  /* =========================================================
+     GET ENABLED SLIDES
+  ========================================================= */
+
+  const enabledSlides =
+    Array.isArray(homeContent.slides)
+      ? homeContent.slides.filter(
+          (slide) =>
+            slide.enabled !== false
+        )
+      : [];
+
+  /* =========================================================
+     SAFE CURRENT SLIDE
+  ========================================================= */
+
+  const safeCurrentSlide =
+    enabledSlides.length === 0
+      ? 0
+      : currentSlide >=
+        enabledSlides.length
+        ? 0
+        : currentSlide;
+
+  /* =========================================================
+     AUTOMATIC CAROUSEL
+  ========================================================= */
+
+  useEffect(() => {
+    if (enabledSlides.length <= 1) {
+      return undefined;
+    }
+
+    const interval = setInterval(() => {
+      setCurrentSlide(
+        (previousSlide) =>
+          (previousSlide + 1) %
+          enabledSlides.length
+      );
+    }, 5000);
+
+    return () => {
+      clearInterval(interval);
+    };
+  }, [enabledSlides.length]);
+
+  /* =========================================================
+     HERO ENABLE / DISABLE
+  ========================================================= */
+
+  if (!homeContent.heroEnabled) {
+    return null;
+  }
+
+  /* =========================================================
+     NO ACTIVE SLIDES
+  ========================================================= */
+
+  if (enabledSlides.length === 0) {
+    return (
+      <section
+        id="home"
+        className="
+          relative
+          flex
+          min-h-screen
+          w-full
+          items-center
+          justify-center
+          bg-[#171815]
+          pt-[86px]
+          text-white
+        "
+      >
+        <p className="text-lg text-white/70">
+          No active Hero slides available.
+        </p>
+      </section>
+    );
+  }
+
+  /* =========================================================
+     CURRENT SLIDE
+  ========================================================= */
+
+  const slide =
+    enabledSlides[safeCurrentSlide];
+
+  /* =========================================================
+     CURRENT IMAGE URL
+  ========================================================= */
+
+  const currentImageUrl = getImageUrl(
+    slide.image,
+    imageCacheVersion
+  );
+
+  console.log(
+    "Current Hero Image:",
+    currentImageUrl
+  );
+
+  /* =========================================================
+     DOT NAVIGATION
+  ========================================================= */
 
   const goToSlide = (index) => {
     setCurrentSlide(index);
   };
+
+  /* =========================================================
+     RENDER
+  ========================================================= */
 
   return (
     <section
@@ -75,42 +801,54 @@ function Hero() {
         pt-[86px]
       "
     >
-      {/* ============================================================
+      {/* =====================================================
           FULL SCREEN BACKGROUND IMAGE CAROUSEL
-      ============================================================ */}
+      ===================================================== */}
 
       <div className="absolute inset-0 overflow-hidden">
-        {slides.map((item, index) => (
-          <img
-            key={item.image}
-            src={item.image}
-            alt=""
-            aria-hidden="true"
-            className={`
-              absolute
-              inset-0
-              h-full
-              w-full
-              object-cover
-              object-center
-              transition-all
-              duration-[1600ms]
-              ease-in-out
-              ${
-                currentSlide === index
-                  ? "scale-105 opacity-100"
-                  : "scale-100 opacity-0"
-              }
-            `}
-          />
-        ))}
+        {enabledSlides.map((item, index) => {
+          const imageUrl = getImageUrl(
+            item.image,
+            imageCacheVersion
+          );
+
+          return (
+            <img
+              key={`${item.id}-${item.image}-${imageCacheVersion}`}
+              src={imageUrl}
+              alt=""
+              aria-hidden="true"
+              draggable="false"
+              className={`
+                absolute
+                inset-0
+                h-full
+                w-full
+                object-cover
+                object-center
+                transition-all
+                duration-[1600ms]
+                ease-in-out
+                ${
+                  safeCurrentSlide === index
+                    ? "scale-105 opacity-100"
+                    : "scale-100 opacity-0"
+                }
+              `}
+              onError={() => {
+                console.error(
+                  "Hero image failed to load:",
+                  imageUrl
+                );
+              }}
+            />
+          );
+        })}
       </div>
 
-      {/* ============================================================
+      {/* =====================================================
           LIGHT OVERLAY
-          
-          Reduced darkness so the construction image remains visible.
-      ============================================================ */}
+      ===================================================== */}
 
       <div
         className="
@@ -120,9 +858,9 @@ function Hero() {
         "
       />
 
-      {/* ============================================================
+      {/* =====================================================
           LEFT TEXT READABILITY
-      ============================================================ */}
+      ===================================================== */}
 
       <div
         className="
@@ -135,9 +873,9 @@ function Hero() {
         "
       />
 
-      {/* ============================================================
+      {/* =====================================================
           BOTTOM READABILITY
-      ============================================================ */}
+      ===================================================== */}
 
       <div
         className="
@@ -152,9 +890,9 @@ function Hero() {
         "
       />
 
-      {/* ============================================================
+      {/* =====================================================
           TOP READABILITY
-      ============================================================ */}
+      ===================================================== */}
 
       <div
         className="
@@ -168,11 +906,9 @@ function Hero() {
         "
       />
 
-      {/* ============================================================
+      {/* =====================================================
           MOBILE LIGHT OVERLAY
-          
-          Keep image visible on mobile as well.
-      ============================================================ */}
+      ===================================================== */}
 
       <div
         className="
@@ -183,9 +919,9 @@ function Hero() {
         "
       />
 
-      {/* ============================================================
+      {/* =====================================================
           GOLD AMBIENT LIGHT
-      ============================================================ */}
+      ===================================================== */}
 
       <div
         className="
@@ -219,9 +955,9 @@ function Hero() {
         "
       />
 
-      {/* ============================================================
+      {/* =====================================================
           MAIN HERO CONTENT
-      ============================================================ */}
+      ===================================================== */}
 
       <div
         className="
@@ -243,22 +979,22 @@ function Hero() {
         "
       >
         <div className="w-full">
-          {/* ========================================================
+
+          {/* =================================================
               DYNAMIC CONTENT
-              
-              This changes with every slide.
-          ======================================================== */}
+          ================================================= */}
 
           <div
-            key={currentSlide}
+            key={`${slide.id}-${slide.title}-${slide.image}`}
             className="
               max-w-4xl
               animate-[heroContent_0.8s_ease-out]
             "
           >
-            {/* ======================================================
+
+            {/* =================================================
                 LABEL
-            ====================================================== */}
+            ================================================= */}
 
             <div
               className="
@@ -295,9 +1031,9 @@ function Hero() {
               </span>
             </div>
 
-            {/* ======================================================
+            {/* =================================================
                 MAIN HEADING
-            ====================================================== */}
+            ================================================= */}
 
             <h1
               className="
@@ -317,9 +1053,9 @@ function Hero() {
               {slide.title}
             </h1>
 
-            {/* ======================================================
+            {/* =================================================
                 SECONDARY HEADING
-            ====================================================== */}
+            ================================================= */}
 
             <h2
               className="
@@ -336,12 +1072,12 @@ function Hero() {
                 lg:text-5xl
               "
             >
-              One Strong Foundation at a Time.
+              {homeContent.heroSecondaryHeading}
             </h2>
 
-            {/* ======================================================
+            {/* =================================================
                 DESCRIPTION
-            ====================================================== */}
+            ================================================= */}
 
             <p
               className="
@@ -361,11 +1097,9 @@ function Hero() {
             </p>
           </div>
 
-          {/* ========================================================
-              STATIC CTA BUTTONS
-
-              These NEVER change when the carousel changes.
-          ======================================================== */}
+          {/* =================================================
+              CTA BUTTONS
+          ================================================= */}
 
           <div
             className="
@@ -379,12 +1113,16 @@ function Hero() {
               sm:gap-4
             "
           >
-            {/* ======================================================
+
+            {/* =================================================
                 EXPLORE PROJECTS
-            ====================================================== */}
+            ================================================= */}
 
             <Link
-              to="/projects"
+              to={
+                homeContent.exploreButtonLink ||
+                "/projects"
+              }
               className="
                 group
                 inline-flex
@@ -410,7 +1148,10 @@ function Hero() {
                 sm:py-4
               "
             >
-              <span>Explore Projects</span>
+              <span>
+                {homeContent.exploreButtonText ||
+                  "Explore Projects"}
+              </span>
 
               <span
                 className="
@@ -440,12 +1181,15 @@ function Hero() {
               </span>
             </Link>
 
-            {/* ======================================================
+            {/* =================================================
                 GET A QUOTE
-            ====================================================== */}
+            ================================================= */}
 
             <Link
-              to="/contact"
+              to={
+                homeContent.quoteButtonLink ||
+                "/contact"
+              }
               className="
                 group
                 inline-flex
@@ -474,7 +1218,10 @@ function Hero() {
                 sm:py-4
               "
             >
-              <span>Get a Quote</span>
+              <span>
+                {homeContent.quoteButtonText ||
+                  "Get a Quote"}
+              </span>
 
               <span
                 className="
@@ -508,85 +1255,96 @@ function Hero() {
         </div>
       </div>
 
-      {/* ============================================================
+      {/* =====================================================
           LEFT SIDE CAROUSEL DOTS
+      ===================================================== */}
 
-          ONLY these 4 dots control the carousel.
-          No previous/next buttons.
-      ============================================================ */}
-
-      <div
-        className="
-          absolute
-          bottom-8
-          left-5
-          z-30
-          flex
-          items-center
-          gap-2
-          sm:left-6
-          md:left-8
-          lg:left-10
-        "
-      >
-        {slides.map((item, index) => (
-          <button
-            key={item.image}
-            type="button"
-            onClick={() => goToSlide(index)}
-            aria-label={`Go to slide ${index + 1}`}
-            aria-current={currentSlide === index ? "true" : "false"}
-            className={`
-              rounded-full
-              transition-all
-              duration-500
-              ${
-                currentSlide === index
-                  ? "h-2 w-9 bg-[#D1A82A] shadow-[0_0_12px_rgba(209,168,42,0.5)] sm:w-10"
-                  : "h-2 w-2 bg-white/60 hover:bg-[#F0CC58]"
+      {enabledSlides.length > 1 && (
+        <div
+          className="
+            absolute
+            bottom-8
+            left-5
+            z-30
+            flex
+            items-center
+            gap-2
+            sm:left-6
+            md:left-8
+            lg:left-10
+          "
+        >
+          {enabledSlides.map((item, index) => (
+            <button
+              key={item.id}
+              type="button"
+              onClick={() => goToSlide(index)}
+              aria-label={`Go to slide ${
+                index + 1
+              }`}
+              aria-current={
+                safeCurrentSlide === index
+                  ? "true"
+                  : "false"
               }
-            `}
-          />
-        ))}
-      </div>
+              className={`
+                rounded-full
+                transition-all
+                duration-500
+                ${
+                  safeCurrentSlide === index
+                    ? "h-2 w-9 bg-[#D1A82A] shadow-[0_0_12px_rgba(209,168,42,0.5)] sm:w-10"
+                    : "h-2 w-2 bg-white/60 hover:bg-[#F0CC58]"
+                }
+              `}
+            />
+          ))}
+        </div>
+      )}
 
-      {/* ============================================================
+      {/* =====================================================
           SLIDE NUMBER
-          
-          Kept on the right, but NO slide buttons.
-      ============================================================ */}
+      ===================================================== */}
 
-      <div
-        className="
-          absolute
-          bottom-8
-          right-5
-          z-30
-          hidden
-          rounded-full
-          border
-          border-white/25
-          bg-black/25
-          px-3
-          py-2
-          text-[10px]
-          font-bold
-          tracking-[0.2em]
-          text-white
-          backdrop-blur-md
-          sm:block
-          md:right-8
-          lg:right-10
-        "
-      >
-        {String(currentSlide + 1).padStart(2, "0")}
-        {" / "}
-        {String(slides.length).padStart(2, "0")}
-      </div>
+      {enabledSlides.length > 1 && (
+        <div
+          className="
+            absolute
+            bottom-8
+            right-5
+            z-30
+            hidden
+            rounded-full
+            border
+            border-white/25
+            bg-black/25
+            px-3
+            py-2
+            text-[10px]
+            font-bold
+            tracking-[0.2em]
+            text-white
+            backdrop-blur-md
+            sm:block
+            md:right-8
+            lg:right-10
+          "
+        >
+          {String(
+            safeCurrentSlide + 1
+          ).padStart(2, "0")}
 
-      {/* ============================================================
+          {" / "}
+
+          {String(
+            enabledSlides.length
+          ).padStart(2, "0")}
+        </div>
+      )}
+
+      {/* =====================================================
           DESKTOP SCROLL INDICATOR
-      ============================================================ */}
+      ===================================================== */}
 
       <a
         href="#about"
@@ -613,9 +1371,9 @@ function Hero() {
         <ArrowDownRight size={16} />
       </a>
 
-      {/* ============================================================
+      {/* =====================================================
           GOLD BOTTOM LINE
-      ============================================================ */}
+      ===================================================== */}
 
       <div
         className="
@@ -629,9 +1387,9 @@ function Hero() {
         "
       />
 
-      {/* ============================================================
+      {/* =====================================================
           CONTENT ANIMATION
-      ============================================================ */}
+      ===================================================== */}
 
       <style>{`
         @keyframes heroContent {
